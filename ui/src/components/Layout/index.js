@@ -3,7 +3,7 @@ import { jsx, Box } from 'theme-ui'
 import { Fragment } from 'react'
 import { Helmet } from 'react-helmet'
 
-// import Footer from "../Footer"
+import Footer from '../Footer'
 import Navigation from '../Navigation'
 
 const LayoutTemplate = ({ children, mainStyles, ...props }) => {
@@ -16,12 +16,12 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
   }
 
   return (
-    <Box {...props}>
+    <Box {...props} sx={styles}>
       <Helmet>
         <meta charSet="utf-8" />
         <title>Curation Starter dApp</title>
       </Helmet>
-      <Navigation sx={styles} />
+      <Navigation />
       <Box
         sx={{
           '@keyframes fadein': {
@@ -33,15 +33,15 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
       >
         <main
           sx={{
-            ...styles,
-            mt: [5, 5, 0],
-            minHeight: 'calc(100vh - 400px)',
+            mt: [3, 0, 0, 0],
+            minHeight: 'calc(100vh - 224px)',
             position: 'static',
           }}
         >
           {children}
         </main>
       </Box>
+      <Footer />
     </Box>
   )
 }

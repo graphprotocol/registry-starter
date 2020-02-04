@@ -1,9 +1,9 @@
 /** @jsx jsx */
-import React from 'react'
 import { useQuery } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import { Grid } from '@theme-ui/components'
-import { jsx, Styled, Box } from 'theme-ui'
+import { jsx, Box, Styled } from 'theme-ui'
+import { navigate } from 'gatsby'
 
 import Layout from '../components/Layout'
 
@@ -40,7 +40,12 @@ const IndexPage = () => {
             justifySelf: 'center',
             textAlign: 'center',
             paddingTop: '24px',
+            cursor: 'pointer',
+            '&:hover': {
+              boxShadow: '0 4px 24px 0 rgba(30,37,44,0.16)',
+            },
           }}
+          onClick={() => navigate(`/token/${token.id}`)}
         >
           <img
             src={token.image}
@@ -52,8 +57,9 @@ const IndexPage = () => {
               boxSizing: 'border-box',
               margin: '0 auto',
             }}
+            alt="Token"
           />
-          {token.symbol}
+          <Styled.h5>{token.symbol}</Styled.h5>
         </Box>
       ))}
     </Grid>
