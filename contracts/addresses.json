@@ -1,0 +1,19 @@
+{
+    "updated-on": "January 30th 2020",
+    "ropsten": {
+      "tokenRegistry": "",
+      "ethereumDIDRegistry": "",
+      "mockDAI": "",
+      "migrations": "",
+      "reserveBank": ""
+    },
+    "ganache": {
+        "tokenRegistry": "",
+        "ethereumDIDRegistry": "",
+        "mockToken": "",
+        "registry": "",
+        "reserveBank": ""
+    },
+    "mainnet": {}
+  }
+  
