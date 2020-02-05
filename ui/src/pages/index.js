@@ -25,21 +25,24 @@ const IndexPage = () => {
     return <p>loading</p>
   }
   return (
-    <Grid columns={[2, 3, 4, 5, 6]} gap={[2, 3]}>
+    <Grid columns={[2, 3, 4, 5, 6]} gap={[2, 2, 4, 6]}>
       {data.tokens.map(token => (
         <Box
           key={token.id}
           sx={{
             height: ['160px', '180px', '180px'],
             width: ['160px', '180px', '180px'],
-            border: '2px solid rgba(9,6,16,0.08)',
+            border: '2px solid',
+            borderColor: 'rgba(9,6,16,0.08)',
             backgroundColor: 'white',
             justifySelf: 'center',
             textAlign: 'center',
             paddingTop: '24px',
             cursor: 'pointer',
+            transition: 'all 0.3s ease',
             '&:hover': {
-              boxShadow: '0 4px 14px 0 rgba(30,37,44,0.16)',
+              borderColor: 'secondary',
+              transition: 'all 0.3s ease',
             },
           }}
           onClick={() => navigate(`/token/${token.id}`)}
@@ -53,6 +56,7 @@ const IndexPage = () => {
               padding: 3,
               boxSizing: 'border-box',
               margin: '0 auto',
+              objectFit: 'contain',
             }}
             alt="Token"
           />

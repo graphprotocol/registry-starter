@@ -8,9 +8,9 @@ import Navigation from '../Navigation'
 
 const LayoutTemplate = ({ children, mainStyles, ...props }) => {
   const styles = {
-    maxWidth: '1260px',
+    maxWidth: '1246px',
     mx: 'auto',
-    px: [2, 4],
+    px: [4, 6, 6, 6],
     boxSizing: 'content-box',
     position: 'relative',
   }

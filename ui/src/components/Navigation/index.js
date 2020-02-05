@@ -74,17 +74,7 @@ export default ({ children, mainStyles, ...props }) => {
           </Link>
         ) : (
           <Modal showModal={showModal} closeModal={closeModal}>
-            <Link onClick={() => openModal()}>
-              <p
-                sx={{
-                  fontWeight: 'heading',
-                  color: 'secondary',
-                  cursor: 'pointer',
-                }}
-              >
-                Sign In
-              </p>
-            </Link>
+            <Link onClick={() => openModal()}>Sign In </Link>
           </Modal>
         )}
       </Grid>

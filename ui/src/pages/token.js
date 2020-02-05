@@ -42,13 +42,21 @@ const Token = ({ location }) => {
       <Grid
         sx={{
           gridTemplateColumns: ['1fr', '80px 1fr', '80px 1fr'],
-          alignItems: 'baseline',
+          alignItems: 'flex-start',
           pl: 2,
         }}
       >
-        {token.image ? <img src={token.image} alt="Token" /> : <div />}
+        {token.image ? (
+          <img
+            src={token.image}
+            alt="Token"
+            sx={{ height: '80px', width: '80px', objectFit: 'contain' }}
+          />
+        ) : (
+          <div />
+        )}
         <Box>
-          <Styled.h1 sx={{ mt: 4, mb: 3 }}>{token.symbol}</Styled.h1>
+          <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
           <Styled.p>{token.description}</Styled.p>
           <p sx={{ variant: 'text.smaller', mt: 3 }}>ID</p>
           <Styled.h6

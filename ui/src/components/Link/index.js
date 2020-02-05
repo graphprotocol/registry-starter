@@ -12,6 +12,7 @@ const Link = ({ to, children, onClick, ...props }) => {
           textDecoration: 'none',
           display: 'block',
           color: 'text',
+          fontWeight: 'heading',
           '&:hover': {
             color: 'linkHover',
           },
@@ -23,7 +24,21 @@ const Link = ({ to, children, onClick, ...props }) => {
       </GatsbyLink>
     )
   } else if (onClick) {
-    return <Styled.p onClick={onClick}>{children}</Styled.p>
+    return (
+      <Styled.p
+        onClick={onClick}
+        sx={{
+          fontWeight: 'heading',
+          color: 'secondary',
+          cursor: 'pointer',
+          '&:hover': {
+            color: 'linkHover',
+          },
+        }}
+      >
+        {children}
+      </Styled.p>
+    )
   }
 }
 
