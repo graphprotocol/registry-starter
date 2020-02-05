@@ -21,7 +21,6 @@ const TOKEN_QUERY = gql`
 
 const Token = ({ location }) => {
   const tokenId = location ? location.pathname.split('/').slice(-1)[0] : ''
-  console.log('location: ', location)
   const { loading, error, data } = useQuery(TOKEN_QUERY, {
     variables: {
       id: tokenId,
@@ -36,7 +35,6 @@ const Token = ({ location }) => {
     return <Styled.h3>Something went wrong - can't find a token </Styled.h3>
   }
 
-  console.log('DATA: ', data)
   let token = data && data.token
 
   return (

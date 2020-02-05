@@ -1,9 +1,10 @@
-import React from "react"
-import { ethers } from "ethers"
-import { ApolloProvider } from "@apollo/react-hooks"
-import { Web3ReactProvider } from "@web3-react/core"
-import client from "./src/apollo/client"
-import Layout from "./src/components/Layout"
+import React from 'react'
+import { ethers } from 'ethers'
+import { ApolloProvider } from '@apollo/react-hooks'
+import { Web3ReactProvider } from '@web3-react/core'
+import client from './src/apollo/client'
+import Layout from './src/components/Layout'
+import Web3ReactConnect from './src/components/Web3ReactConnect'
 
 const getLibrary = provider => {
   const library = new ethers.providers.Web3Provider(provider)
@@ -20,7 +21,9 @@ const wrapRootElement = ({ element }) => {
 }
 
 const wrapPageElement = ({ element, props }) => (
-  <Layout {...props}>{element}</Layout>
+  <Layout {...props}>
+    <Web3ReactConnect>{element}</Web3ReactConnect>
+  </Layout>
 )
 
 export { wrapRootElement, wrapPageElement }

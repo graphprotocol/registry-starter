@@ -12,7 +12,7 @@ module.exports = {
         background_color: `white`,
         theme_color: `white`,
         display: `minimal-ui`,
-        icon: `src/images/logo.png`, // This path is relative to the root of the site.
+        icon: `static/logo.png`, // This path is relative to the root of the site.
       },
     },
     {

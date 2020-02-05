@@ -1,11 +1,6 @@
 /** @jsx jsx */
 import { jsx, Styled } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
-import { Link } from 'gatsby'
-import Graph from '../../images/graph.png'
-import Ipfs from '../../images/ipfs.png'
-import Eth from '../../images/eth.png'
-import Github from '../../images/github.png'
 
 const Footer = ({ ...props }) => {
   return (
@@ -18,7 +13,7 @@ const Footer = ({ ...props }) => {
         >
           <p sx={{ variant: 'text.smaller' }}>
             <img
-              src={Github}
+              src="/github.png"
               alt="Github"
               title="Github"
               sx={{
@@ -40,9 +35,14 @@ const Footer = ({ ...props }) => {
         }}
         columns={3}
       >
-        <img src={Graph} alt="The Graph" title="The Graph" sx={imageStyles} />
-        <img src={Ipfs} alt="IPFS" title="IPFS" sx={imageStyles} />
-        <img src={Eth} alt="Ethereum" title="Ethereum" sx={imageStyles} />
+        <img
+          src="/graph.png"
+          alt="The Graph"
+          title="The Graph"
+          sx={imageStyles}
+        />
+        <img src="/ipfs.png" alt="IPFS" title="IPFS" sx={imageStyles} />
+        <img src="/eth.png" alt="Ethereum" title="Ethereum" sx={imageStyles} />
       </Grid>
     </Grid>
   )

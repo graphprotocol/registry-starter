@@ -19,11 +19,8 @@ const TOKENS_QUERY = gql`
   }
 `
 
-console.log('LAYOUT: ', Layout)
-
 const IndexPage = () => {
   const { data } = useQuery(TOKENS_QUERY)
-  console.log('DATA: ', data)
   if (!data) {
     return <p>loading</p>
   }
@@ -42,7 +39,7 @@ const IndexPage = () => {
             paddingTop: '24px',
             cursor: 'pointer',
             '&:hover': {
-              boxShadow: '0 4px 24px 0 rgba(30,37,44,0.16)',
+              boxShadow: '0 4px 14px 0 rgba(30,37,44,0.16)',
             },
           }}
           onClick={() => navigate(`/token/${token.id}`)}

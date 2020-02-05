@@ -24,6 +24,7 @@ export default {
     body: 400,
     heading: 900,
   },
+  space: [0, 4, 8, 12, 16, 24, 32, 48, 64],
   breakpoints: ['40em', '52em', '64em', '76em'],
   text: {
     heading: {
@@ -44,6 +45,7 @@ export default {
       variant: 'text.heading',
       fontSize: 6,
       fontFamily: 'heading',
+      margin: 0,
     },
     h3: {
       variant: 'text.heading',
@@ -78,10 +80,26 @@ export default {
     },
   },
   text: {
+    large: {
+      fontSize: 3,
+      lineHeight: '1.75rem',
+      letterSpacing: '-0.2px',
+      color: 'text',
+      fontFamily: 'body',
+      margin: 0,
+    },
     smaller: {
       fontSize: 0,
       lineHeight: '1rem',
       color: 'blackFaded',
+      fontFamily: 'body',
+      margin: 0,
+    },
+    small: {
+      fontSize: 1,
+      lineHeight: '1.25rem',
+      letterSpacing: '-0.4px',
+      color: 'text',
       fontFamily: 'body',
       margin: 0,
     },
