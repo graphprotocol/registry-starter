@@ -4,6 +4,9 @@ import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
+import { isMobile } from 'react-device-detect'
+
+import Divider from '../components/Divider'
 
 const TOKEN_QUERY = gql`
   query token($id: ID!) {
@@ -43,10 +46,9 @@ const Token = ({ location }) => {
         sx={{
           gridTemplateColumns: ['1fr', '80px 1fr', '80px 1fr'],
           alignItems: 'flex-start',
-          pl: 2,
         }}
       >
-        {token.image ? (
+        {!isMobile && token.image ? (
           <img
             src={token.image}
             alt="Token"
@@ -56,7 +58,21 @@ const Token = ({ location }) => {
           <div />
         )}
         <Box>
-          <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
+          {isMobile ? (
+            <Fragment>
+              <Grid sx={{ gridTemplateColumns: '80px 1fr', mb: 4 }} gap={2}>
+                <img
+                  src={token.image}
+                  alt="Token"
+                  sx={{ height: '80px', width: '80px', objectFit: 'contain' }}
+                />
+                <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
+              </Grid>
+              <Divider />
+            </Fragment>
+          ) : (
+            <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
+          )}
           <Styled.p>{token.description}</Styled.p>
           <p sx={{ variant: 'text.smaller', mt: 3 }}>ID</p>
           <Styled.h6

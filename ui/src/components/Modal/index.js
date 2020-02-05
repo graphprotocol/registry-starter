@@ -88,9 +88,9 @@ const Modal = ({ children, showModal, closeModal }) => {
         aria-label="Connect to a wallet dialog"
         sx={{
           position: 'relative',
-          maxWidth: '660px',
+          maxWidth: ['350px', '500', '660px'],
           width: '100%',
-          padding: 8,
+          padding: [3, 8],
           boxShadow:
             '0 4px 24px 0 rgba(149,152,171,0.16), 0 12px 48px 0 rgba(30,37,44,0.32)',
         }}
@@ -133,8 +133,10 @@ const Modal = ({ children, showModal, closeModal }) => {
           )
         ) : (
           <Fragment>
-            <Styled.h2>Sign in</Styled.h2>
-            <p sx={{ variant: 'text.large' }}>Connect to a Wallet</p>
+            <Box sx={{ textAlign: ['center', 'left'], mt: [5, 0] }}>
+              <Styled.h2>Sign in</Styled.h2>
+              <p sx={{ variant: 'text.large' }}>Connect to a Wallet</p>
+            </Box>
             <Divider mt={6} mb={6} />
             {Object.keys(wallets).map(key => {
               const wallet = wallets[key]
