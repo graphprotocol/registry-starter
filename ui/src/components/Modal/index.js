@@ -1,4 +1,5 @@
 /** @jsx jsx */
+import PropTypes from 'prop-types'
 import { useState, Fragment, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
@@ -7,7 +8,7 @@ import '@reach/dialog/styles.css'
 import { useWeb3React, UnsupportedChainIdError } from '@web3-react/core'
 import { URI_AVAILABLE } from '@web3-react/walletconnect-connector'
 
-import { walletExists, getAddress } from '../../services/ethers'
+import { walletExists } from '../../services/ethers'
 import wallets from '../../connectors/wallets'
 import { walletconnect } from '../../connectors'
 
@@ -207,6 +208,12 @@ const iconStyles = {
   width: '44px',
   objectFit: 'contain',
   mr: 3,
+}
+
+Modal.propTypes = {
+  children: PropTypes.any,
+  showModal: PropTypes.bool,
+  closeModal: PropTypes.func,
 }
 
 export default Modal

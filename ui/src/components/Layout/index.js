@@ -1,9 +1,9 @@
 /** @jsx jsx */
-
+import { Fragment } from 'react'
 import { jsx, Box } from 'theme-ui'
-import React from 'react'
 import { Helmet } from 'react-helmet'
-import { Global } from '@emotion/core'
+import emotionReset from 'emotion-reset'
+import { Global, css } from '@emotion/core'
 
 import Footer from '../Footer'
 import Navigation from '../Navigation'
@@ -18,14 +18,21 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
   }
 
   return (
-    <>
+    <Fragment>
       <Global
-        styles={theme => ({
+        styles={css`
+          ${emotionReset}
+          *, *::after, *::before {
+            box-sizing: border-box;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-font-smoothing: antialiased;
+            font-smoothing: antialiased;
+          }
           body: {
             margin: 0,
             backgroundColor: 'white',
           },
-        })}
+        `}
       />
       <Box {...props} sx={styles}>
         <Helmet>
@@ -54,7 +61,7 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
         </Box>
         <Footer />
       </Box>
-    </>
+    </Fragment>
   )
 }
 

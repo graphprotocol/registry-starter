@@ -27,27 +27,17 @@ export default {
   },
   space: [0, 4, 8, 12, 16, 24, 32, 48, 64],
   breakpoints: ['40em', '52em', '64em', '76em'],
-  text: {
-    heading: {
-      fontFamily: 'heading',
-    },
-    body: {
-      fontFamily: 'body',
-    },
-  },
   styles: {
     h1: {
       fontWeight: 'heading',
       fontFamily: 'heading',
       fontSize: 7,
-      margin: 0,
       letterSpacing: '2px',
     },
     h2: {
       fontWeight: 'heading',
       fontFamily: 'heading',
       fontSize: 6,
-      margin: 0,
     },
     h3: {
       fontWeight: 'heading',
@@ -63,13 +53,11 @@ export default {
       fontWeight: 'heading',
       fontFamily: 'heading',
       fontSize: 3,
-      margin: 0,
     },
     h6: {
       fontWeight: 'heading',
       fontFamily: 'heading',
       fontSize: 2,
-      margin: 0,
       lineHeight: '1.5rem',
     },
     p: {
@@ -77,7 +65,6 @@ export default {
       fontFamily: 'body',
       fontWeight: 'body',
       lineHeight: '1.5rem',
-      margin: 0,
     },
   },
   text: {
@@ -87,14 +74,12 @@ export default {
       letterSpacing: '-0.2px',
       color: 'text',
       fontFamily: 'body',
-      margin: 0,
     },
     smaller: {
       fontSize: 0,
       lineHeight: '1rem',
       color: 'blackFaded',
       fontFamily: 'body',
-      margin: 0,
     },
     small: {
       fontSize: 1,
@@ -102,7 +87,6 @@ export default {
       letterSpacing: '-0.4px',
       color: 'text',
       fontFamily: 'body',
-      margin: 0,
     },
   },
 }

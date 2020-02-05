@@ -59,11 +59,12 @@ export default ({ children, mainStyles, ...props }) => {
       <Grid>
         {userAccount ? (
           <Link
-            to={`/profile/${userAccount}`}
+            to={`/profile/ck670yk6d8u490935r8v72pa6`} //should be userAccount
             sx={{ '&:hover': { svg: { marginLeft: 0 } } }}
           >
             <img
               src="/user.png"
+              alt="User"
               sx={{
                 width: '32px',
                 height: '32px',

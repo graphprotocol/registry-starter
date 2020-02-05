@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useState, Fragment } from 'react'
+import { Fragment } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'

@@ -11,8 +11,8 @@ exports.onCreatePage = async ({ page, actions }) => {
     createPage(page)
   }
 
-  // if (page.path.match(/^\/profile\//)) {
-  //   page.matchPath = '/profile/*'
-  //   createPage(page)
-  // }
+  if (page.path.match(/^\/profile\//)) {
+    page.matchPath = '/profile/*'
+    createPage(page)
+  }
 }

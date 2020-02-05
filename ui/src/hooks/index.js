@@ -1,5 +1,5 @@
 import { useWeb3React as useWeb3ReactCore } from '@web3-react/core'
-import { useMemo, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { getAddress, getProvider } from '../services/ethers'
 import { injected } from '../connectors'
