@@ -5,7 +5,7 @@ import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import { useWeb3React } from '@web3-react/core'
-import ThreeBox from '3box'
+// import ThreeBox from '3box'
 
 import { metamaskAccountChange } from '../services/ethers'
 
@@ -35,18 +35,18 @@ const Profile = ({ location }) => {
   useEffect(() => {
     async function getProfile() {
       console.log('account: ', account)
-      const threeBoxProfile = await ThreeBox.getProfile(account)
-      const threeBoxAccounts = await ThreeBox.getVerifiedAccounts(
-        threeBoxProfile
-      )
+      //   const threeBoxProfile = await ThreeBox.getProfile(account)
+      //   const threeBoxAccounts = await ThreeBox.getVerifiedAccounts(
+      //     threeBoxProfile
+      //   )
 
-      if (threeBoxProfile && Object.keys(threeBoxProfile).length > 0) {
-        setProfile(state => ({
-          ...state,
-          ...threeBoxProfile,
-          accounts: threeBoxAccounts,
-        }))
-      }
+      //   if (threeBoxProfile && Object.keys(threeBoxProfile).length > 0) {
+      //     setProfile(state => ({
+      //       ...state,
+      //       ...threeBoxProfile,
+      //       accounts: threeBoxAccounts,
+      //     }))
+      //   }
     }
     metamaskAccountChange(() => {
       if (typeof window !== 'undefined') {
