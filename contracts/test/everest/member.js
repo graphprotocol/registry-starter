@@ -30,15 +30,17 @@
     -   make sure it works
 */
 
-const tokenRegistry = artifacts.require('tokenRegistry.sol')
+const TokenRegistry = artifacts.require('TokenRegistry.sol')
 const fs = require('fs')
 const config = require('../../conf/config.js')
 const paramConfig = config.tokenRegistryParams
+const helpers = require('../helpers.js')
 const utils = require('../utils.js')
-const ethers = require('ethers')
-// const BN = require('bn.js') can get from utils
 
-contract('tokenRegistry', accounts => {
+const ethers = require('ethers')
+// const BN = require('bn.js') can get from helpers
+
+contract('TokenRegistry', accounts => {
     let [tokenRegistryOwner, firstOwner] = accounts
     const memberName = 'The Graph'
     // firstOwner = "0x93606b27cB5e4c780883eC4F6b7Bed5f6572d1dd"
@@ -50,30 +52,30 @@ contract('tokenRegistry', accounts => {
             const newMemberAddress = newMember.signingKey.address
             const owner = utils.ethersWallet(utils.walletPaths.one)
 
-            // await utils.applySignedWithAttribute(applicant, delegate, applicantWallet)
-            await utils.applySigned(newMember, owner)
+            // await helpers.applySignedWithAttribute(applicant, delegate, applicantWallet)
+            await helpers.applySigned(newMember, owner)
 
-            await utils.setAttribute(newMemberAddress, owner)
-            await utils.daiPermit(newMember, owner)
-            // let tokenRegistry = await tokenRegistry.deployed()
-            // console.log(await tokenRegistry.isMember(newMember))
-            // console.log(await tokenRegistry.memberChallengeExists(owner))
+            await helpers.setAttribute(newMemberAddress, owner)
+            await helpers.daiPermit(newMember, owner)
+            // let tokenRegistry = await TokenRegistry.deployed()
+            // console.log(await TokenRegistry.isMember(newMember))
+            // console.log(await TokenRegistry.memberChallengeExists(owner))
         })
 
-        it('should allow a member to exit', async () => {
-            // const tokenRegistry = await tokenRegistry.deployed()
-            // await tokenRegistry.memberExit(memberName, { from: applicant })
-            // const isWhitelisted = await tokenRegistry.isWhitelisted(memberName)
-            // assert(!isWhitelisted, 'Project was removed from whitelist')
-        })
+        // it('should allow a member to exit', async () => {
+        //     // const tokenRegistry = await TokenRegistry.deployed()
+        //     // await TokenRegistry.memberExit(memberName, { from: applicant })
+        //     // const isWhitelisted = await TokenRegistry.isWhitelisted(memberName)
+        //     // assert(!isWhitelisted, 'Project was removed from whitelist')
+        // })
     })
-    describe('Member editing. Functions: editMemberOwner(), editOffchainData(), editDelegate()', () => {
-        it('should allow only owner (not delegate) to editMemberOwner()', async () => {})
+    // describe('Member editing. Functions: editMemberOwner(), editOffchainData(), editDelegate()', () => {
+    //     it('should allow only owner (not delegate) to editMemberOwner()', async () => {})
 
-        it('should allow owner and delegate to call editOffChainData()', async () => {})
+    //     it('should allow owner and delegate to call editOffChainData()', async () => {})
 
-        it('should allow owner and delegate to call editDelegate()', async () => {})
+    //     it('should allow owner and delegate to call editDelegate()', async () => {})
 
-        it('should allow only owner (not delegate) to edit owner', async () => {})
-    })
+    //     it('should allow only owner (not delegate) to edit owner', async () => {})
+    // })
 })

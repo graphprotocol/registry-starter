@@ -27,6 +27,7 @@ contract('EthereumDIDRegistry', function(accounts) {
         'a285ab66393c5fdda46d6fbad9e27fafd438254ab72ad5acb681a0e9f20f5d7b',
         'hex'
     )
+    console.log("HEYHEY: ", privateKey)
     const signerAddress = '0x2036C6CD85692F0Fb2C26E6c6B2ECed9e4478Dfd'
 
     const privateKey2 = Buffer.from(
@@ -88,6 +89,7 @@ contract('EthereumDIDRegistry', function(accounts) {
         const dataToSign =
             '1900' + stripHexPrefix(didReg.address) + paddedNonce + stripHexPrefix(identity) + data
         const hash = Buffer.from(sha3.buffer(Buffer.from(dataToSign, 'hex')))
+
         const signature = ethutil.ecsign(hash, key)
         const publicKey = ethutil.ecrecover(hash, signature.v, signature.r, signature.s)
         return {
