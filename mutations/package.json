@@ -17,6 +17,7 @@
   "devDependencies": {
     "@babel/core": "^7.7.5",
     "@babel/preset-env": "^7.7.6",
+    "@types/node": "^13.7.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^7.1.5",
     "babel-plugin-add-module-exports": "^1.0.2",

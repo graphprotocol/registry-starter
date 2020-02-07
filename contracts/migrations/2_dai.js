@@ -1,6 +1,6 @@
 /* global artifacts */
 
-const Token = artifacts.require('dai.sol')
+const Token = artifacts.require('./lib/Dai.sol')
 const config = require('../conf/config.js')
 
 module.exports = async (deployer, network) => {
