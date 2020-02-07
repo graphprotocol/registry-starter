@@ -192,7 +192,9 @@ const gridStyles = {
     transition: 'all 0.2s ease',
   },
   '&:hover': {
+    transition: 'all 0.3s ease',
     h5: {
+      transition: 'all 0.3s ease',
       color: 'linkHover',
     },
     '& img[alt="arrow"]': {

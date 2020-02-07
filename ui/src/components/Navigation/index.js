@@ -6,7 +6,7 @@ import { useWeb3React } from '@web3-react/core'
 
 import { metamaskAccountChange } from '../../services/ethers'
 import Link from '../Link'
-import Modal from '../../components/Modal'
+import SignupModal from '../../components/Modal'
 
 export default ({ children, mainStyles, ...props }) => {
   const { account } = useWeb3React()
@@ -58,13 +58,15 @@ export default ({ children, mainStyles, ...props }) => {
       </Grid>
       <Grid columns={2} sx={{ alignItems: 'center' }} gap={0}>
         <Link
-          to="tokens/new"
+          to="/tokens/new"
           sx={{
             fontWeight: 'heading',
             fontFamily: 'heading',
             color: 'secondary',
             cursor: 'pointer',
+            transition: 'all 0.3s ease',
             '&:hover': {
+              transition: 'all 0.3s ease',
               color: 'linkHover',
             },
           }}
@@ -89,9 +91,9 @@ export default ({ children, mainStyles, ...props }) => {
           </Link>
         ) : (
           <Box sx={{ justifySelf: 'flex-end' }}>
-            <Modal showModal={showModal} closeModal={closeModal}>
+            <SignupModal showModal={showModal} closeModal={closeModal}>
               <Link onClick={() => openModal()}>Sign In </Link>
-            </Modal>
+            </SignupModal>
           </Box>
         )}
       </Grid>

@@ -8,7 +8,7 @@ const styles = {
   height: '2px',
   width: '100%',
   borderTop: '1px solid',
-  borderColor: 'grey',
+  borderColor: 'whiteFaded',
 }
 
 export default Divider

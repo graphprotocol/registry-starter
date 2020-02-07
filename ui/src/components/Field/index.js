@@ -20,7 +20,7 @@ const Field = ({ title, type, placeholder, charsCount, value, setValue }) => {
       sx={{
         ...styles.field,
         borderBottom: '1px solid',
-        borderColor: 'grey',
+        borderColor: 'whiteFaded',
       }}
     >
       <p sx={{ variant: 'text.small', color: 'secondary' }}>{title}</p>
@@ -43,6 +43,7 @@ const Field = ({ title, type, placeholder, charsCount, value, setValue }) => {
           <TextareaAutosize
             minRows={1}
             maxRows={6}
+            style={{ padding: 0 }}
             placeholder={placeholder}
             onChange={e => {
               const value = e.target ? e.target.value : ''

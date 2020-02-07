@@ -60,7 +60,7 @@ const UploadImage = ({ setImage }) => {
               '&:hover': {
                 boxShadow: 'none',
                 border: '1px solid',
-                borderColor: 'grey',
+                borderColor: 'whiteFaded',
               },
             }
       }
@@ -133,7 +133,7 @@ const styles = {
     textAlign: 'center',
     position: 'relative',
     border: '1px solid',
-    borderColor: 'grey',
+    borderColor: 'whiteFaded',
     width: '100%',
     boxShadow: '0 4px 24px 0 rgba(30,37,44,0.16)',
     transition: 'all 0.3s ease',
