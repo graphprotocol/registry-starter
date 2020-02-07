@@ -4,6 +4,7 @@ import { jsx, Box } from 'theme-ui'
 import { Helmet } from 'react-helmet'
 import emotionReset from 'emotion-reset'
 import { Global, css } from '@emotion/core'
+import { isMobile } from 'react-device-detect'
 
 import Footer from '../Footer'
 import Navigation from '../Navigation'
@@ -18,8 +19,11 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
   }
 
   let border =
-    props.path.match(/^\/token\//) || props.path.match(/^\/edit\//)
-      ? '10px solid #6F4CFF'
+    (props.path && props.path.match(/^\/token\//)) ||
+    (props.path && props.path.match(/^\/edit\//))
+      ? isMobile
+        ? '5px solid #6F4CFF'
+        : '10px solid #6F4CFF'
       : '0px solid white'
 
   return (

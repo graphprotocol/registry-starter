@@ -1,13 +1,13 @@
 /** @jsx jsx */
-import { Fragment } from 'react'
+import { useState } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
-import { isMobile } from 'react-device-detect'
 
 import Divider from '../components/Divider'
 import Link from '../components/Link'
+import Button from '../components/Button'
 
 const TOKEN_QUERY = gql`
   query token($id: ID!) {
@@ -19,11 +19,22 @@ const TOKEN_QUERY = gql`
       isChallenged
       decimals
       address
+      totalVotes
+      owner {
+        id
+      }
+      challenges {
+        id
+        resolved
+        description
+      }
     }
   }
 `
 
 const Token = ({ location }) => {
+  const [isKeepOpen, setIsKeepOpen] = useState(false)
+  const [isRemoveOpen, setIsRemoveOpen] = useState(false)
   const tokenId = location ? location.pathname.split('/').slice(-1)[0] : ''
   const { loading, error, data } = useQuery(TOKEN_QUERY, {
     variables: {
@@ -41,39 +52,27 @@ const Token = ({ location }) => {
 
   let token = data && data.token
 
+  let description
+  if (token.isChallenged) {
+    const activeChallenge = token.challenges.find(
+      challenge => challenge.resolved === false
+    )
+    description = activeChallenge ? activeChallenge.description : ''
+  }
+
   return (
-    <Grid columns={[1, 1, 2]} gap={0} sx={{ alignItems: 'center' }}>
-      <Grid
-        sx={{
-          gridTemplateColumns: ['1fr', '80px 1fr', '80px 1fr'],
-          alignItems: 'flex-start',
-        }}
-      >
-        {!isMobile && token.image ? (
-          <img
-            src={token.image}
-            alt="Token"
-            sx={{ height: '80px', width: '80px', objectFit: 'contain' }}
-          />
-        ) : (
-          <div />
-        )}
+    <Grid>
+      <Grid sx={{ gridTemplateColumns: '80px 1fr', mb: 4 }} gap={2}>
+        <img
+          src={token.image}
+          alt="Token"
+          sx={{ height: '80px', width: '80px', objectFit: 'contain' }}
+        />
+        <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
+      </Grid>
+      <Divider />
+      <Grid columns={[1, 1, 2]} gap={0} mt={5}>
         <Box>
-          {isMobile ? (
-            <Fragment>
-              <Grid sx={{ gridTemplateColumns: '80px 1fr', mb: 4 }} gap={2}>
-                <img
-                  src={token.image}
-                  alt="Token"
-                  sx={{ height: '80px', width: '80px', objectFit: 'contain' }}
-                />
-                <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
-              </Grid>
-              <Divider />
-            </Fragment>
-          ) : (
-            <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
-          )}
           <Styled.p>{token.description}</Styled.p>
           <p sx={{ variant: 'text.smaller', mt: 3 }}>ID</p>
           <Styled.h6
@@ -101,19 +100,104 @@ const Token = ({ location }) => {
           >
             {token.address}
           </Styled.h6>
-
           <p sx={{ variant: 'text.smaller', mt: 3 }}>Decimals</p>
           <Styled.p>{token.decimals}</Styled.p>
           <Link to={`edit/${token.id}`} sx={{ color: 'secondary', mt: 5 }}>
             EDIT (placeholder)
           </Link>
         </Box>
+        <Box sx={{ margin: ['32px auto', '32px auto', 0], maxWidth: '400px' }}>
+          {token.isChallenged && (
+            <Box>
+              <Styled.h5 sx={{ mb: 4 }}>Active Challenge</Styled.h5>
+              <Grid columns={3} gap={3} my={5}>
+                <Box>
+                  <p sx={{ variant: 'text.smaller' }}>Ends in</p>
+                  <Styled.p>3d 6h</Styled.p>
+                </Box>
+                <Box>
+                  <p sx={{ variant: 'text.smaller' }}>Voters</p>
+                  <Styled.p>{token.totalVotes}</Styled.p>
+                </Box>
+                <Box>
+                  <p sx={{ variant: 'text.smaller' }}>Challenged by</p>
+                  <Link to={`/profile/${token.owner.id}`}>
+                    <Styled.p
+                      sx={{ color: 'secondary', fontWeight: 'heading' }}
+                    >
+                      {`${token.owner.id.slice(0, 6)}...${token.owner.id.slice(
+                        -6
+                      )}`}
+                    </Styled.p>
+                  </Link>
+                </Box>
+              </Grid>
+              <Box my={5}>
+                <p sx={{ variant: 'text.smaller' }}>Description</p>
+                <Styled.p>{description}</Styled.p>
+              </Box>
+              <Box my={5}>
+                <p sx={{ variant: 'text.smaller' }}>Vote</p>
+                <Grid
+                  columns={2}
+                  sx={{
+                    mt: 1,
+                    mb: 6,
+                    gridTemplateColumns: 'max-content max-content',
+                  }}
+                >
+                  {/* <MultiSelect
+                    setValue={projects => voteOnProject(projects, 'keep')}
+                    title="Vote on behalf of"
+                    subtitle="You can select multiple projects"
+                    items={userData ? userData.user.projects : []}
+                    variant="round"
+                    setOpen={value => {
+                      setIsKeepOpen(value)
+                    }}
+                    styles={{
+                      pointerEvents: isRemoveOpen ? 'none' : 'all',
+                      cursor: isRemoveOpen ? 'auto' : 'pointer',
+                    }}
+                  > */}
+                  <Button
+                    variant="secondary"
+                    text="Keep"
+                    sx={{
+                      backgroundColor: isKeepOpen ? 'secondary' : 'white',
+                      color: isKeepOpen ? 'white' : 'secondary',
+                      opacity: isRemoveOpen ? 0.48 : 1,
+                    }}
+                  />
+                  {/* <MultiSelect
+                  setValue={projects => voteOnProject(projects, 'remove')}
+                  title="Vote on behalf of"
+                  subtitle="You can select multiple projects"
+                  items={userData ? userData.user.projects : []}
+                  variant="round"
+                  setOpen={value => {
+                    setIsRemoveOpen(value)
+                  }}
+                  styles={{
+                    pointerEvents: isKeepOpen && 'none',
+                    cursor: isKeepOpen && 'auto',
+                  }}
+                > */}
+                  <Button
+                    variant="secondary"
+                    text="Remove"
+                    sx={{
+                      backgroundColor: isRemoveOpen ? 'secondary' : 'white',
+                      color: isRemoveOpen ? 'white' : 'secondary',
+                      opacity: isKeepOpen ? 0.48 : 1,
+                    }}
+                  />
+                </Grid>
+              </Box>
+            </Box>
+          )}
+        </Box>
       </Grid>
-      <Grid
-        columns={[1, 2, 2]}
-        mt={[5, 5, 0]}
-        sx={{ alignItems: 'center' }}
-      ></Grid>
     </Grid>
   )
 }

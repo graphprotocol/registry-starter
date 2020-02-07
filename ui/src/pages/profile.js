@@ -68,10 +68,7 @@ const Profile = ({ location }) => {
 
   const user = data.user
 
-  const displayProfileId =
-    profileId.slice(0, 6) +
-    '...' +
-    profileId.slice(profileId.length - 6, profileId.length)
+  const displayProfileId = profileId.slice(0, 6) + '...' + profileId.slice(-6)
 
   return (
     <Grid>

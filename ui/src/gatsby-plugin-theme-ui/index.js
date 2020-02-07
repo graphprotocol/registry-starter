@@ -97,7 +97,8 @@ export default {
     secondary: {
       color: 'secondary',
       bg: 'white',
-      border: 'none',
+      border: '2px solid rgba(111, 76, 255, 0.32)',
+      WebkitAppearance: 'none',
       fontFamily: 'body',
       fontSize: '1rem',
       fontWeight: 'heading',
@@ -113,8 +114,7 @@ export default {
         outline: 'none',
       },
       '&:hover': {
-        boxShadow:
-          '0 4px 32px 0 rgba(76,102,255,0.24), 0 12px 56px 0 rgba(30,37,44,0.32)',
+        borderColor: 'secondary',
         transition: 'all 0.3s ease',
       },
     },

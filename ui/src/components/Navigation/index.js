@@ -74,7 +74,7 @@ export default ({ children, mainStyles, ...props }) => {
         {userAccount ? (
           <Link
             to={`/profile/ck670yk6d8u490935r8v72pa6`} //should be userAccount
-            sx={{ '&:hover': { svg: { marginLeft: 0 } } }}
+            sx={{ textAlign: 'right' }}
           >
             <img
               src="/user.png"
