@@ -1,7 +1,6 @@
 module.exports = {
   plugins: [
     'gatsby-plugin-react-helmet',
-    'gatsby-plugin-zeit-now',
     {
       resolve: 'gatsby-plugin-theme-ui',
       options: {
