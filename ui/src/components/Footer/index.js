@@ -9,6 +9,7 @@ const Footer = ({ ...props }) => {
         <a
           href="https://github.com/graphprotocol/curation-starter"
           target="_blank"
+          rel="noopener noreferrer"
           sx={{ display: 'inline-block', textDecoration: 'none' }}
         >
           <p sx={{ variant: 'text.smaller' }}>

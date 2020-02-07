@@ -1,6 +1,6 @@
 /** @jsx jsx */
 import { useState, useEffect } from 'react'
-import { jsx, Styled } from 'theme-ui'
+import { jsx, Styled, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useWeb3React } from '@web3-react/core'
 
@@ -56,7 +56,21 @@ export default ({ children, mainStyles, ...props }) => {
           <Link to={'/'}>Tokens</Link>
         </Styled.h4>
       </Grid>
-      <Grid>
+      <Grid columns={2} sx={{ alignItems: 'center' }} gap={0}>
+        <Link
+          to="tokens/new"
+          sx={{
+            fontWeight: 'heading',
+            fontFamily: 'heading',
+            color: 'secondary',
+            cursor: 'pointer',
+            '&:hover': {
+              color: 'linkHover',
+            },
+          }}
+        >
+          Add a token
+        </Link>
         {userAccount ? (
           <Link
             to={`/profile/ck670yk6d8u490935r8v72pa6`} //should be userAccount
@@ -74,9 +88,11 @@ export default ({ children, mainStyles, ...props }) => {
             />
           </Link>
         ) : (
-          <Modal showModal={showModal} closeModal={closeModal}>
-            <Link onClick={() => openModal()}>Sign In </Link>
-          </Modal>
+          <Box sx={{ justifySelf: 'flex-end' }}>
+            <Modal showModal={showModal} closeModal={closeModal}>
+              <Link onClick={() => openModal()}>Sign In </Link>
+            </Modal>
+          </Box>
         )}
       </Grid>
     </Grid>

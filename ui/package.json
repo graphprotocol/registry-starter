@@ -14,6 +14,7 @@
     "@web3-react/walletconnect-connector": "^6.0.7",
     "@web3-react/walletlink-connector": "^6.0.7",
     "apollo-boost": "^0.4.7",
+    "base-x": "^3.0.7",
     "emotion-reset": "^2.0.4",
     "ethers": "^4.0.44",
     "gatsby": "^2.19.7",
@@ -27,6 +28,7 @@
     "gatsby-plugin-theme-ui": "^0.3.0",
     "gatsby-source-filesystem": "^2.1.46",
     "gatsby-source-graphql": "^2.1.33",
+    "ipfs-http-client": "^42.0.0",
     "isomorphic-fetch": "^2.2.1",
     "prop-types": "^15.7.2",
     "qrcode.react": "^1.0.0",
@@ -34,6 +36,7 @@
     "react-device-detect": "^1.11.14",
     "react-dom": "^16.12.0",
     "react-helmet": "^5.2.1",
+    "react-textarea-autosize": "^7.1.2",
     "theme-ui": "^0.3.1"
   },
   "devDependencies": {

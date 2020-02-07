@@ -34,12 +34,10 @@ const Profile = ({ location }) => {
 
   useEffect(() => {
     async function getProfile() {
-      console.log('account: ', account)
       //   const threeBoxProfile = await ThreeBox.getProfile(account)
       //   const threeBoxAccounts = await ThreeBox.getVerifiedAccounts(
       //     threeBoxProfile
       //   )
-
       //   if (threeBoxProfile && Object.keys(threeBoxProfile).length > 0) {
       //     setProfile(state => ({
       //       ...state,

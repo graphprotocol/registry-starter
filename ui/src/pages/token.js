@@ -7,6 +7,7 @@ import { gql } from 'apollo-boost'
 import { isMobile } from 'react-device-detect'
 
 import Divider from '../components/Divider'
+import Link from '../components/Link'
 
 const TOKEN_QUERY = gql`
   query token($id: ID!) {
@@ -16,7 +17,7 @@ const TOKEN_QUERY = gql`
       image
       description
       isChallenged
-      amount
+      decimals
       address
     }
   }
@@ -102,7 +103,10 @@ const Token = ({ location }) => {
           </Styled.h6>
 
           <p sx={{ variant: 'text.smaller', mt: 3 }}>Decimals</p>
-          <Styled.p>{token.amount}</Styled.p>
+          <Styled.p>{token.decimals}</Styled.p>
+          <Link to={`edit/${token.id}`} sx={{ color: 'secondary', mt: 5 }}>
+            EDIT (placeholder)
+          </Link>
         </Box>
       </Grid>
       <Grid

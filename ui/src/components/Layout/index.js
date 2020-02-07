@@ -17,6 +17,11 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
     position: 'relative',
   }
 
+  let border =
+    props.path.match(/^\/token\//) || props.path.match(/^\/edit\//)
+      ? '10px solid #6F4CFF'
+      : '0px solid white'
+
   return (
     <Fragment>
       <Global
@@ -28,9 +33,11 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
             -webkit-font-smoothing: antialiased;
             font-smoothing: antialiased;
           }
-          body: {
-            margin: 0,
-            backgroundColor: 'white',
+          body {
+            margin: 0;
+            background-color: white;
+            border: ${border};
+            transition: all 0.3s ease;
           },
         `}
       />

@@ -67,6 +67,58 @@ export default {
       lineHeight: '1.5rem',
     },
   },
+  buttons: {
+    primary: {
+      color: 'white',
+      bg: 'secondary',
+      boxShadow:
+        '0 8px 32px 0 rgba(76,102,255,0.48), 0 4px 16px 0 rgba(0,0,0,0.16)',
+      fontFamily: 'body',
+      fontSize: '1rem',
+      fontWeight: 'heading',
+      letterSpacing: '1px',
+      lineHeight: '2.5rem',
+      height: '48px',
+      boxSizing: 'content-box',
+      border: 'none',
+      px: 6,
+      width: 'fit-content',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      '&:focus': {
+        outline: 'none',
+      },
+      '&:hover': {
+        boxShadow:
+          '0 4px 32px 0 rgba(76,102,255,0.24), 0 12px 56px 0 rgba(30,37,44,0.32)',
+        transition: 'all 0.3s ease',
+      },
+    },
+    secondary: {
+      color: 'secondary',
+      bg: 'white',
+      border: 'none',
+      fontFamily: 'body',
+      fontSize: '1rem',
+      fontWeight: 'heading',
+      letterSpacing: '1px',
+      lineHeight: '2.5rem',
+      height: '48px',
+      boxSizing: 'content-box',
+      px: 6,
+      width: 'fit-content',
+      cursor: 'pointer',
+      transition: 'all 0.3s ease',
+      '&:focus': {
+        outline: 'none',
+      },
+      '&:hover': {
+        boxShadow:
+          '0 4px 32px 0 rgba(76,102,255,0.24), 0 12px 56px 0 rgba(30,37,44,0.32)',
+        transition: 'all 0.3s ease',
+      },
+    },
+  },
   text: {
     large: {
       fontSize: 3,
