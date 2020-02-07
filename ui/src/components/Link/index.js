@@ -13,8 +13,14 @@ const Link = ({ to, children, onClick, ...props }) => {
           display: 'block',
           color: 'text',
           fontWeight: 'heading',
+          fontFamily: 'heading',
           '&:hover': {
             color: 'linkHover',
+            '& img[alt="arrow"]': {
+              transition: 'all 0.2s ease',
+              fill: 'linkHover',
+              marginLeft: 3,
+            },
           },
         }}
         {...props}

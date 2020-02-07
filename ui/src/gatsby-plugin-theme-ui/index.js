@@ -120,6 +120,13 @@ export default {
     },
   },
   text: {
+    huge: {
+      fontSize: 4,
+      lineHeight: '1.75rem',
+      letterSpacing: '-0.8px',
+      color: 'text',
+      fontFamily: 'body',
+    },
     large: {
       fontSize: 3,
       lineHeight: '1.75rem',
