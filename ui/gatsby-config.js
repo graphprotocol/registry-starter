@@ -1,7 +1,15 @@
 module.exports = {
   plugins: [
     'gatsby-plugin-react-helmet',
-    'gatsby-plugin-theme-ui',
+    'gatsby-plugin-zeit-now',
+    {
+      resolve: 'gatsby-plugin-theme-ui',
+      options: {
+        stylesProvider: {
+          injectFirst: true,
+        },
+      },
+    },
     'gatsby-plugin-react-svg',
     {
       resolve: `gatsby-plugin-manifest`,
