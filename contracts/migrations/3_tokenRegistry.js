@@ -1,7 +1,7 @@
 /* global artifacts */
 
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
-const Token = artifacts.require('dai.sol')
+const Token = artifacts.require('./lib/Dai.sol')
 const EthereumDIDRegistry = artifacts.require('EthereumDIDRegistry.sol')
 const config = require('../conf/config.js')
 // const fs = require('fs')
