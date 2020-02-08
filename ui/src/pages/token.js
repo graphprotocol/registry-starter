@@ -45,7 +45,6 @@ const Token = ({ location }) => {
   const [isKeepOpen, setIsKeepOpen] = useState(false)
   const [isRemoveOpen, setIsRemoveOpen] = useState(false)
   const [showChallengeDialog, setShowChallengeDialog] = useState(false)
-  const openChallengeDialog = () => setShowChallengeDialog(true)
   const closeChallengeDialog = () => setShowChallengeDialog(false)
   const [isChallengeDisabled, setIsChallengeDisabled] = useState(false)
   const [challenge, setChallenge] = useState({
@@ -107,6 +106,8 @@ const Token = ({ location }) => {
         />
         <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
         <Menu
+          top="60px"
+          right="0"
           items={[
             {
               text: 'Challenge',

@@ -2,9 +2,19 @@
 import PropTypes from 'prop-types'
 import { useState, Fragment } from 'react'
 import { Styled, jsx, Box, Grid } from 'theme-ui'
-import { Menu, MenuList, MenuButton, MenuItem } from '@reach/menu-button'
+import {
+  Menu,
+  MenuList,
+  MenuButton,
+  MenuItem,
+  MenuPopover,
+} from '@reach/menu-button'
 import '@reach/menu-button/styles.css'
 
+import Field from '../Field'
+
+// TODO: Create a custom select because when you type search letters
+// it interferes with the dropdown selection
 const Select = ({
   title,
   text,
@@ -14,6 +24,13 @@ const Select = ({
   isPlaceholder,
   ...props
 }) => {
+  const [searchText, setSearchText] = useState('')
+  let allTokens = tokens
+  if (searchText.length > 0) {
+    allTokens = tokens.filter(
+      token => token.symbol.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+    )
+  }
   return (
     <Box {...props}>
       <p sx={{ variant: 'text.small', color: 'secondary' }}>{title}</p>
@@ -64,7 +81,7 @@ const Select = ({
                 />
               </Grid>
             </MenuButton>
-            <MenuList
+            <MenuPopover
               sx={{
                 width: '532px',
                 maxHeight: '220px',
@@ -74,6 +91,7 @@ const Select = ({
                 ml: '-10px',
                 mt: '-12px',
                 boxShadow: '0 4px 24px 0 rgba(30,37,44,0.16)',
+                background: 'white',
                 '&>[data-reach-menu-item]:focus': {
                   outline: 'none',
                 },
@@ -83,7 +101,17 @@ const Select = ({
                 },
               }}
             >
-              {tokens.map(token => (
+              <Field
+                type="input"
+                title=""
+                placeholder="Search tokens"
+                value={searchText}
+                setValue={value => {
+                  setSearchText(value)
+                }}
+                sx={{ border: 'none', px: 5, mb: 2 }}
+              />
+              {allTokens.map(token => (
                 <MenuItem
                   key={token.id}
                   onSelect={() => setValue('token', token)}
@@ -116,7 +144,7 @@ const Select = ({
                   </Grid>
                 </MenuItem>
               ))}
-            </MenuList>
+            </MenuPopover>
           </Fragment>
         )}
       </Menu>

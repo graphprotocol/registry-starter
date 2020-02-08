@@ -6,7 +6,7 @@ import { Grid } from '@theme-ui/components'
 
 import Link from '../Link'
 
-const Menu = ({ children, items }) => {
+const Menu = ({ children, items, top, right, ...props }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -21,7 +21,7 @@ const Menu = ({ children, items }) => {
   }, [])
 
   return (
-    <Grid sx={{ position: 'relative' }}>
+    <Grid sx={{ position: 'relative' }} {...props}>
       <Box
         onClick={e => {
           e.stopPropagation()
@@ -31,9 +31,9 @@ const Menu = ({ children, items }) => {
         {children}
       </Box>
       {isOpen && (
-        <Box sx={listStyles}>
+        <Box sx={{ ...listStyles, top: top, right: right }}>
           {items &&
-            items.map(item => (
+            items.map((item, index) => (
               <Box
                 sx={{ ...linkStyles, display: item.icon ? 'grid' : 'block' }}
                 onClick={e => {
@@ -41,7 +41,7 @@ const Menu = ({ children, items }) => {
                   item.handleSelect && item.handleSelect(e)
                   setIsOpen(false)
                 }}
-                key={item.text}
+                key={index}
               >
                 {item.icon && (
                   <img
@@ -62,14 +62,14 @@ const Menu = ({ children, items }) => {
 const listStyles = {
   width: 'fit-content',
   position: 'absolute',
-  right: 0,
-  top: '60px',
+  zIndex: 10,
   boxShadow: '0 20px 64px 0 rgba(12,10,29,0.32)',
   bg: 'white',
   border: 'none',
   textAlign: 'center',
   cursor: 'pointer',
-  padding: 5,
+  px: 7,
+  py: 3,
 }
 
 const linkStyles = {
@@ -85,6 +85,7 @@ const linkStyles = {
   justifyContent: 'left',
   gap: 3,
   textAlign: 'left',
+  my: 6,
 }
 
 const iconStyles = {

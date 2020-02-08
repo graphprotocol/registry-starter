@@ -75,7 +75,7 @@ const Profile = ({ location }) => {
       <Grid columns={[1, 1, 2]} gap={0} sx={{ alignItems: 'center' }}>
         <Grid
           sx={{
-            gridTemplateColumns: [1, '80px 1fr'],
+            gridTemplateColumns: '80px 1fr',
             alignItems: 'center',
           }}
         >
@@ -91,7 +91,14 @@ const Profile = ({ location }) => {
             {profile && profile.name ? (
               <Styled.p>{displayProfileId}</Styled.p>
             ) : (
-              <Styled.h1>{displayProfileId}</Styled.h1>
+              <Styled.h1
+                sx={{
+                  fontSize: ['2rem', '3.375rem'],
+                  letterSpacing: ['-0.8px', '2px'],
+                }}
+              >
+                {displayProfileId}
+              </Styled.h1>
             )}
           </Box>
         </Grid>
