@@ -1,53 +1,14 @@
-// import {
-//   EventPayload,
-//   MutationContext,
-//   MutationResolvers,
-//   MutationState,
-//   StateBuilder,
-//   StateUpdater,
-// } from "@graphprotocol/mutations"
-
-import gql from 'graphql-tag'
 const IpfsClient = require('ipfs-http-client')
-import { ethers } from 'ethers'
-import { Transaction } from 'ethers/utils'
+
+import { ethers, utils } from 'ethers'
 import {
   AsyncSendable,
   Web3Provider
 } from "ethers/providers"
 
-// State Payloads + Events + StateBuilder
-// interface CustomEvent extends EventPayload {
-//   myValue: string
-// }
+import { changeOwnerSignedData, permitSignedData, setAttributeData, VALIDITY_TIMESTAMP, ipfsHexHash } from './utils'
 
-// type EventMap = {
-//   'CUSTOM_EVENT': CustomEvent
-// }
-
-// interface State {
-//   myValue: string
-//   myFlag: boolean
-// }
-
-// const stateBuilder: StateBuilder<State, EventMap> = {
-//   getInitialState(): State {
-//     return {
-//       myValue: '',
-//       myFlag: false
-//     }
-//   },
-//   reducers: {
-//     'CUSTOM_EVENT': async (state: MutationState<State>, payload: CustomEvent) => {
-//       return {
-//         myValue: 'true'
-//       }
-//     }
-//   }
-// }
-
-// Configuration
-type Config = typeof config
+const address = "0xFC628dd79137395F3C9744e33b1c5DE554D94882"
 
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
@@ -55,71 +16,20 @@ const config = {
   },
   ipfs: (endpoint: string) => {
     return new IpfsClient(endpoint)
-  },
-  // Example of a custom configuration property
-  property: {
-    // Property setters can be nested
-    a: (value: string) => { },
-    b: (value: string) => { }
-  }
-}
-
-//type Context = MutationContext<Config, State, EventMap>
-
-// async function queryUserGravatar(context: any) {
-//   const { client } = context
-//   const { ethereum } = context.graph.config
-
-//   const address = await ethereum.getSigner().getAddress()
-
-//   if (client) {
-//     // TODO time travel query (specific block #)
-//     // block: hash#?
-//     for (let i = 0; i < 20; ++i) {
-//       const { data } = await client.query({
-//         query: gql`
-//           query GetGravatars {
-//             gravatars (where: {owner: "${address}"}) {
-//               id
-//               owner
-//               displayName
-//               imageUrl
-//             }
-//           }`
-//         }
-//       )
-
-//       if (data === null) {
-//         await sleep(500)
-//       } else {
-//         return data.gravatars[0]
-//       }
-//     }
-//   }
-
-//   return null
-// }
-
-async function sendTx(tx: Transaction) {
-  try {
-    return await tx;
-  } catch (error) {
-    console.log(error)
   }
 }
 
 async function getTokenRegistryContract(context: any) {
-  const abi = require("../../contracts/abis/TokenRegistry.abi")
-  const address = "0x0290FB167208Af455bB137780163b7B7a9a10C16"
+  const abi = require("../../contracts/build/contracts/TokenRegistry.json").abi
 
-  if (!abi || !address) { 
+  if (!abi || !address) {
     throw Error(`Missing the DataSource 'TokenRegistry'`)
   }
 
   const { ethereum } = context.graph.config
 
   const contract = new ethers.Contract(
-    address, abi, ethereum.getSigner? ethereum.getSigner: ethereum
+    address, abi, ethereum.getSigner ? ethereum.getSigner() : ethereum
   )
   contract.connect(ethereum)
 
@@ -128,32 +38,80 @@ async function getTokenRegistryContract(context: any) {
 
 async function addToken(_, { options }: any, context: any) {
 
+  let metadataHash: string, imageHash: string
+
   const { ipfs } = context.graph.config
 
   const { symbol, description, image, decimals } = options
 
+  for await (const result of ipfs.add(image)) {
+    imageHash = `/ipfs/${result.path}`
+  }
+
   const metadata = JSON.stringify(
-    { symbol,
+    {
+      symbol,
       description,
-      image,
+      image: imageHash,
       decimals
     }
   )
 
   for await (const result of ipfs.add(metadata)) {
-    console.log(result)
+    metadataHash = result.path
   }
 
-  // const tokenRegistry = await getTokenRegistryContract(context)
+  const randomWallet = ethers.Wallet.createRandom() as any
+  const randomWalletAddress = randomWallet.signingKey.address
+  const offChainDataName =
+    '0x50726f6a65637444617461000000000000000000000000000000000000000000'
 
-  // await sendTx(
-  //   await tokenRegistry.applySignedWithAttribute()
-  // )
+  const signedMessage1 = await randomWallet.signMessage(
+    changeOwnerSignedData(randomWalletAddress, address),
+  )
 
-  return null;
+  const signedMessage2 = await randomWallet.signMessage(
+    permitSignedData(randomWalletAddress, address),
+  )
+
+  const signedMessage3 = await randomWallet.signMessage(
+    setAttributeData(
+      randomWalletAddress,
+      metadataHash,
+      offChainDataName,
+    ),
+  )
+
+  const sig1 = utils.splitSignature(signedMessage1)
+  const sig2 = utils.splitSignature(signedMessage2)
+  const sig3 = utils.splitSignature(signedMessage3)
+
+  let { v: v1, r: r1, s: s1 } = sig1
+  let { v: v2, r: r2, s: s2 } = sig2
+  let { v: v3, r: r3, s: s3 } = sig3
+
+  const tokenRegistry = await getTokenRegistryContract(context)
+
+  const transaction = await tokenRegistry.applySignedWithAttribute(
+    randomWalletAddress,
+    [v1, v2],
+    [r1, r2],
+    [s1, s2],
+    address,
+    v3,
+    r3,
+    s3,
+    offChainDataName,
+    ipfsHexHash(metadataHash),
+    VALIDITY_TIMESTAMP,
+  )
+
+  return {
+    metadataHash
+  };
 }
 
-const resolvers: any = {
+const resolvers = {
   Mutation: {
     addToken
   }
@@ -163,14 +121,3 @@ export default {
   resolvers,
   config
 }
-
-// Required Types
-// export {
-//   State,
-//   EventMap,
-//   CustomEvent
-// }
-
-// function sleep(ms: number): Promise<void> {
-//   return new Promise(resolve => setTimeout(resolve, ms));
-// }
