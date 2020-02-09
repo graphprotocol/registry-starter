@@ -3,10 +3,9 @@ import {
   MutationContext,
   MutationResolvers,
   MutationState,
-  StateBuilder,
-  StateUpdater,
+  StateBuilder
 } from "../mutations-package"
-import { ethers, utils } from 'ethers'
+import { ethers } from 'ethers'
 import {
   AsyncSendable,
   Web3Provider
@@ -58,7 +57,7 @@ const stateBuilder: StateBuilder<State, EventMap> = {
   }
 }
 
-const address = "0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF"
+const contractAddress = "0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF"
 
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
@@ -76,14 +75,14 @@ type Context = MutationContext<Config, State, EventMap>
 async function getContract(context: Context, name: string) {
   const abi = require(`../../contracts/build/contracts/${name}.json`).abi
 
-  if (!abi || !address) {
+  if (!abi || !contractAddress) {
     throw Error(`Missing the DataSource '${name}'`)
   }
 
   const { ethereum } = context.graph.config
 
   const contract = new ethers.Contract(
-    address, abi, ethereum.getSigner ? ethereum.getSigner() : ethereum
+    contractAddress, abi, ethereum.getSigner()
   )
   contract.connect(ethereum)
 
@@ -92,11 +91,13 @@ async function getContract(context: Context, name: string) {
 
 async function addToken(_, { options }: any, context: Context) {
 
-  const { ipfs } = context.graph.config
+  const { ipfs, ethereum } = context.graph.config
 
   const { state } = context.graph
 
   const { symbol, description, image, decimals } = options
+
+  const address = await ethereum.getSigner().getAddress()
 
   const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
   
@@ -187,10 +188,23 @@ async function editToken(_, { options }: any, context: Context) {
   return null
 }
 
+async function deleteToken(_, { tokenId }: any, context: Context) {
+
+  const { ethereum } = context.graph.config
+
+  const tokenRegistry = await getContract(context, "TokenRegistry")
+  const address = await ethereum.getSigner().getAddress()
+
+  tokenRegistry.memberExit(address)
+
+  return true
+}
+
 const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {
     addToken,
-    editToken
+    editToken,
+    deleteToken
   }
 }
 

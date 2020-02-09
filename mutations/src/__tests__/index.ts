@@ -20,12 +20,12 @@ describe("Mutation Resolvers", () => {
     resolvers.stateBuilder
   )
 
-  let addToken: any
+  let publishedValue: any
 
   beforeAll(() => {
     observer.subscribe( value => {
-      if(value.addToken){
-        addToken = value.addToken
+      if(value){
+        publishedValue = value
       }
     })
   })
@@ -57,13 +57,38 @@ describe("Mutation Resolvers", () => {
         }
       })
 
-      const metadataString = await getFromIpfs(ipfsClient, addToken.metadataHash)
+      const metadataString = await getFromIpfs(
+        ipfsClient,
+        publishedValue.addToken.metadataHash
+      )
 
       metadata = JSON.parse(metadataString)
       image = await getFromIpfs(ipfsClient, metadata.image)
 
       expect(metadata.symbol).toEqual('test sym')
       expect(image).toEqual('test img')
+
+    })
+
+  })
+
+  describe("deleteToken resolver", () => {
+
+    it("Should delete token", async () => {
+
+      await client.mutate({
+        mutation: gql`
+            mutation deleteToken ($tokenId: TokenOptions) {
+              deleteToken(tokenId: $tokenId) @client
+            }
+          `,
+        variables: {
+          tokenId: "RandomID"
+        },
+        context: {
+          _rootSub: observer
+        }
+      })
 
     })
 
