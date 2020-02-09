@@ -24,7 +24,9 @@
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.0",
     "apollo-cache-inmemory": "^1.6.5",
+    "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.13",
+    "apollo-link-http": "^1.5.16",
     "apollo-link-state": "^0.4.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-loader": "^7.1.5",
@@ -34,6 +36,7 @@
     "graphql": "^14.6.0",
     "jest": "^25.1.0",
     "rimraf": "3.0.0",
+    "rxjs": "^6.5.4",
     "ts-jest": "^25.2.0",
     "ts-loader": "6.2.1",
     "typescript": "^3.7.3",
@@ -43,6 +46,7 @@
   "jest": {
     "transform": {
       "^.+\\.ts?$": "ts-jest"
-    }
+    },
+    "modulePathIgnorePatterns": ["utils"]
   }
 }
