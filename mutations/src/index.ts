@@ -19,6 +19,10 @@ interface UploadImageEvent extends EventPayload {
   value: boolean
 }
 
+interface UploadChallengeEvent extends EventPayload {
+  challengeHash: string
+}
+
 interface UploadMetadataEvent extends EventPayload {
   metadataHash: string
 }
@@ -26,12 +30,15 @@ interface UploadMetadataEvent extends EventPayload {
 type EventMap = {
   'UPLOAD_IMAGE': UploadImageEvent
   'UPLOAD_METADATA': UploadMetadataEvent
+  'UPLOAD_CHALLENGE': UploadChallengeEvent
 }
 
 interface State {
-  imageUploaded: boolean,
+  imageUploaded: boolean
   metadataUploaded: boolean
   metadataHash: string
+  challengeUploaded: boolean
+  challengeHash: string
 }
 
 const stateBuilder: StateBuilder<State, EventMap> = {
@@ -39,7 +46,9 @@ const stateBuilder: StateBuilder<State, EventMap> = {
     return {
       imageUploaded: false,
       metadataUploaded: false,
-      metadataHash: ''
+      metadataHash: '',
+      challengeUploaded: false,
+      challengeHash: ''
     }
   },
   reducers: {
@@ -52,6 +61,12 @@ const stateBuilder: StateBuilder<State, EventMap> = {
       return {
         metadataUploaded: true,
         metadataHash: payload.metadataHash
+      }
+    },
+    'UPLOAD_CHALLENGE': async (state: MutationState<State>, payload: UploadChallengeEvent) => {
+      return {
+        challengeUploaded: true,
+        challengeHash: payload.challengeHash
       }
     }
   }
@@ -161,7 +176,7 @@ async function addToken(_, { options }: any, context: Context) {
   //   VALIDITY_TIMESTAMP,
   // )
 
-  return null
+  return true;
 }
 
 async function editToken(_, { options }: any, context: Context) {
@@ -200,11 +215,46 @@ async function deleteToken(_, { tokenId }: any, context: Context) {
   return true
 }
 
+async function challengeToken(_, { options: { description, token } }: any, context: Context) {
+
+  const { ipfs } = context.graph.config
+
+  const { state } = context.graph
+
+  const challenge = JSON.stringify({
+    description,
+    token
+  })
+
+  const { path: challengeHash }: { path: string } = await uploadToIpfs(ipfs, challenge)
+
+  await state.dispatch('UPLOAD_CHALLENGE', { challengeHash })
+
+  const tokenRegistry = await getContract(context, "TokenRegistry")
+  
+  //tokenRegistry.challenge( ... )
+
+  return true
+}
+
+async function voteChallenge(_, args: any, context: Context) {
+
+  const tokenRegistry = await getContract(context, "TokenRegistry")
+  
+  //tokenRegistry.submitVotes( ... )
+
+  return true
+}
+
+
+
 const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {
     addToken,
     editToken,
-    deleteToken
+    deleteToken,
+    challengeToken,
+    voteChallenge
   }
 }
 

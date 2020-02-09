@@ -74,9 +74,9 @@ describe("Mutation Resolvers", () => {
 
   describe("deleteToken resolver", () => {
 
-    it("Should delete token", async () => {
+    it("Should return true", async () => {
 
-      await client.mutate({
+      const { data: { deleteToken }} = await client.mutate({
         mutation: gql`
             mutation deleteToken ($tokenId: TokenOptions) {
               deleteToken(tokenId: $tokenId) @client
@@ -89,6 +89,48 @@ describe("Mutation Resolvers", () => {
           _rootSub: observer
         }
       })
+
+      expect(deleteToken).toEqual(true)
+
+    })
+
+  })
+
+  describe("challengeToken resolver", () => {
+
+    it("Should upload challenge data to IPFS", async () => {
+
+      await client.mutate({
+        mutation: gql`
+            mutation challengeToken ($options: ChallengeOptions!) {
+              challengeToken(options: $options) @client
+            }
+          `,
+        variables: {
+          options: {
+            description: "test desc",
+            token: {
+              symbol: 'test sym',
+              description: 'test description',
+              image: "test img",
+              decimals: 'test decimals'
+            }
+          }
+        },
+        context: {
+          _rootSub: observer
+        }
+      })
+
+      const challengeString = await getFromIpfs(
+        ipfsClient,
+        publishedValue.challengeToken.challengeHash
+      )
+
+      const challengeData = JSON.parse(challengeString)
+
+      expect(challengeData.description).toEqual("test desc")
+      expect(challengeData.token.symbol).toEqual("test sym")
 
     })
 
