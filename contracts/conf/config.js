@@ -2,7 +2,6 @@ const config = {
     tokenRegistryParams: {
         owner: '0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1', // Ganache deterministic account 0
         ropstenOwner: '0x93606b27cB5e4c780883eC4F6b7Bed5f6572d1dd', // Daves metamask account 0
-        approvedToken: '0xCfEB869F69431e42cdB54A4F4f105C19C080A601', // Ganache MockDAI
         votingPeriodDuration: 432000, // 5 days, in seconds
         challengeDeposit: '500000000000000000000', // $50 DAI challenge fee
         fullMemberPeriodDuration: 259200, // 3 days, in seconds
