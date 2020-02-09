@@ -78,7 +78,7 @@ type Mutation {
   ): Token!
 
   removeToken(
-    id: ID!
+    tokenId: ID!
   ): Boolean!
 
   challengeToken(
