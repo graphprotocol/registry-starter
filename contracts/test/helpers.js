@@ -18,8 +18,9 @@ const DAI_PERMIT_TYPEHASH = 'ea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d
 const helpers = {
     applySignedWithAttribute: async (newMemberWallet, ownerWallet) => {
         const ownerAddress = ownerWallet.signingKey.address
-        const memberAddress = newMemberWallet.signingKey.address
+        const newMemberAddress = newMemberWallet.signingKey.address
         const tokenRegistry = await TokenRegistry.deployed()
+        const token = await Token.deployed()
 
         // Get the signature for changing ownership on ERC-1056 Registry
         const applySignedSig = await module.exports.applySigned(newMemberWallet, ownerWallet)
@@ -40,7 +41,7 @@ const helpers = {
 
         // Send all three meta transactions to TokenRegistry to be executed in one tx
         tx = await tokenRegistry.applySignedWithAttribute(
-            memberAddress,
+            newMemberAddress,
             [applySignedSig.v, permitSig.v],
             [applySignedSig.r, permitSig.r],
             [applySignedSig.s, permitSig.s],
@@ -53,15 +54,44 @@ const helpers = {
             '0x' + maxValidity
         )
 
-        console.log(tx.receipt.rawLogs)
+        // Tx logs order
+            // 1. NewMember
+            // 2. Owner changed
+            // 3. Permit
+            // 4. Transfer
+            // 5. Set Attribute
 
-        // TODO - checks
-                // const updatedAllowance = await token.allowance(holderAddress, spenderAddress)
-        // assert.equal(
-        //     updatedAllowance.toString(),
-        //     '115792089237316195423570985008687907853269984665640564039457584007913129639935',
-        //     'Allowance was not set to max'
-        // )
+        // Token Checks
+        const reserveBankAddressBytes32 = tx.receipt.rawLogs[3].topics[2]
+        const reserveBankAddress = '0x' + reserveBankAddressBytes32.slice(26, 67)
+        const ownerBalanceEnd = (await token.balanceOf(ownerAddress)).toString()
+        const reserveBankBalanceEnd = (await token.balanceOf(reserveBankAddress)).toString()
+        const updatedAllowance = await token.allowance(ownerAddress, tokenRegistry.address)
+
+        assert.equal(ownerBalanceEnd, '24999900000000000000000000', 'Owner did not transfer 10 DAI')
+        assert.equal(reserveBankBalanceEnd, '100000000000000000000', 'Bank didnt receive 10 DAI')
+        assert.equal(
+            updatedAllowance.toString(),
+            '115792089237316195423570985008687907853269984665640564039457584007913129639935',
+            'Allowance was not set to max from owner to TokenRegistry'
+        )
+
+        // ERC-1056 Checks
+        // Check Ownership change
+        const didReg = await EthereumDIDRegistry.deployed()
+        const identityOwner = await didReg.identityOwner(newMemberAddress)
+        assert.equal(ownerAddress, identityOwner, 'Ownership was not transferred')
+
+        // Check set attribute worked 
+        const setAttributeLogData = tx.receipt.rawLogs[4].data
+        const mockDataFromLogs = setAttributeLogData.slice((setAttributeLogData.length - 64), setAttributeLogData.length)
+        const ipfsMockDataStripped = utils.stripHexPrefix(utils.mockIPFSData)
+        assert.equal(mockDataFromLogs, ipfsMockDataStripped, 'Logs do not include ipfs hash')
+
+        // TokenRegistry checks
+        const membershipStartTime = Number((await tokenRegistry.getMembershipStartTime(newMemberAddress)).toString())
+        assert(membershipStartTime > 0, "Membership start time not updated")
+
     },
 
     applySigned: async (newMemberWallet, ownerWallet) => {
@@ -158,7 +188,6 @@ const helpers = {
         // ChainID of uint256 9854 used for development, in bytes32
         const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
         const daiAddress = (await Token.deployed()).address
-        console.log("DAI ADDR: ", daiAddress)
         const paddedDaiAddress = utils.leftPad(utils.stripHexPrefix(daiAddress))
         const data = domain + hashedName + hashedVersion + paddedChainID + paddedDaiAddress
         const hash = Buffer.from(keccak256.buffer(Buffer.from(data, 'hex')))
@@ -167,7 +196,6 @@ const helpers = {
 
     signPermit: async (holderAddress, spenderAddress, holderPrivateKey, nonce) => {
         const paddedNonce = utils.leftPad(Buffer.from([nonce], 64).toString('hex'))
-        console.log("PADDED NONCE: ", paddedNonce)
         // We set expiry to 0 always, as that will be default for the TokenRegistry calling
         const paddedExpiry = utils.leftPad(Buffer.from([0], 64).toString('hex'))
         // We set to 1 == true, as that will be default for the TokenRegistry calling
@@ -203,13 +231,9 @@ const helpers = {
         /*  Expected hashedStruct value:
             01b930e8948f5be49f019425c83bcf1657b07efb06fb959192051e9c412abace
         */
-       console.log("STRUCT ENCODED: ", structEncoded)
         const hashedStruct = Buffer.from(keccak256.buffer(Buffer.from(structEncoded, 'hex')))
         const stringHashedStruct = hashedStruct.toString('hex')
-        console.log("HASHES STRUCT: ", stringHashedStruct)
-
         const stringDomainSeparator = DAI_DOMAIN_SEPARATOR.toString('hex')
-        console.log("Domain Separator: ", stringDomainSeparator)
 
 
         /*  Expected digestData value on first test run (dependant on mock dai address)
@@ -227,8 +251,6 @@ const helpers = {
             fc60391b0087e420dc8e15ae01ef93d0814572bbd80b3111248897d3a0d9f941
         */
         const digest = Buffer.from(keccak256.buffer(Buffer.from(digestData, 'hex')))
-        console.log("DIGESt: ", digest.toString('hex'))
-
         const signature = ethutil.ecsign(digest, holderPrivateKey)
         return {
             r: '0x' + signature.r.toString('hex'),

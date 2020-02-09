@@ -37,12 +37,12 @@ contract TokenRegistry is Registry, Ownable {
     event Withdrawal(address indexed receiver, uint256 amount);
 
     event TokenRegistryDeployed(
+        address indexed reserveBank,
         address owner,
         address approvedToken,
         uint256 votingPeriodDuration,
         uint256 challengeDeposit,
         uint256 applicationFee,
-        address reserveBank,
         bytes32 charter
     );
 
@@ -152,12 +152,12 @@ contract TokenRegistry is Registry, Ownable {
         applicationFee = _applicationFee;
 
         emit TokenRegistryDeployed(
+            address(reserveBank),
             _owner,
             _approvedToken,
             _votingPeriodDuration,
             _challengeDeposit,
             _applicationFee,
-            address(reserveBank),
             _charter
         );
     }
@@ -262,15 +262,6 @@ contract TokenRegistry is Registry, Ownable {
         uint256 _offChainDataValidity
     ) external {
         applySignedInternal(_newMember, _sigV, _sigR, _sigS, _owner);
-        // editOffChainDataSigned(
-        //     _newMember,
-        //     _attributeSigV,
-        //     _attributeSigR,
-        //     _attributeSigS,
-        //     _offChainDataName,
-        //     _offChainDataValue,
-        //     _offChainDataValidity
-        // );
         erc1056Registry.setAttributeSigned(
             _newMember,
             _attributeSigV,
@@ -295,44 +286,6 @@ contract TokenRegistry is Registry, Ownable {
         );
         deleteMember(_member);
         emit MemberExited(_member);
-    }
-
-    /******************
-    EDIT MEMBER FUNCTIONS
-    ******************/
-
-    /**
-    @dev                            Allows offChainData to be edited by the owner.
-                                    To revoke an attribute, just pass a validity of 0. There is no
-                                    need to wrap the revokeAttribute function in ERC-1056.
-    @param _member                  The address of the member
-    @param _sigV                    V of the member signature
-    @param _sigR                    R of the member signature
-    @param _sigS                    S of the member signature
-    @param _offChainDataName        Attribute name. Should be a string less than 32 bytes, converted
-                                    to bytes32. example: 'TokenData' = 0x546f6b656e44617461
-                                    with zeros appended to make it 32 bytes
-    @param _offChainDataValue       Attribute data stored offchain (such as IPFS)
-    @param _offChainDataValidity    Length of time attribute data is valid
-     */
-    function editOffChainDataSigned(
-        address _member,
-        uint8 _sigV,
-        bytes32 _sigR,
-        bytes32 _sigS,
-        bytes32 _offChainDataName,
-        bytes memory _offChainDataValue,
-        uint256 _offChainDataValidity
-    ) public {//onlyMemberOwner(_member) {
-        erc1056Registry.setAttributeSigned(
-            _member,
-            _sigV,
-            _sigR,
-            _sigS,
-            _offChainDataName,
-            _offChainDataValue,
-            _offChainDataValidity
-        );
     }
 
     /******************
