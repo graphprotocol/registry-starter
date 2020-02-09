@@ -1,5 +1,11 @@
-const IpfsClient = require('ipfs-http-client')
-
+import {
+  EventPayload,
+  MutationContext,
+  MutationResolvers,
+  MutationState,
+  StateBuilder,
+  StateUpdater,
+} from "../mutations-package"
 import { ethers, utils } from 'ethers'
 import {
   AsyncSendable,
@@ -8,7 +14,51 @@ import {
 
 import { changeOwnerSignedData, permitSignedData, setAttributeData, VALIDITY_TIMESTAMP, ipfsHexHash } from './utils'
 
-const address = "0xFC628dd79137395F3C9744e33b1c5DE554D94882"
+const IpfsClient = require('ipfs-http-client')
+
+interface UploadImageEvent extends EventPayload {
+  value: boolean
+}
+
+interface UploadMetadataEvent extends EventPayload {
+  metadataHash: string
+}
+
+type EventMap = {
+  'UPLOAD_IMAGE': UploadImageEvent
+  'UPLOAD_METADATA': UploadMetadataEvent
+}
+
+interface State {
+  imageUploaded: boolean,
+  metadataUploaded: boolean
+  metadataHash: string
+}
+
+const stateBuilder: StateBuilder<State, EventMap> = {
+  getInitialState(): State {
+    return {
+      imageUploaded: false,
+      metadataUploaded: false,
+      metadataHash: ''
+    }
+  },
+  reducers: {
+    'UPLOAD_IMAGE': async (state: MutationState<State>, payload: UploadImageEvent) => {
+      return {
+        imageUploaded: payload.value
+      }
+    },
+    'UPLOAD_METADATA': async (state: MutationState<State>, payload: UploadMetadataEvent) => {
+      return {
+        metadataUploaded: true,
+        metadataHash: payload.metadataHash
+      }
+    }
+  }
+}
+
+const address = "0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF"
 
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
@@ -19,11 +69,15 @@ const config = {
   }
 }
 
-async function getTokenRegistryContract(context: any) {
-  const abi = require("../../contracts/build/contracts/TokenRegistry.json").abi
+type Config = typeof config
+
+type Context = MutationContext<Config, State, EventMap>
+
+async function getContract(context: Context, name: string) {
+  const abi = require(`../../contracts/build/contracts/${name}.json`).abi
 
   if (!abi || !address) {
-    throw Error(`Missing the DataSource 'TokenRegistry'`)
+    throw Error(`Missing the DataSource '${name}'`)
   }
 
   const { ethereum } = context.graph.config
@@ -36,17 +90,17 @@ async function getTokenRegistryContract(context: any) {
   return contract
 }
 
-async function addToken(_, { options }: any, context: any) {
-
-  let metadataHash: string, imageHash: string
+async function addToken(_, { options }: any, context: Context) {
 
   const { ipfs } = context.graph.config
 
+  const { state } = context.graph
+
   const { symbol, description, image, decimals } = options
 
-  for await (const result of ipfs.add(image)) {
-    imageHash = `/ipfs/${result.path}`
-  }
+  const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
+  
+  await state.dispatch("UPLOAD_IMAGE", { value: true })
 
   const metadata = JSON.stringify(
     {
@@ -57,67 +111,108 @@ async function addToken(_, { options }: any, context: any) {
     }
   )
 
-  for await (const result of ipfs.add(metadata)) {
-    metadataHash = result.path
-  }
+  const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
 
-  const randomWallet = ethers.Wallet.createRandom() as any
-  const randomWalletAddress = randomWallet.signingKey.address
-  const offChainDataName =
-    '0x50726f6a65637444617461000000000000000000000000000000000000000000'
+  await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
-  const signedMessage1 = await randomWallet.signMessage(
-    changeOwnerSignedData(randomWalletAddress, address),
-  )
+  // const randomWallet = ethers.Wallet.createRandom() as any
+  // const randomWalletAddress = randomWallet.signingKey.address
+  // const offChainDataName =
+  //   '0x50726f6a65637444617461000000000000000000000000000000000000000000'
 
-  const signedMessage2 = await randomWallet.signMessage(
-    permitSignedData(randomWalletAddress, address),
-  )
+  // const signedMessage1 = await randomWallet.signMessage(
+  //   changeOwnerSignedData(randomWalletAddress, address),
+  // )
 
-  const signedMessage3 = await randomWallet.signMessage(
-    setAttributeData(
-      randomWalletAddress,
-      metadataHash,
-      offChainDataName,
-    ),
-  )
+  // const signedMessage2 = await randomWallet.signMessage(
+  //   permitSignedData(randomWalletAddress, address),
+  // )
 
-  const sig1 = utils.splitSignature(signedMessage1)
-  const sig2 = utils.splitSignature(signedMessage2)
-  const sig3 = utils.splitSignature(signedMessage3)
+  // const signedMessage3 = await randomWallet.signMessage(
+  //   setAttributeData(
+  //     randomWalletAddress,
+  //     metadataHash,
+  //     offChainDataName,
+  //   ),
+  // )
 
-  let { v: v1, r: r1, s: s1 } = sig1
-  let { v: v2, r: r2, s: s2 } = sig2
-  let { v: v3, r: r3, s: s3 } = sig3
+  // const sig1 = utils.splitSignature(signedMessage1)
+  // const sig2 = utils.splitSignature(signedMessage2)
+  // const sig3 = utils.splitSignature(signedMessage3)
 
-  const tokenRegistry = await getTokenRegistryContract(context)
+  // let { v: v1, r: r1, s: s1 } = sig1
+  // let { v: v2, r: r2, s: s2 } = sig2
+  // let { v: v3, r: r3, s: s3 } = sig3
 
-  const transaction = await tokenRegistry.applySignedWithAttribute(
-    randomWalletAddress,
-    [v1, v2],
-    [r1, r2],
-    [s1, s2],
-    address,
-    v3,
-    r3,
-    s3,
-    offChainDataName,
-    ipfsHexHash(metadataHash),
-    VALIDITY_TIMESTAMP,
-  )
+  // const tokenRegistry = await getContract(context, "TokenRegistry")
 
-  return {
-    metadataHash
-  };
+  // const transaction = await tokenRegistry.applySignedWithAttribute(
+  //   randomWalletAddress,
+  //   [v1, v2],
+  //   [r1, r2],
+  //   [s1, s2],
+  //   address,
+  //   v3,
+  //   r3,
+  //   s3,
+  //   offChainDataName,
+  //   ipfsHexHash(metadataHash),
+  //   VALIDITY_TIMESTAMP,
+  // )
+
+  return null
 }
 
-const resolvers = {
+async function editToken(_, { options }: any, context: Context) {
+
+  const { ipfs } = context.graph.config
+
+  const { symbol, description, image, decimals } = options
+
+  const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
+
+  const metadata = JSON.stringify(
+    {
+      symbol,
+      description,
+      image: imageHash,
+      decimals
+    }
+  )
+
+  const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
+
+  const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry")
+
+  return null
+}
+
+const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {
-    addToken
+    addToken,
+    editToken
   }
 }
 
 export default {
   resolvers,
-  config
+  config,
+  stateBuilder
+}
+
+export {
+  State,
+  EventMap,
+  UploadImageEvent,
+  UploadMetadataEvent
+}
+
+const uploadToIpfs = async (ipfs: any, element: string) => {
+  let result;
+
+  for await (const returnedValue of ipfs.add(element)) {
+    result = returnedValue
+  }
+
+  return result
 }
