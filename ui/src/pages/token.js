@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
@@ -8,6 +8,10 @@ import { gql } from 'apollo-boost'
 import Divider from '../components/Divider'
 import Link from '../components/Link'
 import Button from '../components/Button'
+import Dialog from '../components/Modal/Dialog'
+import Select from '../components/Select'
+import Field from '../components/Field'
+import Menu from '../components/Select/Menu'
 
 const TOKEN_QUERY = gql`
   query token($id: ID!) {
@@ -22,6 +26,11 @@ const TOKEN_QUERY = gql`
       totalVotes
       owner {
         id
+        tokens {
+          id
+          symbol
+          image
+        }
       }
       challenges {
         id
@@ -35,6 +44,33 @@ const TOKEN_QUERY = gql`
 const Token = ({ location }) => {
   const [isKeepOpen, setIsKeepOpen] = useState(false)
   const [isRemoveOpen, setIsRemoveOpen] = useState(false)
+  const [showChallengeDialog, setShowChallengeDialog] = useState(false)
+  const closeChallengeDialog = () => setShowChallengeDialog(false)
+  const [isChallengeDisabled, setIsChallengeDisabled] = useState(false)
+  const [challenge, setChallenge] = useState({
+    description: '',
+    token: null,
+  })
+
+  const setValue = (field, value) => {
+    setChallenge(state => ({
+      ...state,
+      [field]: value,
+    }))
+  }
+
+  useEffect(() => {
+    setIsChallengeDisabled(
+      !(challenge.description.length > 0 && challenge.token !== null)
+    )
+  }, [challenge])
+
+  const handleChallenge = () => {
+    // TODO: call challenge function
+    console.log('Handle challenge clicked')
+    closeChallengeDialog()
+  }
+
   const tokenId = location ? location.pathname.split('/').slice(-1)[0] : ''
   const { loading, error, data } = useQuery(TOKEN_QUERY, {
     variables: {
@@ -62,13 +98,58 @@ const Token = ({ location }) => {
 
   return (
     <Grid>
-      <Grid sx={{ gridTemplateColumns: '80px 1fr', mb: 4 }} gap={2}>
+      <Grid sx={{ gridTemplateColumns: '80px 1fr 64px', mb: 4 }} gap={2}>
         <img
           src={token.image}
           alt="Token"
           sx={{ height: '80px', width: '80px', objectFit: 'contain' }}
         />
         <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
+        <Menu
+          top="60px"
+          right="0"
+          items={[
+            {
+              text: 'Challenge',
+              handleSelect: value => {
+                setShowChallengeDialog(true)
+              },
+              icon: '/challenge.png',
+            },
+          ]}
+        >
+          <Box
+            sx={{
+              backgroundColor: 'white',
+              boxShadow: '0 4px 24px 0 rgba(30,37,44,0.16)',
+              position: 'relative',
+              height: '64px',
+              width: '64px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                transition: 'all 0.3s ease',
+                boxShadow: '0px 0px 35px 0 rgba(30,37,44,0.16)',
+              },
+            }}
+          >
+            <img
+              src="/dots.png"
+              sx={{
+                position: 'absolute',
+                top: 'calc(50% - 12px)',
+                height: '24px',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                left: 0,
+                right: 0,
+                margin: '0 auto',
+              }}
+              alt="dots icon"
+            />
+          </Box>
+        </Menu>
       </Grid>
       <Divider />
       <Grid columns={[1, 1, 2]} gap={0} mt={5}>
@@ -102,9 +183,42 @@ const Token = ({ location }) => {
           </Styled.h6>
           <p sx={{ variant: 'text.smaller', mt: 3 }}>Decimals</p>
           <Styled.p>{token.decimals}</Styled.p>
-          <Link to={`edit/${token.id}`} sx={{ color: 'secondary', mt: 5 }}>
+          <Link to={`/edit/${token.id}`} sx={{ color: 'secondary', mt: 5 }}>
             EDIT (placeholder)
           </Link>
+          {showChallengeDialog && (
+            <Dialog
+              title="Challenge"
+              description="Challenge to remove token. Price: 10 DAI, etc etc"
+              showDialog={showChallengeDialog}
+              closeDialog={closeChallengeDialog}
+            >
+              <Select
+                title="Challenge on behalf of"
+                selected={
+                  challenge.token ? challenge.token.symbol : 'Select a token'
+                }
+                isPlaceholder={!challenge.token}
+                tokens={token.owner.tokens}
+                setValue={setValue}
+                sx={{ mb: 6 }}
+              />
+              <Field
+                type="textarea"
+                title="Description"
+                placeholder="Describe the token"
+                charsCount={300}
+                value={challenge.description}
+                setValue={value => setValue('description', value)}
+              />
+              <Button
+                variant="primary"
+                text="Challenge"
+                isDisabled={isChallengeDisabled}
+                onClick={handleChallenge}
+              />
+            </Dialog>
+          )}
         </Box>
         <Box sx={{ margin: ['32px auto', '32px auto', 0], maxWidth: '400px' }}>
           {token.isChallenged && (

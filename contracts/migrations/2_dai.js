@@ -42,7 +42,6 @@ module.exports = async (deployer, network) => {
 
         console.log(`Giving tokens to ${tokenHolders.length} accounts`)
         const token = await Token.deployed()
-        console.log(`DAI TOKEN ADDRESS: ${token.address}`)
 
         // eslint-disable-next-line no-console
         await token.mint(tokenMinter, config.token.supply)

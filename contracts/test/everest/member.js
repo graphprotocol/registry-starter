@@ -31,6 +31,8 @@
 */
 
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
+const Token = artifacts.require('dai.sol')
+const EthereumDIDRegistry = artifacts.require('EthereumDIDRegistry.sol')
 const fs = require('fs')
 const config = require('../../conf/config.js')
 const paramConfig = config.tokenRegistryParams
@@ -42,24 +44,33 @@ const ethers = require('ethers')
 
 contract('TokenRegistry', accounts => {
     let [tokenRegistryOwner, firstOwner] = accounts
-    const memberName = 'The Graph'
-    // firstOwner = "0x93606b27cB5e4c780883eC4F6b7Bed5f6572d1dd"
-    describe('Member joining and leaving. Functions: applyMember(), whitelist(), memberExit(), isWhiteListed()', () => {
-        it('should allow a member to apply, pass time, and get whitelisted', async () => {
-            // let applicantWallet = utils.ethersWallet(utils.walletPaths.zero)
+    describe('Member joining and leaving. Functions: applySignedWithAttribute(), memberExit()', () => {
+        // Allows a member to permit the TokenRegistry to transfer DAI, apply to be on the
+        // TokenRegistry, and update the token information, while using ERC-1056 for each
+        it('Should allow member to join the registry', async () => {
+            const newMemberWallet = utils.ethersWallet(utils.walletPaths.zero)
+            const newMemberWalletAddress = newMemberWallet.signingKey.address
+            const ownerWallet = utils.ethersWallet(utils.walletPaths.one)
+            const ownerWalletAddress = ownerWallet.signingKey.address
+            const didReg = await EthereumDIDRegistry.deployed()
+            const daiToken = await Token.deployed()
 
-            const newMember = utils.ethersWallet(utils.walletPaths.zero)
-            const newMemberAddress = newMember.signingKey.address
-            const owner = utils.ethersWallet(utils.walletPaths.one)
 
-            // await helpers.applySignedWithAttribute(applicant, delegate, applicantWallet)
-            await helpers.applySigned(newMember, owner)
+            console.log("BALANCE: ", (await daiToken.balanceOf("0xf68f5498dd766a8d65c4785219d61fcc5e0e920a")).toString())
+            console.log("BALANCE: ", (await daiToken.balanceOf(newMemberWalletAddress)).toString())
+            console.log("BALANCE: ", (await daiToken.balanceOf(ownerWalletAddress)).toString())
 
-            await helpers.setAttribute(newMemberAddress, owner)
-            await helpers.daiPermit(newMember, owner)
-            // let tokenRegistry = await TokenRegistry.deployed()
-            // console.log(await TokenRegistry.isMember(newMember))
-            // console.log(await TokenRegistry.memberChallengeExists(owner))
+            // TODO - don't use newMemberWallet, use a throw away wallet, to symbolize the real situation. 
+            await helpers.applySignedWithAttribute(newMemberWallet, ownerWallet)
+            // await helpers.tempEditOffChainData(newMemberWallet, ownerWallet)
+
+            // TODO - pretty sure balance is wrong here, in the contract, it should be minusing
+            console.log("BALANCE: ", (await daiToken.balanceOf("0xf68f5498dd766a8d65c4785219d61fcc5e0e920a")).toString())
+            console.log("BALANCE: ", (await daiToken.balanceOf(newMemberWalletAddress)).toString())
+            console.log("BALANCE: ", (await daiToken.balanceOf(ownerWalletAddress)).toString())
+
+            // await helpers.setAttribute(newMemberWalletAddress, ownerWallet)
+            // await helpers.daiPermit(newMemberWallet, ownerWallet)
         })
 
         // it('should allow a member to exit', async () => {

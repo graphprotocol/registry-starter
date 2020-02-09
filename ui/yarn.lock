@@ -1520,6 +1520,11 @@
     string-width "^2.0.0"
     strip-ansi "^3"
 
+"@reach/auto-id@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.npmjs.org/@reach/auto-id/-/auto-id-0.8.0.tgz#13a73facfa42e78eea7f97aba675e15f386ec801"
+  integrity sha512-7Aazft/dB2/4NSGl2ixx2n4BKsQLFEiVtEiw3/GdFb6U7+bJ1qJLzWAsSkFc7ACeNtbkhM34RuBZTd44bOtzbQ==
+
 "@reach/dialog@^0.8.0":
   version "0.8.0"
   resolved "https://registry.npmjs.org/@reach/dialog/-/dialog-0.8.0.tgz#0f65ede5bf7103e290fe073ab5bebb2713c93ae4"
@@ -1531,10 +1536,44 @@
     react-focus-lock "^2.2.1"
     react-remove-scroll "^2.2.0"
 
+"@reach/menu-button@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.npmjs.org/@reach/menu-button/-/menu-button-0.8.0.tgz#11ee34d039279feeac9f5ec34d784fe6603f3a2a"
+  integrity sha512-W8uolB4qt2LPItl0XHkIaXE9dHEBthto/UARY+rEyC/HtjrsZGUnPdCjKI/hxUePYxMB0N6PGEG6vG9ghcye5A==
+  dependencies:
+    "@reach/auto-id" "^0.8.0"
+    "@reach/popover" "^0.8.0"
+    "@reach/utils" "^0.8.0"
+    prop-types "^15.7.2"
+    warning "^4.0.3"
+
+"@reach/observe-rect@^1.0.5":
+  version "1.0.5"
+  resolved "https://registry.npmjs.org/@reach/observe-rect/-/observe-rect-1.0.5.tgz#28bf3c5c35da7fef72cd124af4ac32308d0c3f15"
+  integrity sha512-EQLHhquzwAh2TFtMJU0PXJRmhpOrAhzApgoI4Lwn72J7ygrMk3Ys3a3i8KDnV0TetbwAxn4XSHi4pE8sPWUYLg==
+
+"@reach/popover@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.npmjs.org/@reach/popover/-/popover-0.8.0.tgz#1ab27008e9e28493c35db5d9d058740393cd50bb"
+  integrity sha512-ywtIUQyxp+Nsj5jqlHXWWT+nuOxC0pyZOWx6WVa3vKWF/+6PCeZ8fp5u7rlOK1iFylkRTukZk3ti33v+Vl80Ww==
+  dependencies:
+    "@reach/portal" "^0.8.0"
+    "@reach/rect" "^0.8.0"
+    "@reach/utils" "^0.8.0"
+    tabbable "^4.0.0"
+
 "@reach/portal@^0.8.0":
   version "0.8.0"
   resolved "https://registry.npmjs.org/@reach/portal/-/portal-0.8.0.tgz#60b17921f6036a4fe809c83ee3ce6a9dfc75fb8f"
   integrity sha512-yxNzz/zvya4PBJ4mQvQXidYU33TdREm0w8zmv9piyq85E4azQriBPQjxkIYtIvV8oh17JjJBuSt/W5VSZ7HV+w==
+
+"@reach/rect@^0.8.0":
+  version "0.8.0"
+  resolved "https://registry.npmjs.org/@reach/rect/-/rect-0.8.0.tgz#451f22e6d5500179b250fb857ea3ec2e86b1f753"
+  integrity sha512-jtKhzzbCXKLgrFg9ned0bzRnI6lbBYJybq6XDwwzisFd3AzKiqG07rwSLvTOpwTzpiVjCtCUotekI+QnsQbkVA==
+  dependencies:
+    "@reach/observe-rect" "^1.0.5"
+    prop-types "^15.7.2"
 
 "@reach/router@1.2.1":
   version "1.2.1"
@@ -15358,6 +15397,11 @@ symbol-observable@^1.0.2, symbol-observable@^1.2.0:
   resolved "https://registry.npmjs.org/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
   integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
 
+tabbable@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmjs.org/tabbable/-/tabbable-4.0.0.tgz#5bff1d1135df1482cf0f0206434f15eadbeb9261"
+  integrity sha512-H1XoH1URcBOa/rZZWxLxHCtOdVUEev+9vo5YdYhC9tCY4wnybX+VQrCYuy9ubkg69fCBxCONJOSLGfw0DWMffQ==
+
 table@^5.2.3:
   version "5.4.6"
   resolved "https://registry.npmjs.org/table/-/table-5.4.6.tgz#1292d19500ce3f86053b05f0e8e7e4a3bb21079e"
@@ -16333,6 +16377,13 @@ warning@^3.0.0:
   version "3.0.0"
   resolved "https://registry.npmjs.org/warning/-/warning-3.0.0.tgz#32e5377cb572de4ab04753bdf8821c01ed605b7c"
   integrity sha1-MuU3fLVy3kqwR1O9+IIcAe1gW3w=
+  dependencies:
+    loose-envify "^1.0.0"
+
+warning@^4.0.3:
+  version "4.0.3"
+  resolved "https://registry.npmjs.org/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
+  integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
   dependencies:
     loose-envify "^1.0.0"
 

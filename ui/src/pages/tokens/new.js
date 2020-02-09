@@ -31,13 +31,13 @@ const NewToken = ({ ...props }) => {
   }
 
   useEffect(() => {
-    if (
-      token.symbol.length > 0 &&
-      token.description.length > 0 &&
-      token.decimals.length > 0
-    ) {
-      setIsDisabled(false)
-    }
+    setIsDisabled(
+      !(
+        token.symbol.length > 0 &&
+        token.description.length > 0 &&
+        token.decimals.length > 0
+      )
+    )
   }, [token])
 
   const handleSubmit = () => {

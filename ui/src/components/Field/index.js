@@ -1,11 +1,19 @@
 /** @jsx jsx */
-import { useRef } from 'react'
+import { useRef, forwardRef } from 'react'
 import PropTypes from 'prop-types'
 import { jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import TextareaAutosize from 'react-textarea-autosize'
 
-const Field = ({ title, type, placeholder, charsCount, value, setValue }) => {
+const Field = ({
+  title,
+  type,
+  placeholder,
+  charsCount,
+  value,
+  setValue,
+  ...props
+}) => {
   const charRef = useRef()
 
   if (value && value.length === charsCount) {
@@ -17,10 +25,11 @@ const Field = ({ title, type, placeholder, charsCount, value, setValue }) => {
 
   return (
     <Box
+      {...props}
       sx={{
         ...styles.field,
         borderBottom: '1px solid',
-        borderColor: 'grey',
+        borderColor: 'whiteFaded',
       }}
     >
       <p sx={{ variant: 'text.small', color: 'secondary' }}>{title}</p>
@@ -33,6 +42,7 @@ const Field = ({ title, type, placeholder, charsCount, value, setValue }) => {
           <input
             placeholder={placeholder}
             onChange={e => {
+              e.stopPropagation()
               const value = e.target ? e.target.value : ''
               setValue(value)
             }}
@@ -43,6 +53,7 @@ const Field = ({ title, type, placeholder, charsCount, value, setValue }) => {
           <TextareaAutosize
             minRows={1}
             maxRows={6}
+            style={{ padding: 0 }}
             placeholder={placeholder}
             onChange={e => {
               const value = e.target ? e.target.value : ''

@@ -5,7 +5,7 @@ export default {
     secondary: '#6F4CFF',
     blackFaded: 'rgba(9,6,16,0.64)',
     linkHover: '#452DA8',
-    grey: 'rgba(30,37,44,0.16)',
+    whiteFaded: 'rgba(30,37,44,0.16)',
   },
   fontSizes: [
     '0.75rem',
