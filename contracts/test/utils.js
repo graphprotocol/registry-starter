@@ -1,16 +1,15 @@
 const ethers = require('ethers')
 const { time, expectEvent, expectRevert, constants } = require('openzeppelin-test-helpers')
 
-// The deterministic flag mneumonic
+// The deterministic flag mneumonic from ganache
 const ganacheMneumonic =
     'myth like bonus scare over problem client lizard pioneer submit female collect'
 
 const utils = {
-
     /****** Constants ******/
     ZERO_ADDRESS: constants.ZERO_ADDRESS,
 
-    mockBytes32: '0xbabbabb9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
+    mockIPFSData: '0xbabbabb9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
 
     getReceiptValue: (receipt, arg) => receipt.logs[0].args[arg],
 
@@ -60,11 +59,11 @@ const utils = {
         return Buffer.from(str).toString('hex')
     },
 
-    bytes32ToString: (bytes) => {
+    bytes32ToString: bytes => {
         return Buffer.from(bytes.slice(2).split('00')[0], 'hex').toString()
     },
 
-    stringToBytes32: (str) => {
+    stringToBytes32: str => {
         const buffstr = Buffer.from(str).toString('hex')
         return buffstr + '0'.repeat(64 - buffstr.length)
     }

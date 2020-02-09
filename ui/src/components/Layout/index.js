@@ -18,13 +18,16 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
     position: 'relative',
   }
 
-  let border =
+  const isTokenPage =
     (props.path && props.path.match(/^\/token\//)) ||
     (props.path && props.path.match(/^\/edit\//))
-      ? isMobile
-        ? '5px solid #6F4CFF'
-        : '10px solid #6F4CFF'
-      : '0px solid white'
+  let border = isTokenPage
+    ? isMobile
+      ? '5px solid #6F4CFF'
+      : '10px solid #6F4CFF'
+    : '0px solid white'
+
+  let height = isTokenPage ? '100vh' : '100%'
 
   return (
     <Fragment>
@@ -42,6 +45,7 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
             background-color: white;
             border: ${border};
             transition: all 0.3s ease;
+            height: ${height};
           },
         `}
       />

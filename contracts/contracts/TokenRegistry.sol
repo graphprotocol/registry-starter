@@ -199,12 +199,13 @@ contract TokenRegistry is Registry, Ownable {
 
         erc1056Registry.changeOwnerSigned(_newMember, _sigV[0], _sigR[0], _sigS[0], _owner);
 
-        // Nonce starts at 1. Expiry = 0 is infinite. true is unlimited allowance
-        approvedToken.permit(_newMember, _owner, 1, 0, true, _sigV[1], _sigR[1], _sigS[1]);
+        // Approve the TokenRegistry to transfer on the owners behalf
+        // Nonce starts at 0. Expiry = 0 is infinite. true is unlimited allowance
+        approvedToken.permit(_owner, address(this), 0, 0, true, _sigV[1], _sigR[1], _sigS[1]);
 
-        // Transfers tokens from user to the Reserve Bank
+        // Transfers tokens from owner to the reserve bank
         require(
-            approvedToken.transferFrom(msg.sender, address(reserveBank), applicationFee),
+            approvedToken.transferFrom(_owner, address(reserveBank), applicationFee),
             "applySignedInternal - Token transfer failed"
         );
     }
@@ -229,13 +230,16 @@ contract TokenRegistry is Registry, Ownable {
 
     /**
     @dev                            Allows a user to apply to add a member to the Registry and
-                                    add off chain data to the DID registry
+                                    add off chain data to the DID registry. Important note - the
+                                    signature for changeOwner() and permit() are from newMember.
+                                    The signature of changeAttribute is the owner. This is because
+                                    when it is called, changeOwner() has already been enacted
     @param _newMember               The address of the new member
-    @param _sigV                    V of the apply and permit() signature : [0] = apply, [1] = permit
+    @param _sigV                    V of the apply and permit() signature : [0] = apply, [1] = permit.
     @param _sigR                    R of the apply and permit() signature : [0] = apply, [1] = permit
     @param _sigS                    S of the apply and permit() signature : [0] = apply, [1] = permit
     @param _owner                   Owner of the member application
-    @param _attributeSigV           V of the attribute signature
+    @param _attributeSigV           V of the attribute signature. (Signature is of the OWNER)
     @param _attributeSigR           R of the attribute signature
     @param _attributeSigS           S of the attribute signature
     @param _offChainDataName        Attribute name. Should be a string less than 32 bytes, converted
@@ -258,7 +262,16 @@ contract TokenRegistry is Registry, Ownable {
         uint256 _offChainDataValidity
     ) external {
         applySignedInternal(_newMember, _sigV, _sigR, _sigS, _owner);
-        editOffChainDataSigned(
+        // editOffChainDataSigned(
+        //     _newMember,
+        //     _attributeSigV,
+        //     _attributeSigR,
+        //     _attributeSigS,
+        //     _offChainDataName,
+        //     _offChainDataValue,
+        //     _offChainDataValidity
+        // );
+        erc1056Registry.setAttributeSigned(
             _newMember,
             _attributeSigV,
             _attributeSigR,
@@ -310,7 +323,7 @@ contract TokenRegistry is Registry, Ownable {
         bytes32 _offChainDataName,
         bytes memory _offChainDataValue,
         uint256 _offChainDataValidity
-    ) public onlyMemberOwner(_member) {
+    ) public {//onlyMemberOwner(_member) {
         erc1056Registry.setAttributeSigned(
             _member,
             _sigV,

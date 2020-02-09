@@ -7,8 +7,6 @@ import Link from '../components/Link'
 
 const faces = [...Array(9).keys()]
 
-console.log('Faces: ', faces)
-
 const NotFoundPage = () => (
   <Grid columns={[1, 1, 2]} gap={8} mt={8}>
     <Box>

@@ -14,7 +14,9 @@ const Link = ({ to, children, onClick, ...props }) => {
           color: 'text',
           fontWeight: 'heading',
           fontFamily: 'heading',
+          transition: 'all 0.3s ease',
           '&:hover': {
+            transition: 'all 0.3s ease',
             color: 'linkHover',
             '& img[alt="arrow"]': {
               transition: 'all 0.2s ease',
@@ -37,6 +39,7 @@ const Link = ({ to, children, onClick, ...props }) => {
           fontWeight: 'heading',
           color: 'secondary',
           cursor: 'pointer',
+          letterSpacing: '0.2px',
           '&:hover': {
             color: 'linkHover',
           },
