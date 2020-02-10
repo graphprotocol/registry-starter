@@ -8,7 +8,7 @@ dataSources:
     name: TokenRegistry
     network: ropsten
     source:
-      address: '0xC487a615e0A9C69De4c795a45c33A965aBFa3673'
+      address: '0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3'
       abi: TokenRegistry
     mapping:
       kind: ethereum/events
