@@ -30,4 +30,11 @@ module.exports = async (deployer, network, accounts) => {
         params.charter,
         didAddress, {from: owner}
     )
+    const tokenRegistry = await TokenRegistry.deployed()
+    const reserveBankAddr = await tokenRegistry.reserveBank()
+    console.log(`Mock DAI Address: ${daiAddress}`)
+    console.log(`Ethr DID Address: ${didAddress}`)
+    console.log(`Token Registry Address: ${tokenRegistry.address}`)
+    console.log(`Reserve Bank Address: ${reserveBankAddr.toString()}`)
+
 }

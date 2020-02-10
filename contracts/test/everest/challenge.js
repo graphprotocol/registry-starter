@@ -55,7 +55,7 @@ contract('tokenRegistry', () => {
     const fakeDetails = '0x5555555555555555555555555555555555555555555555555555555555554444'
 
     describe(
-        'Challenges. Functions: challenge(), submitVote(), submitVotes() resolveChallenge(),' +
+        'Challenges. Functions: challenge(), submitVote(), submitVotes() resolveChallenge(), ' +
             'memberChallengeExists(), challengeCanBeResolved(), isMember()',
         () => {
             it('should allow a member to be challenged, lose, and be removed', async () => {

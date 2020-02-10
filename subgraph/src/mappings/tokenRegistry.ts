@@ -52,7 +52,7 @@ export function handleWithdrawal(event: Withdrawal): void {
   tokenRegistry.save()
 }
 
-export function handleEverestDeployed(event: TokenRegistryDeployed): void {
+export function handleTokenRegistryDeployed(event: TokenRegistryDeployed): void {
   let tokenRegistry = new TokenRegistry('1')
   tokenRegistry.owner = event.params.owner
   tokenRegistry.approvedToken = event.params.approvedToken

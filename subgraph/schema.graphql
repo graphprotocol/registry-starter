@@ -9,7 +9,7 @@ type Token @entity {
     symbol: String
     description: String
     image: String
-    decimals: Int
+    decimals: String
     address: String
 
     # From smart contracts directly
@@ -57,9 +57,11 @@ type User @entity {
   votes: [Vote!] @relation(name: "UserVote")
 }
 
+# Where yes is remove the token from the list and pass challenge
+# No is keep token and fail challenge
 enum Choice {
-  RemoveToken
-  KeepToken
+  Yes
+  No
 }
 
 type TokenRegistry @entity {

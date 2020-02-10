@@ -7,9 +7,9 @@
       "reserveBank": "0x05fbf3f158Ae7c56c87dB57ebEde4374deA6fBD8"
     },
     "ganache": {
-        "tokenRegistry": "",
-        "ethereumDIDRegistry": "",
-        "mockDAI": "",
+        "tokenRegistry": "0x0290FB167208Af455bB137780163b7B7a9a10C16",
+        "ethereumDIDRegistry": "0x59d3631c86BbE35EF041872d502F218A39FBa150",
+        "mockDAI": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
         "reserveBank": ""
     },
     "mainnet": {}

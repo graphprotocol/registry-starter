@@ -6,9 +6,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: TokenRegistry
-    network: ropsten
+    network: ganache
     source:
-      address: '0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3'
+      address: '0x0290FB167208Af455bB137780163b7B7a9a10C16' # Ropsten: 0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3 Ganache: 0x0290FB167208Af455bB137780163b7B7a9a10C16
       abi: TokenRegistry
     mapping:
       kind: ethereum/events
@@ -16,8 +16,7 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/tokenRegistry.ts
       entities:
-        - Project
-        - Category
+        - Token
         - Challenge
         - TokenRegistry
         - Vote
@@ -35,7 +34,7 @@ dataSources:
         - event: Withdrawal(indexed address,uint256)
           handler: handleWithdrawal
         - event: TokenRegistryDeployed(indexed address,address,address,uint256,uint256,uint256,bytes32)
-          handler: handleEverestDeployed
+          handler: handleTokenRegistryDeployed
         - event: MemberChallenged(indexed address,indexed uint256,indexed address,uint256,bytes32)
           handler: handleMemberChallenged
         - event: SubmitVote(indexed uint256,indexed address,indexed address,uint8,uint256)
@@ -46,9 +45,9 @@ dataSources:
           handler: handleChallengeSucceeded
   - kind: ethereum/contract
     name: EthereumDIDRegistry
-    network: ropsten
+    network: ganache
     source:
-      address: '0xdca7ef03e98e0dc2b855be647c39abe984fcf21b'
+      address: '0x59d3631c86BbE35EF041872d502F218A39FBa150' # Ropsten: 0xdca7ef03e98e0dc2b855be647c39abe984fcf21b # Ganache: 0x59d3631c86BbE35EF041872d502F218A39FBa150
       abi: EthereumDIDRegistry
     mapping:
       kind: ethereum/events
@@ -56,17 +55,13 @@ dataSources:
       language: wasm/assemblyscript
       file: ./src/mappings/ethereumDIDRegistry.ts
       entities:
-        - Project
+        - Token
         - User
       abis:
         - name: EthereumDIDRegistry
           file: ../contracts/abis/EthereumDIDRegistry.abi
       eventHandlers:
-        # TODO - figure out how to make this only track the data we NEED
-        # not all eth did registry data
         - event: DIDOwnerChanged(indexed address,address,uint256)
           handler: handleDIDOwnerChanged
-        - event: DIDDelegateChanged(indexed address,bytes32,address,uint256,uint256)
-          handler: handleDIDDelegateChanged
         - event: DIDAttributeChanged(indexed address,bytes32,bytes,uint256,uint256)
           handler: handleDIDAttributeChanged
