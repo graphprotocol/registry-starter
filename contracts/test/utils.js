@@ -1,12 +1,16 @@
 const ethers = require('ethers')
 const { time, expectEvent, expectRevert, constants } = require('openzeppelin-test-helpers')
+const BN = require('bn.js')
 
+const config = require('../conf/config.js')
+const paramConfig = config.tokenRegistryParams
 // The deterministic flag mneumonic from ganache
 const ganacheMneumonic =
     'myth like bonus scare over problem client lizard pioneer submit female collect'
 
 const utils = {
     /****** Constants ******/
+    applyFeeBN: new BN(paramConfig.applicationFee),
     ZERO_ADDRESS: constants.ZERO_ADDRESS,
 
     mockIPFSData: '0xbabbabb9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
@@ -15,6 +19,7 @@ const utils = {
 
     /****** Open Zeppelin Test Helpers ******/
     increaseTime: async seconds => time.increase(seconds),
+    votePeriod: paramConfig.votingPeriodDuration,
 
     expectRevert: async (tx, errorString) => expectRevert(tx, errorString),
 
@@ -36,8 +41,6 @@ const utils = {
         eight: "m/44'/60'/0'/0/8",
         nine: "m/44'/60'/0'/0/9"
     },
-
-    randomBytes32: ethers.utils.randomBytes(32),
 
     getStringHash: domain =>
         `${ethers.utils.solidityKeccak256(['string'], [domain]).toString('hex')}`,

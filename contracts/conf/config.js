@@ -3,9 +3,8 @@ const config = {
         owner: '0x90f8bf6a479f320ead074411a4b0e7944ea8c9c1', // Ganache deterministic account 0
         ropstenOwner: '0x93606b27cB5e4c780883eC4F6b7Bed5f6572d1dd', // Daves metamask account 0
         votingPeriodDuration: 432000, // 5 days, in seconds
-        challengeDeposit: '500000000000000000000', // $50 DAI challenge fee
-        fullMemberPeriodDuration: 259200, // 3 days, in seconds
-        applicationFee: '100000000000000000000', // $10 DAI application fee
+        challengeDeposit: '10000000000000000000', // $1 DAI challenge fee
+        applicationFee: '10000000000000000000', // $1 DAI application fee
         // Charter is fake IPFS hash, in bytes, not base58
         charter: '0xb94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9'
     },

@@ -18,6 +18,9 @@ contract TokenRegistry is Registry, Ownable {
     uint256 public challengeDeposit;
     // Application fee to become a member
     uint256 public applicationFee;
+    // IPFS hash for charter, which dicates how token data should be posted
+    bytes32 public charter;
+
 
     // Approved token contract reference (this version = DAI)
     Dai public approvedToken;
@@ -128,7 +131,6 @@ contract TokenRegistry is Registry, Ownable {
     FUNCTIONS
     ********/
     constructor(
-        address _owner,
         address _approvedToken,
         uint256 _votingPeriodDuration,
         uint256 _challengeDeposit,
@@ -136,7 +138,6 @@ contract TokenRegistry is Registry, Ownable {
         bytes32 _charter,
         address _DIDregistry
     ) public {
-        require(_owner != address(0), "constructor - owner cannot be 0");
         require(_approvedToken != address(0), "constructor - _approvedToken cannot be 0");
         require(
             _votingPeriodDuration > 0,
@@ -153,7 +154,7 @@ contract TokenRegistry is Registry, Ownable {
 
         emit TokenRegistryDeployed(
             address(reserveBank),
-            _owner,
+            msg.sender, // owner
             _approvedToken,
             _votingPeriodDuration,
             _challengeDeposit,
@@ -319,7 +320,7 @@ contract TokenRegistry is Registry, Ownable {
         uint256 newChallengeID = challengeCounter;
         Challenge memory newChallenge = Challenge({
             challenger: _challengingMember,
-            member: _challengingMember,
+            member: _challengedMember,
             /* solium-disable-next-line security/no-block-members*/
             yesVotes: now - challengerMemberTime,
             noVotes: 0,
@@ -351,21 +352,21 @@ contract TokenRegistry is Registry, Ownable {
         );
 
         // Insert challengers vote into the challenge
-        submitVote(challengeID, VoteChoice.Yes, _challengingMember);
-        return challengeID;
+        submitVote(newChallengeID, VoteChoice.Yes, _challengingMember);
+        return newChallengeID;
     }
 
     /**
     @dev                    Allow an owner to submit a vote
     @param _challengeID     The challenge ID
     @param _voteChoice      The vote choice (yes or no)
-    @param _voter           The member who is voting
+    @param _votingMember    The member who is voting (note owner is msg.sender)
     */
     function submitVote(
         uint256 _challengeID,
         VoteChoice _voteChoice,
-        address _voter
-    ) public onlyMemberOwner(_voter) {
+        address _votingMember
+    ) public onlyMemberOwner(_votingMember) {
         require(
             _voteChoice == VoteChoice.Yes || _voteChoice == VoteChoice.No,
             "submitVote - Vote must be either Yes or No"
@@ -381,20 +382,20 @@ contract TokenRegistry is Registry, Ownable {
             "submitVote - Challenge voting period has expired"
         );
         require(
-            storedChallenge.voteChoiceByMember[_voter] == VoteChoice.Null,
+            storedChallenge.voteChoiceByMember[_votingMember] == VoteChoice.Null,
             "submitVote - Member has already voted on this challenge"
         );
 
         require(
-            storedChallenge.member != _voter,
+            storedChallenge.member != _votingMember,
             "submitVote - Member can't vote on their own challenge"
         );
 
-        uint256 memberStartTime = getMembershipStartTime(_voter);
+        uint256 memberStartTime = getMembershipStartTime(_votingMember);
         // The lower the member start time (i.e. the older the member) the more vote weight
         uint256 voteWeight = storedChallenge.endTime.sub(memberStartTime);
-        storedChallenge.voteChoiceByMember[_voter] = _voteChoice;
-        storedChallenge.voteWeightByMember[_voter] = voteWeight;
+        storedChallenge.voteChoiceByMember[_votingMember] = _voteChoice;
+        storedChallenge.voteWeightByMember[_votingMember] = voteWeight;
         storedChallenge.voterCount += 1;
 
         // Count vote
@@ -404,7 +405,7 @@ contract TokenRegistry is Registry, Ownable {
             storedChallenge.noVotes = storedChallenge.noVotes.add(voteWeight);
         }
 
-        emit SubmitVote(_challengeID, msg.sender, _voter, _voteChoice, voteWeight);
+        emit SubmitVote(_challengeID, msg.sender, _votingMember, _voteChoice, voteWeight);
     }
 
     // TODO - test gas limit for this, and maybe hard code in the array size
@@ -487,6 +488,15 @@ contract TokenRegistry is Registry, Ownable {
     function withdraw(address _receiver, uint256 _amount) public onlyOwner returns (bool) {
         emit Withdrawal(_receiver, _amount);
         return reserveBank.withdraw(_receiver, _amount);
+    }
+
+    /**
+    @dev                Updates the charter for the TokenRegistry
+    @param _newCharter  The data that point to the new charter
+    */
+    function updateCharter(bytes32 _newCharter) public onlyOwner {
+        charter = _newCharter;
+        emit CharterUpdated(charter);
     }
 
     /***************

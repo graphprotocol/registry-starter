@@ -3,10 +3,10 @@ const keccak256 = require('js-sha3').keccak_256
 const ethutil = require('ethereumjs-util')
 
 // Local imports
-const utils = require('./utils.js')
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
 const EthereumDIDRegistry = artifacts.require('EthereumDIDRegistry.sol')
 const Token = artifacts.require('dai.sol')
+const utils = require('./utils.js')
 
 ////////////// CONSTANTS //////////////
 const offChainDataName = 'TokenData'
@@ -39,6 +39,10 @@ const helpers = {
             setAttributeData
         )
 
+        const reserveBankAddress = await tokenRegistry.reserveBank()
+        const reserveBankBalanceStart = await token.balanceOf(reserveBankAddress)
+        const ownerBalanceStart = await token.balanceOf(ownerAddress)
+
         // Send all three meta transactions to TokenRegistry to be executed in one tx
         tx = await tokenRegistry.applySignedWithAttribute(
             newMemberAddress,
@@ -51,25 +55,32 @@ const helpers = {
             setAttributeSignedSig.s,
             '0x' + utils.stringToBytes32(offChainDataName),
             utils.mockIPFSData,
-            '0x' + maxValidity
+            '0x' + maxValidity,
+            { from: ownerAddress }
         )
 
         // Tx logs order
-            // 1. NewMember
-            // 2. Owner changed
-            // 3. Permit
-            // 4. Transfer
-            // 5. Set Attribute
+        // 1. NewMember
+        // 2. Owner changed
+        // 3. Permit
+        // 4. Transfer
+        // 5. Set Attribute
 
         // Token Checks
-        const reserveBankAddressBytes32 = tx.receipt.rawLogs[3].topics[2]
-        const reserveBankAddress = '0x' + reserveBankAddressBytes32.slice(26, 67)
         const ownerBalanceEnd = (await token.balanceOf(ownerAddress)).toString()
-        const reserveBankBalanceEnd = (await token.balanceOf(reserveBankAddress)).toString()
+        const reserveBankBalanceEnd = await token.balanceOf(reserveBankAddress)
         const updatedAllowance = await token.allowance(ownerAddress, tokenRegistry.address)
 
-        assert.equal(ownerBalanceEnd, '24999900000000000000000000', 'Owner did not transfer 10 DAI')
-        assert.equal(reserveBankBalanceEnd, '100000000000000000000', 'Bank didnt receive 10 DAI')
+        assert.equal(
+            ownerBalanceEnd.toString(),
+            ownerBalanceStart.sub(utils.applyFeeBN).toString(),
+            'Owner did not transfer application fee'
+        )
+        assert.equal(
+            reserveBankBalanceEnd.toString(),
+            reserveBankBalanceStart.add(utils.applyFeeBN).toString(),
+            'Bank didnt receive application fee'
+        )
         assert.equal(
             updatedAllowance.toString(),
             '115792089237316195423570985008687907853269984665640564039457584007913129639935',
@@ -82,16 +93,22 @@ const helpers = {
         const identityOwner = await didReg.identityOwner(newMemberAddress)
         assert.equal(ownerAddress, identityOwner, 'Ownership was not transferred')
 
-        // Check set attribute worked 
+        // Check set attribute worked
         const setAttributeLogData = tx.receipt.rawLogs[4].data
-        const mockDataFromLogs = setAttributeLogData.slice((setAttributeLogData.length - 64), setAttributeLogData.length)
+        const mockDataFromLogs = setAttributeLogData.slice(
+            setAttributeLogData.length - 64,
+            setAttributeLogData.length
+        )
         const ipfsMockDataStripped = utils.stripHexPrefix(utils.mockIPFSData)
         assert.equal(mockDataFromLogs, ipfsMockDataStripped, 'Logs do not include ipfs hash')
 
         // TokenRegistry checks
-        const membershipStartTime = Number((await tokenRegistry.getMembershipStartTime(newMemberAddress)).toString())
-        assert(membershipStartTime > 0, "Membership start time not updated")
+        const membershipStartTime = Number(
+            (await tokenRegistry.getMembershipStartTime(newMemberAddress)).toString()
+        )
+        assert(membershipStartTime > 0, 'Membership start time not updated')
 
+        console.log(`Member ${newMemberAddress} successfully added`)
     },
 
     applySigned: async (newMemberWallet, ownerWallet) => {
@@ -118,7 +135,7 @@ const helpers = {
             memberAddress,
             '0x' + utils.stringToBytes32(offChainDataName),
             utils.mockIPFSData,
-            offChainDataValidity,
+            '0x' + maxValidity,
             { from: ownerAddress }
         )
         const event = tx.logs[0]
@@ -234,7 +251,6 @@ const helpers = {
         const hashedStruct = Buffer.from(keccak256.buffer(Buffer.from(structEncoded, 'hex')))
         const stringHashedStruct = hashedStruct.toString('hex')
         const stringDomainSeparator = DAI_DOMAIN_SEPARATOR.toString('hex')
-
 
         /*  Expected digestData value on first test run (dependant on mock dai address)
             Where mock dai addr = 0xCfEB869F69431e42cdB54A4F4f105C19C080A601
