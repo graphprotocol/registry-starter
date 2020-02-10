@@ -26,7 +26,7 @@ dataSources:
         - name: TokenRegistry
           file: ../contracts/abis/TokenRegistry.abi
       eventHandlers:
-        - event: NewMember(address,uint256)
+        - event: NewMember(indexed address,uint256,uint256)
           handler: handleNewMember
         - event: MemberExited(indexed address)
           handler: handleMemberExited
@@ -34,7 +34,7 @@ dataSources:
           handler: handleCharterUpdated
         - event: Withdrawal(indexed address,uint256)
           handler: handleWithdrawal
-        - event:   TokenRegistryDeployed(address,address,uint256,uint256,uint256,address,bytes32)
+        - event: TokenRegistryDeployed(indexed address,address,address,uint256,uint256,uint256,bytes32)
           handler: handleEverestDeployed
         - event: MemberChallenged(indexed address,indexed uint256,indexed address,uint256,bytes32)
           handler: handleMemberChallenged

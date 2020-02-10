@@ -6,19 +6,20 @@ type Token @entity {
     # Then DIDAttributeChanged gets emitted, where we will see theses values filled in
     # Note - someone could not upload any data here (blank IPFS file, or never calling
     # DIDAttributeChanged). But this is okay, because that project should get challenged
-    symbol: String!
-    description: String!
+    symbol: String
+    description: String
     image: String
     decimals: Int
     address: String
 
     # From smart contracts directly
     owner: User
-    isChallenged: Boolean
+    currentChallenge: Challenge
+    isChallenged: Boolean!
     pastChallenges: [Challenge!]
     ipfsHash: String # aka DIDAttribute
-    totalVotes: Int
-    reputation: Int
+    totalVotes: Int!
+    memberStartTime: Int! # reputation = Date.now() - membershipStartTime
     votes: [Vote!] @derivedFrom(field: "voter")
 
     createdAt: Int # DateTime! @createdAt
@@ -26,12 +27,13 @@ type Token @entity {
 
 type Challenge @entity {
     id: ID! @id
+    ipfsHash: String!
     description: String
     endTime: Int!
     votesFor: Int
     votesAgainst: Int
     token: Token
-    owner: String
+    owner: Bytes
     votes: [Vote!] @derivedFrom(field: "challenge")
     resolved: Boolean! # This is when the challenge is resolved, which is different from end time
 

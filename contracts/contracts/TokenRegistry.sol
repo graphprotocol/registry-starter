@@ -34,7 +34,7 @@ contract TokenRegistry is Registry, Ownable {
     ******/
     // We rely on NewMember and MemberExited to distingushing between identities on
     // ERC-1056 that are part of TokenRegistry and aren't
-    event NewMember(address member, uint256 applicationTime);
+    event NewMember(address indexed member, uint256 applicationTime, uint256 fee);
     event MemberExited(address indexed member);
     event CharterUpdated(bytes32 indexed data);
     event Withdrawal(address indexed receiver, uint256 amount);
@@ -195,7 +195,8 @@ contract TokenRegistry is Registry, Ownable {
         // identity
         emit NewMember(
             _newMember,
-            membershipTime
+            membershipTime,
+            applicationFee
         );
 
         erc1056Registry.changeOwnerSigned(_newMember, _sigV[0], _sigR[0], _sigS[0], _owner);
