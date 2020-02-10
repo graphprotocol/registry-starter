@@ -1,0 +1,8 @@
+{
+  "name": "Dai Stablecoin",
+  "symbol": "DAI",
+  "description": "A stable coin pegged to $1.00 USD, controlled by Maker DAO.",
+  "image": "<IMAGE_LINK>",
+  "decimals": 18,
+  "address": "0x6d7682885f67fBFb2De5B6940d2Be707be1DeF9e"
+}
