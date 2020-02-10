@@ -81,103 +81,100 @@ const Modal = ({ children, showModal, closeModal }) => {
   }
 
   return (
-    <Box>
-      {children}
-      <Dialog
-        isOpen={showModal}
-        onDismiss={closeModal}
-        aria-label="Connect to a wallet dialog"
-        sx={{
-          position: 'relative',
-          maxWidth: ['350px', '500', '660px'],
-          width: '100%',
-          padding: [3, 8],
-          boxShadow:
-            '0 4px 24px 0 rgba(149,152,171,0.16), 0 12px 48px 0 rgba(30,37,44,0.32)',
-        }}
-      >
-        {showPendingView && !showWalletsView && (
-          <img
-            src="/arrow.svg"
-            alt="arrow"
-            onClick={handleGoBack}
-            sx={{
-              position: 'absolute',
-              left: 5,
-              top: 5,
-              fill: '#bebebe',
-              cursor: 'pointer',
-              transform: 'rotate(180deg)',
-            }}
-          />
-        )}
+    <Dialog
+      isOpen={showModal}
+      onDismiss={closeModal}
+      aria-label="Connect to a wallet dialog"
+      sx={{
+        position: 'relative',
+        maxWidth: ['350px', '500', '660px'],
+        width: '100%',
+        padding: [3, 8],
+        boxShadow:
+          '0 4px 24px 0 rgba(149,152,171,0.16), 0 12px 48px 0 rgba(30,37,44,0.32)',
+      }}
+    >
+      {showPendingView && !showWalletsView && (
         <img
-          src="/close.svg"
-          alt="close"
-          onClick={closeModal}
+          src="/arrow.svg"
+          alt="arrow"
+          onClick={handleGoBack}
           sx={{
             position: 'absolute',
-            right: 5,
+            left: 5,
             top: 5,
             fill: '#bebebe',
             cursor: 'pointer',
+            transform: 'rotate(180deg)',
           }}
         />
-        {!showWalletsView ? (
-          account && showAccountView ? (
-            <Grid>
-              <Styled.p>You are logged in with {selectedWallet.name}</Styled.p>
-              <Styled.p>{account}</Styled.p>
-            </Grid>
-          ) : (
-            <QRCode size={240} uri={uri} />
-          )
+      )}
+      <img
+        src="/close.svg"
+        alt="close"
+        onClick={closeModal}
+        sx={{
+          position: 'absolute',
+          right: 5,
+          top: 5,
+          fill: '#bebebe',
+          cursor: 'pointer',
+        }}
+      />
+      {!showWalletsView ? (
+        account && showAccountView ? (
+          <Grid>
+            <Styled.p>You are logged in with {selectedWallet.name}</Styled.p>
+            <Styled.p>{account}</Styled.p>
+          </Grid>
         ) : (
-          <Fragment>
-            <Box sx={{ textAlign: ['center', 'left'], mt: [5, 0] }}>
-              <Styled.h2>Sign in</Styled.h2>
-              <p sx={{ variant: 'text.large' }}>Connect to a Wallet</p>
-            </Box>
-            <Divider mt={6} mb={6} />
-            {Object.keys(wallets).map(key => {
-              const wallet = wallets[key]
-              return (
-                <Grid
-                  key={wallet.name}
-                  columns={2}
-                  gap={2}
-                  sx={gridStyles}
-                  onClick={e => {
-                    handleWalletActivation(wallet)
-                  }}
-                >
-                  <Box>
+          <QRCode size={240} uri={uri} />
+        )
+      ) : (
+        <Fragment>
+          <Box sx={{ textAlign: ['center', 'left'], mt: [5, 0] }}>
+            <Styled.h2>Sign in</Styled.h2>
+            <p sx={{ variant: 'text.large' }}>Connect to a Wallet</p>
+          </Box>
+          <Divider mt={6} mb={6} />
+          {Object.keys(wallets).map(key => {
+            const wallet = wallets[key]
+            return (
+              <Grid
+                key={wallet.name}
+                columns={2}
+                gap={2}
+                sx={gridStyles}
+                onClick={e => {
+                  handleWalletActivation(wallet)
+                }}
+              >
+                <Box>
+                  <img
+                    src={`/${wallet.icon}`}
+                    sx={iconStyles}
+                    alt="Wallet icon"
+                  />
+                </Box>
+                <Box>
+                  <Styled.h5 sx={{ color: 'secondary' }}>
+                    {!isWalletEnabled && wallet.name === 'MetaMask'
+                      ? 'Install MetaMask '
+                      : wallet.name}
                     <img
-                      src={`/${wallet.icon}`}
-                      sx={iconStyles}
-                      alt="Wallet icon"
+                      src="/arrow.svg"
+                      alt="arrow"
+                      sx={{ ml: 1, fill: 'secondary' }}
                     />
-                  </Box>
-                  <Box>
-                    <Styled.h5 sx={{ color: 'secondary' }}>
-                      {!isWalletEnabled && wallet.name === 'MetaMask'
-                        ? 'Install MetaMask '
-                        : wallet.name}
-                      <img
-                        src="/arrow.svg"
-                        alt="arrow"
-                        sx={{ ml: 1, fill: 'secondary' }}
-                      />
-                    </Styled.h5>
-                    <p sx={{ variant: 'text.small' }}>{wallet.description}</p>
-                  </Box>
-                </Grid>
-              )
-            })}
-          </Fragment>
-        )}
-      </Dialog>
-    </Box>
+                  </Styled.h5>
+                  <p sx={{ variant: 'text.small' }}>{wallet.description}</p>
+                </Box>
+              </Grid>
+            )
+          })}
+        </Fragment>
+      )}
+    </Dialog>
   )
 }
 

@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
@@ -10,7 +10,9 @@ import { useWeb3React } from '@web3-react/core'
 import { metamaskAccountChange } from '../services/ethers'
 
 import Divider from '../components/Divider'
+import Section from '../components/Section'
 import Card from '../components/Card'
+import Button from '../components/Button'
 
 const PROFILE_QUERY = gql`
   query profile($id: ID!) {
@@ -22,6 +24,22 @@ const PROFILE_QUERY = gql`
         id
         symbol
         image
+      }
+      challenges {
+        id
+        token {
+          symbol
+          image
+        }
+      }
+      votes {
+        id
+        challenge {
+          token {
+            symbol
+            image
+          }
+        }
       }
     }
   }
@@ -63,7 +81,7 @@ const Profile = ({ location }) => {
   })
 
   if (loading && !error) {
-    return <Styled.p>Loading</Styled.p>
+    return <div />
   }
 
   const user = data.user
@@ -119,24 +137,46 @@ const Profile = ({ location }) => {
           )}
         </Box>
       </Grid>
-      <Grid columns={[1, 2, 2]} mb={1} mt={1}>
-        <Box>
-          <Styled.h4>Your Tokens</Styled.h4>
-          <Styled.p sx={{ opacity: 0.64, color: 'rgba(9,6,16,0.5)' }}>
-            {user && user.tokens && user.tokens.length > 0 && (
-              <span>{user.tokens.length} Tokens</span>
-            )}
-          </Styled.p>
+      {user && user.tokens && user.tokens.length > 0 ? (
+        <Fragment>
+          <Section
+            items={user.tokens}
+            title="Your Tokens"
+            subtitle={`${user.tokens.length} Tokens`}
+          />
+          {user.challenges.length > 0 && (
+            <Section
+              items={user.challenges.map(challenge => ({
+                symbol: challenge.token.symbol,
+                image: challenge.token.image,
+              }))}
+              title="Your Active Challenges"
+              subtitle={`${user.challenges.length} Challenges`}
+            />
+          )}
+          {user.votes.length > 0 && (
+            <Section
+              items={user.votes.map(votes => ({
+                symbol: votes.challenge.token.symbol,
+                image: votes.challenge.token.image,
+              }))}
+              title="Your Active Votes"
+              subtitle={`${user.votes.length} Votes`}
+            />
+          )}
+        </Fragment>
+      ) : (
+        <Box sx={{ textAlign: 'center', margin: '50px auto 0' }}>
+          <img src="/logo-faded.svg" />
+          <Styled.p sx={{ opacity: 0.64, mt: 3 }}>You have no tokens</Styled.p>
+          <Button
+            text="Add a Token"
+            to="/tokens/new"
+            variant="primary"
+            sx={{ m: '0 auto', mt: 5 }}
+          />
         </Box>
-      </Grid>
-      {user && user.tokens.length > 0 && (
-        <Grid columns={[2, 3, 4, 5, 6]} gap={[2, 2, 4, 6]}>
-          {user.tokens.map(token => (
-            <Card id={token.id} title={token.symbol} image={token.image} />
-          ))}
-        </Grid>
       )}
-      {/* TODO: Replace with challenges  */}
     </Grid>
   )
 }

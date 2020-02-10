@@ -6,7 +6,14 @@ import { Grid } from '@theme-ui/components'
 import { Dialog as ReachDialog } from '@reach/dialog'
 import '@reach/dialog/styles.css'
 
-const Dialog = ({ children, title, description, showDialog, closeDialog }) => {
+const Dialog = ({
+  children,
+  title,
+  description,
+  showDialog,
+  closeDialog,
+  showMask,
+}) => {
   return (
     <ReachDialog
       isOpen={showDialog}
@@ -14,6 +21,7 @@ const Dialog = ({ children, title, description, showDialog, closeDialog }) => {
       aria-label="Actions modal"
       sx={{
         position: 'relative',
+        zIndex: 10,
         maxWidth: ['350px', '500', '660px'],
         width: '100%',
         py: [5, 7],
@@ -21,6 +29,19 @@ const Dialog = ({ children, title, description, showDialog, closeDialog }) => {
         boxShadow: '0 4px 24px 0 rgba(30,37,44,0.16)',
       }}
     >
+      {showMask && (
+        <Box
+          sx={{
+            position: 'absolute',
+            zIndex: 0,
+            width: '100%',
+            height: '100%',
+            top: 0,
+            left: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.23)',
+          }}
+        />
+      )}
       <img
         src="/close.svg"
         alt="close"

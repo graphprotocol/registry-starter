@@ -10,7 +10,7 @@ const TokenForm = ({ token, setValue, isDisabled, handleSubmit }) => (
     <Field
       type="input"
       title="Token symbol"
-      placeholder="text"
+      placeholder="Text"
       charsCount={10}
       value={token.symbol}
       setValue={value => setValue('symbol', value)}
@@ -22,6 +22,14 @@ const TokenForm = ({ token, setValue, isDisabled, handleSubmit }) => (
       charsCount={300}
       value={token.description}
       setValue={value => setValue('description', value)}
+    />
+    <Field
+      type="input"
+      title="Contract address"
+      placeholder="Enter Address"
+      charsCount={42}
+      value={token.address}
+      setValue={value => setValue('address', value)}
     />
     <Box sx={{ my: 6 }}>
       <p sx={{ variant: 'text.small', color: 'secondary', mb: 2 }}>

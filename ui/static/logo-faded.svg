@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="176px" height="176px" viewBox="0 0 176 176" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61.1 (89650) - https://sketch.com -->
+    <title>Icon / Error Copy</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Curation-Starter" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="User-/-Signed-in---0" transform="translate(-632.000000, -320.000000)" fill="#1E252C" fill-rule="nonzero">
+            <g id="Icon-/-logo" transform="translate(624.000000, 312.000000)">
+                <path d="M148.704523,25.5155502 L25.5168045,148.706202 C-0.672250795,113.667519 2.84705589,64.7125181 33.7786773,33.7801601 C64.7102987,2.84780198 113.665215,-0.672670575 148.704523,25.5155502" id="Path" fill-opacity="0.16"></path>
+                <path d="M166.483196,43.3030242 L43.2954771,166.493676 C78.3347846,192.681897 127.289701,189.161425 158.221323,158.229067 C189.152944,127.296708 192.672251,78.341708 166.483196,43.3030242" id="Path" fill-opacity="0.32"></path>
+            </g>
+        </g>
+    </g>
+</svg>

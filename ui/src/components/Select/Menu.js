@@ -60,7 +60,7 @@ const Menu = ({ children, items, top, right, ...props }) => {
 }
 
 const listStyles = {
-  width: 'fit-content',
+  width: 'max-content',
   position: 'absolute',
   zIndex: 10,
   boxShadow: '0 20px 64px 0 rgba(12,10,29,0.32)',
@@ -85,7 +85,7 @@ const linkStyles = {
   justifyContent: 'left',
   gap: 3,
   textAlign: 'left',
-  my: 6,
+  my: 3,
 }
 
 const iconStyles = {

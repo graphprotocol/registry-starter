@@ -18,6 +18,11 @@ const Card = ({ id, title, image }) => {
         paddingTop: '24px',
         cursor: 'pointer',
         transition: 'all 0.3s ease',
+        '@keyframes fadein': {
+          from: { opacity: 0 },
+          to: { opacity: 1 },
+        },
+        animation: 'fadein 0.5s',
         '&:hover': {
           borderColor: 'secondary',
           transition: 'all 0.3s ease',
