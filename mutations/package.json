@@ -29,6 +29,7 @@
   "devDependencies": {
     "@babel/core": "^7.7.5",
     "@babel/preset-env": "^7.7.6",
+    "@truffle/hdwallet-provider": "^1.0.30",
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.0",
     "babel-core": "^7.0.0-bridge.0",

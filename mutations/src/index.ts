@@ -11,7 +11,6 @@ import {
   Web3Provider
 } from "ethers/providers"
 import { applySignedWithAttribute, setAttribute } from './utils'
-
 const ipfsHttpClient = require('ipfs-http-client')
 
 interface UploadImageEvent extends EventPayload {
@@ -71,6 +70,9 @@ const stateBuilder: StateBuilder<State, EventMap> = {
   }
 }
 
+const mnemonic = "myth like bonus scare over problem client lizard pioneer submit female collect"
+const accountPath = "m/44'/60'/0'/0/"
+
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
     return new Web3Provider(provider)
@@ -91,18 +93,25 @@ type Config = typeof config
 type Context = MutationContext<Config, State, EventMap>
 
 const abis = {
-  Context: require('../../contracts/abis/Context.abi'),
-  Dai: require('../../contracts/abis/Dai.abi'),
-  EthereumDIDRegistry: require('../../contracts/abis/EthereumDIDRegistry.abi'),
-  LibNote: require('../../contracts/abis/LibNote.abi'),
-  Ownable: require('../../contracts/abis/Ownable.abi'),
-  Registry: require('../../contracts/abis/Registry.abi'),
-  ReserveBank: require('../../contracts/abis/ReserveBank.abi'),
-  SafeMath: require('../../contracts/abis/SafeMath.abi'),
-  TokenRegistry: require('../../contracts/abis/TokenRegistry.abi')
+  Context: require('../../contracts/build/contracts/Context.json').abi,
+  Dai: require('../../contracts/build/contracts/Dai.json').abi,
+  EthereumDIDRegistry: require('../../contracts/build/contracts/EthereumDIDRegistry.json').abi,
+  LibNote: require('../../contracts/build/contracts/LibNote.json').abi,
+  Ownable: require('../../contracts/build/contracts/Ownable.json').abi,
+  Registry: require('../../contracts/build/contracts/Registry.json').abi,
+  ReserveBank: require('../../contracts/build/contracts/ReserveBank.json').abi,
+  SafeMath: require('../../contracts/build/contracts/SafeMath.json').abi,
+  TokenRegistry: require('../../contracts/build/contracts/TokenRegistry.json').abi
 }
 
-const addresses = require('../../contracts/addresses.json')
+const addressMap = {
+  Dai: "mockDAIs",
+  EthereumDIDRegistry: "ethereumDIDRegistry",
+  ReserveBank: "reserveBank",
+  TokenRegistry: "tokenRegistry",
+}
+
+const addressesByNetwork = require('../../contracts/addresses.json')
 
 async function getContract(context: Context, contract: string, signer: ethers.Signer) {
   const { ethereum } = context.graph.config
@@ -110,14 +119,26 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
   const abi = abis[contract]
 
   if (!abi) {
-    throw Error(`Missing the ABI for '${contract}'`)
+    throw new Error(`Missing the ABI for '${contract}'`)
   }
 
-  const network = ethereum.network.name
-  const address = addresses[network]
+  const network = "dev" //ethereum.network.name
+  const addresses = addressesByNetwork[network]
 
-  if (address) {
-    throw Error(`Missing the address for '${name}'`)
+  if (!addresses) {
+    throw new Error(`Missing addresses for network '${network}'`)
+  }
+
+  const addressName = addressMap[contract]
+
+  if(!addressName) {
+    throw new Error(`Missing address name mapping for '${contract}'`)
+  }
+
+  const address = addresses[addressName]
+
+  if(!address) {
+    throw new Error(`Missing address for '${addressName}'`)
   }
 
   const instance = new ethers.Contract(
@@ -194,11 +215,14 @@ async function editToken(_, { options }: any, context: Context) {
 
   const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
 
-  // TODO: fix
-  const memberWallet = await ethers.Wallet.fromMnemonic("","").connect(ethereum)
-  const ownerWallet = await ethers.Wallet.fromMnemonic("", "").connect(ethereum)
+  // TODO: How to generate/get ethers wallet from user?
+  // TODO: Who is 'owner'?
 
-  const memberAddress = await memberWallet.getAddress()
+  // Seems to be working
+  
+  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + 1).connect(ethereum)
+
+  const memberAddress = await ethereum.getSigner().getAddress()
 
   const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", ethereum.getSigner())
 
@@ -215,7 +239,10 @@ async function deleteToken(_, args: any, context: Context) {
 
   const { ethereum } = context.graph.config
 
-  const tokenRegistry = await getContract(context, "TokenRegistry", ethereum.getSigner())
+  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + 0).connect(ethereum)
+
+  const tokenRegistry = await getContract(context, "TokenRegistry", memberWallet)
+
   const address = await ethereum.getSigner().getAddress()
 
   try{
