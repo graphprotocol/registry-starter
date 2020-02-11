@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { Fragment } from 'react'
+import { useState, createContext } from 'react'
 import { jsx, Box } from 'theme-ui'
 import { Helmet } from 'react-helmet'
 import emotionReset from 'emotion-reset'
@@ -9,7 +9,12 @@ import { isMobile } from 'react-device-detect'
 import Footer from '../Footer'
 import Navigation from '../Navigation'
 
+export const ReactContext = createContext()
+
 const LayoutTemplate = ({ children, mainStyles, ...props }) => {
+  const [filter, setFilter] = useState('All')
+  const [order, setOrder] = useState('')
+
   const styles = {
     maxWidth: '1246px',
     mx: 'auto',
@@ -18,12 +23,8 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
     position: 'relative',
   }
 
-  const isTokenPage =
-    (props.path && props.path.match(/^\/token\//)) ||
-    (props.path && props.path.match(/^\/edit\//))
-
   return (
-    <Fragment>
+    <ReactContext.Provider value={{ filter: filter, order: order }}>
       <Global
         styles={css`
           ${emotionReset}
@@ -40,14 +41,20 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
           }
         `}
       />
-      <Box {...props} sx={styles}>
+      <Box {...props}>
         <Helmet>
           <meta charSet="utf-8" />
           <title>Curation Starter dApp</title>
         </Helmet>
-        <Navigation />
+        <Navigation
+          setFilter={setFilter}
+          setOrder={setOrder}
+          sx={styles}
+          {...props}
+        />
         <Box
           sx={{
+            ...styles,
             '@keyframes fadein': {
               from: { opacity: 0 },
               to: { opacity: 1 },
@@ -65,9 +72,9 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
             {children}
           </main>
         </Box>
-        <Footer />
+        <Footer sx={styles} />
       </Box>
-    </Fragment>
+    </ReactContext.Provider>
   )
 }
 

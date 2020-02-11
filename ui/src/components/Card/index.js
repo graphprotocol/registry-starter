@@ -3,8 +3,17 @@ import PropTypes from 'prop-types'
 import { jsx, Box, Styled } from 'theme-ui'
 import { navigate } from 'gatsby'
 
-const Card = ({ id, title, image }) => {
-  return (
+const Card = ({ id, title, image, type }) => {
+  return type === 'loading' ? (
+    <Box
+      sx={{
+        height: ['160px', '180px', '180px'],
+        width: ['160px', '180px', '180px'],
+        backgroundColor: 'rgba(30, 37, 44, 0.16)',
+        justifySelf: 'center',
+      }}
+    />
+  ) : (
     <Box
       key={id}
       sx={{

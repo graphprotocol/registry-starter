@@ -108,8 +108,7 @@ const Token = ({ location }) => {
         />
         <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
         <Menu
-          top="60px"
-          right="0"
+          menuStyles={{ top: '60px', right: '0' }}
           items={[
             {
               text: 'Challenge',

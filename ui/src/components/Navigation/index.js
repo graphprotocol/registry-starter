@@ -9,11 +9,28 @@ import { metamaskAccountChange } from '../../services/ethers'
 import Link from '../Link'
 import SignupModal from '../../components/Modal'
 import Menu from '../../components/Select/Menu'
+import Caret from '../../images/caret.svg'
+import Arrows from '../../images/arrows.svg'
 
-export default ({ children, mainStyles, ...props }) => {
+export const FILTERS = [
+  {
+    name: 'All',
+    displayName: 'All Tokens',
+  },
+  {
+    name: 'Challenged',
+    displayName: 'Challenged Tokens',
+  },
+]
+
+export default ({ children, setFilter, setOrder, location, ...props }) => {
   const { account } = useWeb3React()
   const [showModal, setShowModal] = useState(false)
   const [userAccount, setUserAccount] = useState(account)
+  const [selectedFilter, setSelectedFilter] = useState(FILTERS[0].name)
+  const [selectedOrder, setSelectedOrder] = useState('createdAt_DESC')
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [orderOpen, setOrderOpen] = useState(false)
   const openModal = () => setShowModal(true)
 
   const closeModal = () => {
@@ -30,6 +47,24 @@ export default ({ children, mainStyles, ...props }) => {
     metamaskAccountChange(accounts => setUserAccount(accounts[0]))
   }, [account])
 
+  const items = FILTERS.map(filter => {
+    return {
+      text:
+        selectedFilter === filter.name ? (
+          <div>
+            <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} />
+            {filter.displayName}
+          </div>
+        ) : (
+          filter.displayName
+        ),
+      handleSelect: () => {
+        setSelectedFilter(filter.name)
+        setFilter(filter.name)
+      },
+    }
+  })
+
   return (
     <Grid
       sx={{
@@ -42,8 +77,9 @@ export default ({ children, mainStyles, ...props }) => {
     >
       <Grid
         sx={{
-          gridTemplateColumns: 'max-content max-content',
+          gridTemplateColumns: 'max-content max-content max-content 1fr',
           alignItems: 'center',
+          position: 'relative',
         }}
         gap={2}
       >
@@ -57,6 +93,174 @@ export default ({ children, mainStyles, ...props }) => {
         <Styled.h4>
           <Link to={'/'}>Tokens</Link>
         </Styled.h4>
+        {props.path === '/' && (
+          <Fragment>
+            <Menu
+              items={items}
+              menuStyles={{ top: '48px', left: '8px' }}
+              setOpen={setFilterOpen}
+            >
+              <p
+                sx={{
+                  variant: 'text.cta',
+                  px: 3,
+                  mx: 2,
+                  borderLeft: '1px solid',
+                  borderRight: '1px solid',
+                  backgroundColor: filterOpen ? 'secondary' : 'transparent',
+                  borderColor: filterOpen ? 'transparent' : 'whiteFadedMore',
+                  cursor: 'pointer',
+                  color: filterOpen ? 'white' : 'blackFaded',
+                  py: filterOpen ? 2 : 0,
+                  transition: 'background 0.2s ease',
+                }}
+              >
+                {selectedFilter}
+                {filterOpen ? (
+                  <Caret
+                    sx={{
+                      width: '16px',
+                      height: 'auto',
+                      ml: 2,
+                      fill: 'white',
+                      transform: 'rotate(180deg)',
+                    }}
+                  />
+                ) : (
+                  <Caret
+                    sx={{
+                      width: '16px',
+                      height: 'auto',
+                      ml: 2,
+                      fill: 'blackFaded',
+                    }}
+                  />
+                )}
+              </p>
+            </Menu>
+            <Menu
+              menuStyles={{ top: '50px', left: '-17px' }}
+              setOpen={setOrderOpen}
+              items={[
+                {
+                  text: (
+                    <Box>
+                      {(selectedOrder === 'createdAt_DESC' ||
+                        selectedOrder === 'createdAt_ASC') && (
+                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} />
+                      )}
+                      Date added{' '}
+                      <p
+                        sx={{
+                          variant: 'text.small',
+                          display: 'inline',
+                          color: 'blackFaded',
+                          fontWeight: 'body',
+                        }}
+                      >
+                        Recent
+                        <img
+                          src="/arrow-down.png"
+                          sx={{
+                            width: '8px',
+                            height: 'auto',
+                            ml: 1,
+                            transform: selectedOrder.includes('ASC')
+                              ? 'rotate(180deg)'
+                              : 'none',
+                          }}
+                        />
+                      </p>
+                    </Box>
+                  ),
+                  handleSelect: () => {
+                    if (selectedOrder === 'createdAt_DESC') {
+                      setSelectedOrder('createdAt_ASC')
+                      setOrder('createdAt_ASC')
+                    } else {
+                      setSelectedOrder('createdAt_DESC')
+                      setOrder('createdAt_DESC')
+                    }
+                  },
+                  delay: 500,
+                },
+                {
+                  text: (
+                    <Box>
+                      {(selectedOrder === 'symbol_ASC' ||
+                        selectedOrder === 'symbol_DESC') && (
+                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} />
+                      )}
+                      Name{' '}
+                      <p
+                        sx={{
+                          variant: 'text.small',
+                          display: 'inline',
+                          color: 'blackFaded',
+                          fontWeight: 'body',
+                        }}
+                      >
+                        a-z
+                        <img
+                          src="/arrow-down.png"
+                          sx={{
+                            width: '8px',
+                            height: 'auto',
+                            ml: 1,
+                            transform: selectedOrder.includes('ASC')
+                              ? 'rotate(180deg)'
+                              : 'none',
+                          }}
+                        />
+                      </p>
+                    </Box>
+                  ),
+                  handleSelect: () => {
+                    if (selectedOrder === 'symbol_DESC') {
+                      setSelectedOrder('symbol_ASC')
+                      setOrder('symbol_ASC')
+                    } else {
+                      setSelectedOrder('symbol_DESC')
+                      setOrder('symbol_DESC')
+                    }
+                  },
+                  delay: 500,
+                },
+              ]}
+            >
+              <Box
+                sx={{
+                  width: 'fit-content',
+                  backgroundColor: orderOpen ? 'secondary' : 'transparent',
+                  padding: 4,
+                  marginLeft: '-17px',
+                  transition: 'background 0.2s ease',
+                }}
+              >
+                {orderOpen ? (
+                  <Arrows
+                    sx={{
+                      width: '22px',
+                      height: 'auto',
+                      fill: 'white',
+                      transform: 'rotate(180deg)',
+                      cursor: 'pointer',
+                    }}
+                  />
+                ) : (
+                  <Arrows
+                    sx={{
+                      width: '22px',
+                      height: 'auto',
+                      fill: 'blackFaded',
+                      cursor: 'pointer',
+                    }}
+                  />
+                )}
+              </Box>
+            </Menu>
+          </Fragment>
+        )}
       </Grid>
       <Grid
         columns={userAccount ? [2, 3] : 2}
@@ -106,8 +310,7 @@ export default ({ children, mainStyles, ...props }) => {
               />
             </Link>
             <Menu
-              top="25px"
-              right="-10px"
+              menuStyles={{ top: '25px', right: '-10px' }}
               items={[
                 {
                   text: 'Your Tokens',

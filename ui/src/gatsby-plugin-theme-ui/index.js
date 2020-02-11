@@ -4,6 +4,8 @@ export default {
     text: '#090610',
     secondary: '#6F4CFF',
     blackFaded: 'rgba(9,6,16,0.64)',
+    blackFadedMore: 'rgba(9,6,16,0.32)',
+    whiteFadedMore: 'rgba(30,37,44,0.16)',
     linkHover: '#452DA8',
     whiteFaded: 'rgba(30,37,44,0.16)',
   },
@@ -146,6 +148,14 @@ export default {
       letterSpacing: '-0.4px',
       color: 'text',
       fontFamily: 'body',
+    },
+    cta: {
+      fontSize: 2,
+      fontWeight: 'heading',
+      letterSpacing: 0.2,
+      lineHeight: '2rem',
+      fontFamily: 'body',
+      color: 'blackFaded',
     },
   },
 }
