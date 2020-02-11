@@ -2,7 +2,7 @@ import ApolloClient from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
 import HDWalletProvider from '@truffle/hdwallet-provider'
 
-import { createMutations, createMutationsLink } from '../../../mutations-package'
+import { createMutations, createMutationsLink } from '../../../@graphprotocol/mutations'
 
 const IpfsClient = require('ipfs-http-client')
 
