@@ -7,12 +7,18 @@
       "./mutations",
       "./subgraph",
       "./ui"
+    ],
+    "nohoist": [
+      "**/graph-ts"
     ]
   },
   "scripts": {
     "build": "yarn build:mutations && yarn build:subgraph && yarn build:ui",
+    "build:mutations": "lerna exec --scope token-registry-mutations -- yarn build",
+    "build:subgraph": "lerna exec --scope token-registry -- yarn build",
+    "build:ui": "lerna exec --scope curation-starter -- yarn build",
     "start:env": "concurrently \"docker-compose up\" \"yarn:deploy\"",
-    "start:dapp": "lerna exec --scope curation-starter -- yarn start",
+    "start:ui": "lerna exec --scope curation-starter -- yarn start",
     "deploy": "yarn deploy:contracts && yarn deploy:subgraph",
     "deploy:contracts": "lerna exec --scope token-registry-contracts -- yarn deploy",
     "deploy:subgraph": "lerna exec --scope token-registry -- yarn deploy"
