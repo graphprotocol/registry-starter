@@ -5,15 +5,14 @@ import {
   MutationState,
   StateBuilder
 } from '../@graphprotocol/mutations'
-import { ethers, providers } from 'ethers'
+import { ethers } from 'ethers'
 import {
   AsyncSendable,
   Web3Provider
 } from "ethers/providers"
-
 import { applySignedWithAttribute, setAttribute } from './utils'
 
-const IpfsClient = require('ipfs-http-client')
+const ipfsHttpClient = require('ipfs-http-client')
 
 interface UploadImageEvent extends EventPayload {
   value: boolean
@@ -72,17 +71,18 @@ const stateBuilder: StateBuilder<State, EventMap> = {
   }
 }
 
-const contractAddress = "0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF"
-
-const mnemonic = "myth like bonus scare over problem client lizard pioneer submit female collect"
-const accountPath = index => `m/44'/60'/0'/0/${index}`
-
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
     return new Web3Provider(provider)
   },
   ipfs: (endpoint: string) => {
-    return new IpfsClient(endpoint)
+    const url = new URL(endpoint)
+    return ipfsHttpClient({
+      protocol: url.protocol.replace(/[:]+$/, ''),
+      host: url.hostname,
+      port: url.port,
+      'api-path': url.pathname.replace(/\/$/, '') + '/api/v0/',
+    })
   }
 }
 
@@ -90,21 +90,42 @@ type Config = typeof config
 
 type Context = MutationContext<Config, State, EventMap>
 
-async function getContract(context: Context, name: string, signer) {
-  const abi = require(`../../contracts/build/contracts/${name}.json`).abi
+const abis = {
+  Context: require('../../contracts/abis/Context.abi'),
+  Dai: require('../../contracts/abis/Dai.abi'),
+  EthereumDIDRegistry: require('../../contracts/abis/EthereumDIDRegistry.abi'),
+  LibNote: require('../../contracts/abis/LibNote.abi'),
+  Ownable: require('../../contracts/abis/Ownable.abi'),
+  Registry: require('../../contracts/abis/Registry.abi'),
+  ReserveBank: require('../../contracts/abis/ReserveBank.abi'),
+  SafeMath: require('../../contracts/abis/SafeMath.abi'),
+  TokenRegistry: require('../../contracts/abis/TokenRegistry.abi')
+}
 
-  if (!abi || !contractAddress) {
-    throw Error(`Missing the DataSource '${name}'`)
-  }
+const addresses = require('../../contracts/addresses.json')
 
+async function getContract(context: Context, contract: string, signer: ethers.Signer) {
   const { ethereum } = context.graph.config
 
-  const contract = new ethers.Contract(
-    contractAddress, abi, signer
-  )
-  contract.connect(ethereum)
+  const abi = abis[contract]
 
-  return contract
+  if (!abi) {
+    throw Error(`Missing the ABI for '${contract}'`)
+  }
+
+  const network = ethereum.network.name
+  const address = addresses[network]
+
+  if (address) {
+    throw Error(`Missing the address for '${name}'`)
+  }
+
+  const instance = new ethers.Contract(
+    address, abi, signer
+  )
+  instance.connect(ethereum)
+
+  return instance
 }
 
 async function addToken(_, { options }: any, context: Context) {
@@ -173,8 +194,9 @@ async function editToken(_, { options }: any, context: Context) {
 
   const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
 
-  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(0)).connect(ethereum)
-  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(1)).connect(ethereum)
+  // TODO: fix
+  const memberWallet = await ethers.Wallet.fromMnemonic("","").connect(ethereum)
+  const ownerWallet = await ethers.Wallet.fromMnemonic("", "").connect(ethereum)
 
   const memberAddress = await memberWallet.getAddress()
 
