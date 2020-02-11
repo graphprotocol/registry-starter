@@ -1,6 +1,6 @@
 import ApolloClient from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
-import HDWalletProvider from '@truffle/hdwallet-provider'
+import { ethers } from 'ethers'
 import {
   createMutations,
   createMutationsLink
@@ -8,11 +8,7 @@ import {
 
 const IpfsClient = require('ipfs-http-client')
 
-const mnemonic = "biology lend alone bracket exist betray ability ticket fury lady rapid bulk"
-
-//TODO: Ethers's JSONRpcProvider results in error 'Method [object Object] not supported'
-
-const provider = new HDWalletProvider(mnemonic, "http://localhost:8545")
+const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545")
 
 export const getFromIpfs = async (ipfs: any, hash: string) => {
   let result: string;
