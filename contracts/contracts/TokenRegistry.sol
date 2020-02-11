@@ -308,10 +308,18 @@ contract TokenRegistry is Registry, Ownable {
         uint256 challengeeMemberTime = getMembershipStartTime(_challengedMember);
         require (challengeeMemberTime > 0, "challenge - Challengee must exist");
         uint256 challengerMemberTime = getMembershipStartTime(_challengingMember);
-        require(
-            !memberChallengeExists(_challengedMember),
-            "challenge - Member can't be challenged multiple times at once"
-        );
+
+        uint256 currentChallengeID = getChallengeID(_challengedMember);
+        if(currentChallengeID > 0){
+            require(
+                challengeCanBeResolved(currentChallengeID),
+                "challenge - Member can't be challenged multiple times at once"
+            );
+            // Doing this allows us to never get stuck in a state with unresolved challenges
+            // Also, the challenge rewards the deposit fee to winner or loser, so they are
+            // financially motivated too
+            resolveChallenge(currentChallengeID);
+        }
 
         require(
             _challengingMember != _challengedMember,
