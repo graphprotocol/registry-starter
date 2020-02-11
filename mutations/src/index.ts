@@ -5,13 +5,13 @@ import {
   MutationState,
   StateBuilder
 } from "../mutations-package"
-import { ethers } from 'ethers'
+import { ethers, providers } from 'ethers'
 import {
   AsyncSendable,
   Web3Provider
 } from "ethers/providers"
 
-import { changeOwnerSignedData, permitSignedData, setAttributeData, VALIDITY_TIMESTAMP, ipfsHexHash } from './utils'
+import { applySignedWithAttribute, setAttribute } from './utils'
 
 const IpfsClient = require('ipfs-http-client')
 
@@ -74,6 +74,9 @@ const stateBuilder: StateBuilder<State, EventMap> = {
 
 const contractAddress = "0x970e8f18ebfEa0B08810f33a5A40438b9530FBCF"
 
+const mnemonic = "myth like bonus scare over problem client lizard pioneer submit female collect"
+const accountPath = index => `m/44'/60'/0'/0/${index}`
+
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
     return new Web3Provider(provider)
@@ -87,7 +90,7 @@ type Config = typeof config
 
 type Context = MutationContext<Config, State, EventMap>
 
-async function getContract(context: Context, name: string) {
+async function getContract(context: Context, name: string, signer) {
   const abi = require(`../../contracts/build/contracts/${name}.json`).abi
 
   if (!abi || !contractAddress) {
@@ -97,7 +100,7 @@ async function getContract(context: Context, name: string) {
   const { ethereum } = context.graph.config
 
   const contract = new ethers.Contract(
-    contractAddress, abi, ethereum.getSigner()
+    contractAddress, abi, signer
   )
   contract.connect(ethereum)
 
@@ -111,8 +114,6 @@ async function addToken(_, { options }: any, context: Context) {
   const { state } = context.graph
 
   const { symbol, description, image, decimals } = options
-
-  const address = await ethereum.getSigner().getAddress()
 
   const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
   
@@ -131,57 +132,31 @@ async function addToken(_, { options }: any, context: Context) {
 
   await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
-  // const randomWallet = ethers.Wallet.createRandom() as any
-  // const randomWalletAddress = randomWallet.signingKey.address
-  // const offChainDataName =
-  //   '0x50726f6a65637444617461000000000000000000000000000000000000000000'
+  // const userWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(0)).connect(ethereum)
+  // const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(1)).connect(ethereum)
 
-  // const signedMessage1 = await randomWallet.signMessage(
-  //   changeOwnerSignedData(randomWalletAddress, address),
-  // )
+  // const tokenRegistryContract = await getContract(context, "TokenRegistry", userWallet)
+  // const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", userWallet)
 
-  // const signedMessage2 = await randomWallet.signMessage(
-  //   permitSignedData(randomWalletAddress, address),
-  // )
+  // const daiContract = await getContract(context, "Dai", userWallet)
 
-  // const signedMessage3 = await randomWallet.signMessage(
-  //   setAttributeData(
-  //     randomWalletAddress,
-  //     metadataHash,
-  //     offChainDataName,
-  //   ),
-  // )
+  // try{
+  //   await applySignedWithAttribute(
+  //     userWallet,
+  //     ownerWallet,
+  //     tokenRegistryContract,
+  //     ethereumDIDContract,
+  //     daiContract
+  //   )
+  // }catch(err) {
+  //   console.log(err)
+  // }
 
-  // const sig1 = utils.splitSignature(signedMessage1)
-  // const sig2 = utils.splitSignature(signedMessage2)
-  // const sig3 = utils.splitSignature(signedMessage3)
-
-  // let { v: v1, r: r1, s: s1 } = sig1
-  // let { v: v2, r: r2, s: s2 } = sig2
-  // let { v: v3, r: r3, s: s3 } = sig3
-
-  // const tokenRegistry = await getContract(context, "TokenRegistry")
-
-  // const transaction = await tokenRegistry.applySignedWithAttribute(
-  //   randomWalletAddress,
-  //   [v1, v2],
-  //   [r1, r2],
-  //   [s1, s2],
-  //   address,
-  //   v3,
-  //   r3,
-  //   s3,
-  //   offChainDataName,
-  //   ipfsHexHash(metadataHash),
-  //   VALIDITY_TIMESTAMP,
-  // )
-
-  return true;
 }
 
 async function editToken(_, { options }: any, context: Context) {
 
-  const { ipfs } = context.graph.config
+  const { ipfs, ethereum } = context.graph.config
 
   const { symbol, description, image, decimals } = options
 
@@ -198,26 +173,41 @@ async function editToken(_, { options }: any, context: Context) {
 
   const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
 
-  const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry")
+  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(0)).connect(ethereum)
+  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(1)).connect(ethereum)
 
+  const memberAddress = await memberWallet.getAddress()
+
+  const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", ethereum.getSigner())
+
+  try{
+    await setAttribute(memberAddress, ownerWallet, ethereumDIDRegistry)
+  }catch(err) {
+    console.log(err)
+  }
+  
   return null
 }
 
-async function deleteToken(_, { tokenId }: any, context: Context) {
+async function deleteToken(_, args: any, context: Context) {
 
   const { ethereum } = context.graph.config
 
-  const tokenRegistry = await getContract(context, "TokenRegistry")
+  const tokenRegistry = await getContract(context, "TokenRegistry", ethereum.getSigner())
   const address = await ethereum.getSigner().getAddress()
 
-  tokenRegistry.memberExit(address)
+  try{
+    await tokenRegistry.memberExit(address)
+  }catch(err){
+    console.log(err)
+  }
 
   return true
 }
 
 async function challengeToken(_, { options: { description, token } }: any, context: Context) {
 
-  const { ipfs } = context.graph.config
+  const { ipfs, ethereum } = context.graph.config
 
   const { state } = context.graph
 
@@ -230,7 +220,7 @@ async function challengeToken(_, { options: { description, token } }: any, conte
 
   await state.dispatch('UPLOAD_CHALLENGE', { challengeHash })
 
-  const tokenRegistry = await getContract(context, "TokenRegistry")
+  const tokenRegistry = await getContract(context, "TokenRegistry", ethereum.getSigner())
   
   //tokenRegistry.challenge( ... )
 
@@ -239,7 +229,9 @@ async function challengeToken(_, { options: { description, token } }: any, conte
 
 async function voteChallenge(_, args: any, context: Context) {
 
-  const tokenRegistry = await getContract(context, "TokenRegistry")
+  const { ethereum } = context.graph.config
+
+  const tokenRegistry = await getContract(context, "TokenRegistry", ethereum.getSigner())
   
   //tokenRegistry.submitVotes( ... )
 
