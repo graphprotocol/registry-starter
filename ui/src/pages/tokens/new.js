@@ -10,6 +10,7 @@ const NewToken = ({ ...props }) => {
   const [token, setToken] = useState({
     symbol: '',
     description: '',
+    address: '',
     decimals: '',
     imageName: '',
     imageUrl: '',
@@ -49,7 +50,7 @@ const NewToken = ({ ...props }) => {
     <Grid>
       <Styled.h1>Add a Token</Styled.h1>
       <Styled.p>TODO: Need Copy</Styled.p>
-      <Box sx={{ maxWidth: '504px', width: '100%', mt: 7 }}>
+      <Box sx={{ maxWidth: '504px', width: '100%', my: 7 }}>
         <TokenForm
           token={token}
           setValue={setValue}

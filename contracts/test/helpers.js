@@ -3,10 +3,10 @@ const keccak256 = require('js-sha3').keccak_256
 const ethutil = require('ethereumjs-util')
 
 // Local imports
-const utils = require('./utils.js')
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
 const EthereumDIDRegistry = artifacts.require('EthereumDIDRegistry.sol')
 const Token = artifacts.require('dai.sol')
+const utils = require('./utils.js')
 
 ////////////// CONSTANTS //////////////
 const offChainDataName = 'TokenData'
@@ -18,8 +18,9 @@ const DAI_PERMIT_TYPEHASH = 'ea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d
 const helpers = {
     applySignedWithAttribute: async (newMemberWallet, ownerWallet) => {
         const ownerAddress = ownerWallet.signingKey.address
-        const memberAddress = newMemberWallet.signingKey.address
+        const newMemberAddress = newMemberWallet.signingKey.address
         const tokenRegistry = await TokenRegistry.deployed()
+        const token = await Token.deployed()
 
         // Get the signature for changing ownership on ERC-1056 Registry
         const applySignedSig = await module.exports.applySigned(newMemberWallet, ownerWallet)
@@ -38,9 +39,13 @@ const helpers = {
             setAttributeData
         )
 
+        const reserveBankAddress = await tokenRegistry.reserveBank()
+        const reserveBankBalanceStart = await token.balanceOf(reserveBankAddress)
+        const ownerBalanceStart = await token.balanceOf(ownerAddress)
+
         // Send all three meta transactions to TokenRegistry to be executed in one tx
         tx = await tokenRegistry.applySignedWithAttribute(
-            memberAddress,
+            newMemberAddress,
             [applySignedSig.v, permitSig.v],
             [applySignedSig.r, permitSig.r],
             [applySignedSig.s, permitSig.s],
@@ -50,18 +55,60 @@ const helpers = {
             setAttributeSignedSig.s,
             '0x' + utils.stringToBytes32(offChainDataName),
             utils.mockIPFSData,
-            '0x' + maxValidity
+            '0x' + maxValidity,
+            { from: ownerAddress }
         )
 
-        console.log(tx.receipt.rawLogs)
+        // Tx logs order
+        // 1. NewMember
+        // 2. Owner changed
+        // 3. Permit
+        // 4. Transfer
+        // 5. Set Attribute
 
-        // TODO - checks
-                // const updatedAllowance = await token.allowance(holderAddress, spenderAddress)
-        // assert.equal(
-        //     updatedAllowance.toString(),
-        //     '115792089237316195423570985008687907853269984665640564039457584007913129639935',
-        //     'Allowance was not set to max'
-        // )
+        // Token Checks
+        const ownerBalanceEnd = (await token.balanceOf(ownerAddress)).toString()
+        const reserveBankBalanceEnd = await token.balanceOf(reserveBankAddress)
+        const updatedAllowance = await token.allowance(ownerAddress, tokenRegistry.address)
+
+        assert.equal(
+            ownerBalanceEnd.toString(),
+            ownerBalanceStart.sub(utils.applyFeeBN).toString(),
+            'Owner did not transfer application fee'
+        )
+        assert.equal(
+            reserveBankBalanceEnd.toString(),
+            reserveBankBalanceStart.add(utils.applyFeeBN).toString(),
+            'Bank didnt receive application fee'
+        )
+        assert.equal(
+            updatedAllowance.toString(),
+            '115792089237316195423570985008687907853269984665640564039457584007913129639935',
+            'Allowance was not set to max from owner to TokenRegistry'
+        )
+
+        // ERC-1056 Checks
+        // Check Ownership change
+        const didReg = await EthereumDIDRegistry.deployed()
+        const identityOwner = await didReg.identityOwner(newMemberAddress)
+        assert.equal(ownerAddress, identityOwner, 'Ownership was not transferred')
+
+        // Check set attribute worked
+        const setAttributeLogData = tx.receipt.rawLogs[4].data
+        const mockDataFromLogs = setAttributeLogData.slice(
+            setAttributeLogData.length - 64,
+            setAttributeLogData.length
+        )
+        const ipfsMockDataStripped = utils.stripHexPrefix(utils.mockIPFSData)
+        assert.equal(mockDataFromLogs, ipfsMockDataStripped, 'Logs do not include ipfs hash')
+
+        // TokenRegistry checks
+        const membershipStartTime = Number(
+            (await tokenRegistry.getMembershipStartTime(newMemberAddress)).toString()
+        )
+        assert(membershipStartTime > 0, 'Membership start time not updated')
+
+        console.log(`Member ${newMemberAddress} successfully added`)
     },
 
     applySigned: async (newMemberWallet, ownerWallet) => {
@@ -88,7 +135,7 @@ const helpers = {
             memberAddress,
             '0x' + utils.stringToBytes32(offChainDataName),
             utils.mockIPFSData,
-            offChainDataValidity,
+            '0x' + maxValidity,
             { from: ownerAddress }
         )
         const event = tx.logs[0]
@@ -158,7 +205,6 @@ const helpers = {
         // ChainID of uint256 9854 used for development, in bytes32
         const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
         const daiAddress = (await Token.deployed()).address
-        console.log("DAI ADDR: ", daiAddress)
         const paddedDaiAddress = utils.leftPad(utils.stripHexPrefix(daiAddress))
         const data = domain + hashedName + hashedVersion + paddedChainID + paddedDaiAddress
         const hash = Buffer.from(keccak256.buffer(Buffer.from(data, 'hex')))
@@ -167,7 +213,6 @@ const helpers = {
 
     signPermit: async (holderAddress, spenderAddress, holderPrivateKey, nonce) => {
         const paddedNonce = utils.leftPad(Buffer.from([nonce], 64).toString('hex'))
-        console.log("PADDED NONCE: ", paddedNonce)
         // We set expiry to 0 always, as that will be default for the TokenRegistry calling
         const paddedExpiry = utils.leftPad(Buffer.from([0], 64).toString('hex'))
         // We set to 1 == true, as that will be default for the TokenRegistry calling
@@ -203,14 +248,9 @@ const helpers = {
         /*  Expected hashedStruct value:
             01b930e8948f5be49f019425c83bcf1657b07efb06fb959192051e9c412abace
         */
-       console.log("STRUCT ENCODED: ", structEncoded)
         const hashedStruct = Buffer.from(keccak256.buffer(Buffer.from(structEncoded, 'hex')))
         const stringHashedStruct = hashedStruct.toString('hex')
-        console.log("HASHES STRUCT: ", stringHashedStruct)
-
         const stringDomainSeparator = DAI_DOMAIN_SEPARATOR.toString('hex')
-        console.log("Domain Separator: ", stringDomainSeparator)
-
 
         /*  Expected digestData value on first test run (dependant on mock dai address)
             Where mock dai addr = 0xCfEB869F69431e42cdB54A4F4f105C19C080A601
@@ -227,8 +267,6 @@ const helpers = {
             fc60391b0087e420dc8e15ae01ef93d0814572bbd80b3111248897d3a0d9f941
         */
         const digest = Buffer.from(keccak256.buffer(Buffer.from(digestData, 'hex')))
-        console.log("DIGESt: ", digest.toString('hex'))
-
         const signature = ethutil.ecsign(digest, holderPrivateKey)
         return {
             r: '0x' + signature.r.toString('hex'),

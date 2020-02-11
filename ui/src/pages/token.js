@@ -12,6 +12,7 @@ import Dialog from '../components/Modal/Dialog'
 import Select from '../components/Select'
 import Field from '../components/Field'
 import Menu from '../components/Select/Menu'
+import { navigate } from 'gatsby'
 
 const TOKEN_QUERY = gql`
   query token($id: ID!) {
@@ -44,6 +45,7 @@ const TOKEN_QUERY = gql`
 const Token = ({ location }) => {
   const [isKeepOpen, setIsKeepOpen] = useState(false)
   const [isRemoveOpen, setIsRemoveOpen] = useState(false)
+  const [isChallengeOpen, setIsChallengeOpen] = useState(false)
   const [showChallengeDialog, setShowChallengeDialog] = useState(false)
   const closeChallengeDialog = () => setShowChallengeDialog(false)
   const [isChallengeDisabled, setIsChallengeDisabled] = useState(false)
@@ -79,7 +81,7 @@ const Token = ({ location }) => {
   })
 
   if (loading && !error) {
-    return <Styled.p>Loading</Styled.p>
+    return <div />
   }
 
   if (error) {
@@ -115,6 +117,13 @@ const Token = ({ location }) => {
                 setShowChallengeDialog(true)
               },
               icon: '/challenge.png',
+            },
+            {
+              text: 'Edit',
+              handleSelect: value => {
+                navigate(`/edit/${token.id}`)
+              },
+              icon: '/edit.png',
             },
           ]}
         >
@@ -183,15 +192,13 @@ const Token = ({ location }) => {
           </Styled.h6>
           <p sx={{ variant: 'text.smaller', mt: 3 }}>Decimals</p>
           <Styled.p>{token.decimals}</Styled.p>
-          <Link to={`/edit/${token.id}`} sx={{ color: 'secondary', mt: 5 }}>
-            EDIT (placeholder)
-          </Link>
           {showChallengeDialog && (
             <Dialog
               title="Challenge"
               description="Challenge to remove token. Price: 10 DAI, etc etc"
               showDialog={showChallengeDialog}
               closeDialog={closeChallengeDialog}
+              showMask={isChallengeOpen}
             >
               <Select
                 title="Challenge on behalf of"
@@ -201,6 +208,7 @@ const Token = ({ location }) => {
                 isPlaceholder={!challenge.token}
                 tokens={token.owner.tokens}
                 setValue={setValue}
+                setIsOpen={setIsChallengeOpen}
                 sx={{ mb: 6 }}
               />
               <Field
@@ -220,11 +228,17 @@ const Token = ({ location }) => {
             </Dialog>
           )}
         </Box>
-        <Box sx={{ margin: ['32px auto', '32px auto', 0], maxWidth: '400px' }}>
+        <Box
+          sx={{
+            margin: ['32px auto', '32px auto', 0],
+            maxWidth: '400px',
+            width: '100%',
+          }}
+        >
           {token.isChallenged && (
             <Box>
               <Styled.h5 sx={{ mb: 4 }}>Active Challenge</Styled.h5>
-              <Grid columns={3} gap={3} my={5}>
+              <Grid columns={['1fr 1fr max-content', 3]} gap={3} my={5}>
                 <Box>
                   <p sx={{ variant: 'text.smaller' }}>Ends in</p>
                   <Styled.p>3d 6h</Styled.p>

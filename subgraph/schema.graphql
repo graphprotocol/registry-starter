@@ -1,0 +1,85 @@
+type Token @entity {
+    id: ID! @id
+
+    # Below data is from IPFS (off chain storage)
+    # None of these are required, since first the event DIDOwnerChanged creates the project first
+    # Then DIDAttributeChanged gets emitted, where we will see theses values filled in
+    # Note - someone could not upload any data here (blank IPFS file, or never calling
+    # DIDAttributeChanged). But this is okay, because that project should get challenged
+    symbol: String
+    description: String
+    image: String
+    decimals: String
+    address: String
+
+    # From smart contracts directly
+    owner: User
+    currentChallenge: Challenge
+    isChallenged: Boolean!
+    pastChallenges: [Challenge!]
+    ipfsHash: String # aka DIDAttribute
+    totalVotes: Int!
+    memberStartTime: Int! # reputation = Date.now() - membershipStartTime
+    votes: [Vote!] @derivedFrom(field: "voter")
+
+    createdAt: Int # DateTime! @createdAt
+}
+
+type Challenge @entity {
+    id: ID! @id
+    ipfsHash: String!
+    description: String
+    endTime: Int!
+    votesFor: Int
+    votesAgainst: Int
+    token: Token
+    owner: Bytes
+    votes: [Vote!] @derivedFrom(field: "challenge")
+    resolved: Boolean! # This is when the challenge is resolved, which is different from end time
+
+    createdAt: Int # DateTime! @createdAt
+}
+
+type Vote @entity {
+  id: ID! # concatenation of challenge ID and voter address
+  voter: Token!
+  challenge: Challenge!
+  choice: Choice!
+  weight: Int!
+}
+
+type User @entity {
+  id: ID! @id
+  name: String
+  bio: String
+  tokens: [Token!]
+  challenges: [Challenge!] 
+  votes: [Vote!] @relation(name: "UserVote")
+}
+
+# Where yes is remove the token from the list and pass challenge
+# No is keep token and fail challenge
+enum Choice {
+  Yes
+  No
+}
+
+type TokenRegistry @entity {
+  id: ID!
+  "Owner of the TokenRegistry contract"
+  owner: Bytes!
+  "Approved token for fees (DAI)"
+  approvedToken: Bytes!
+  "Voting period for challenges"
+  votingPeriodDuration: Int!
+  "Challege deposit in DAI"
+  challengeDeposit: BigInt!
+  "Fee to apply to be in TokenRegistry"
+  applicationFee: BigInt!
+  "Address of the reserve bank"
+  reserveBankAddress: Bytes!
+  "Balance of the reserve bank (DAI)"
+  reserveBankBalance: BigInt!
+  "IPFS hash pointing to the charter"
+  charter: Bytes!
+}

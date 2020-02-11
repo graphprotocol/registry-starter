@@ -15,6 +15,7 @@ const TOKEN_QUERY = gql`
       image
       description
       decimals
+      address
     }
   }
 `
@@ -31,6 +32,7 @@ const EditToken = ({ location, ...props }) => {
   const [token, setToken] = useState({
     symbol: '',
     description: '',
+    address: '',
     decimals: '',
     imageName: '',
     imageUrl: '',
@@ -90,7 +92,7 @@ const EditToken = ({ location, ...props }) => {
     <Grid>
       <Styled.h1>Edit {token.symbol}</Styled.h1>
       <Styled.p>TODO: Need Copy</Styled.p>
-      <Box sx={{ maxWidth: '504px', width: '100%', mt: 7 }}>
+      <Box sx={{ maxWidth: '504px', width: '100%', my: 7 }}>
         <TokenForm
           token={token}
           setValue={setValue}

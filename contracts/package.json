@@ -1,5 +1,5 @@
 {
-  "name": "TokenRegistry",
+  "name": "token-registry",
   "version": "0.0.1",
   "scripts": {
     "fix-js": "eslint ./ --fix",

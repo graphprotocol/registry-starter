@@ -18,6 +18,9 @@ contract TokenRegistry is Registry, Ownable {
     uint256 public challengeDeposit;
     // Application fee to become a member
     uint256 public applicationFee;
+    // IPFS hash for charter, which dicates how token data should be posted
+    bytes32 public charter;
+
 
     // Approved token contract reference (this version = DAI)
     Dai public approvedToken;
@@ -31,18 +34,18 @@ contract TokenRegistry is Registry, Ownable {
     ******/
     // We rely on NewMember and MemberExited to distingushing between identities on
     // ERC-1056 that are part of TokenRegistry and aren't
-    event NewMember(address member, uint256 applicationTime);
+    event NewMember(address indexed member, uint256 applicationTime, uint256 fee);
     event MemberExited(address indexed member);
     event CharterUpdated(bytes32 indexed data);
     event Withdrawal(address indexed receiver, uint256 amount);
 
     event TokenRegistryDeployed(
+        address indexed reserveBank,
         address owner,
         address approvedToken,
         uint256 votingPeriodDuration,
         uint256 challengeDeposit,
         uint256 applicationFee,
-        address reserveBank,
         bytes32 charter
     );
 
@@ -128,7 +131,6 @@ contract TokenRegistry is Registry, Ownable {
     FUNCTIONS
     ********/
     constructor(
-        address _owner,
         address _approvedToken,
         uint256 _votingPeriodDuration,
         uint256 _challengeDeposit,
@@ -136,7 +138,6 @@ contract TokenRegistry is Registry, Ownable {
         bytes32 _charter,
         address _DIDregistry
     ) public {
-        require(_owner != address(0), "constructor - owner cannot be 0");
         require(_approvedToken != address(0), "constructor - _approvedToken cannot be 0");
         require(
             _votingPeriodDuration > 0,
@@ -152,12 +153,12 @@ contract TokenRegistry is Registry, Ownable {
         applicationFee = _applicationFee;
 
         emit TokenRegistryDeployed(
-            _owner,
+            address(reserveBank),
+            msg.sender, // owner
             _approvedToken,
             _votingPeriodDuration,
             _challengeDeposit,
             _applicationFee,
-            address(reserveBank),
             _charter
         );
     }
@@ -194,7 +195,8 @@ contract TokenRegistry is Registry, Ownable {
         // identity
         emit NewMember(
             _newMember,
-            membershipTime
+            membershipTime,
+            applicationFee
         );
 
         erc1056Registry.changeOwnerSigned(_newMember, _sigV[0], _sigR[0], _sigS[0], _owner);
@@ -262,15 +264,6 @@ contract TokenRegistry is Registry, Ownable {
         uint256 _offChainDataValidity
     ) external {
         applySignedInternal(_newMember, _sigV, _sigR, _sigS, _owner);
-        // editOffChainDataSigned(
-        //     _newMember,
-        //     _attributeSigV,
-        //     _attributeSigR,
-        //     _attributeSigS,
-        //     _offChainDataName,
-        //     _offChainDataValue,
-        //     _offChainDataValidity
-        // );
         erc1056Registry.setAttributeSigned(
             _newMember,
             _attributeSigV,
@@ -295,44 +288,6 @@ contract TokenRegistry is Registry, Ownable {
         );
         deleteMember(_member);
         emit MemberExited(_member);
-    }
-
-    /******************
-    EDIT MEMBER FUNCTIONS
-    ******************/
-
-    /**
-    @dev                            Allows offChainData to be edited by the owner.
-                                    To revoke an attribute, just pass a validity of 0. There is no
-                                    need to wrap the revokeAttribute function in ERC-1056.
-    @param _member                  The address of the member
-    @param _sigV                    V of the member signature
-    @param _sigR                    R of the member signature
-    @param _sigS                    S of the member signature
-    @param _offChainDataName        Attribute name. Should be a string less than 32 bytes, converted
-                                    to bytes32. example: 'TokenData' = 0x546f6b656e44617461
-                                    with zeros appended to make it 32 bytes
-    @param _offChainDataValue       Attribute data stored offchain (such as IPFS)
-    @param _offChainDataValidity    Length of time attribute data is valid
-     */
-    function editOffChainDataSigned(
-        address _member,
-        uint8 _sigV,
-        bytes32 _sigR,
-        bytes32 _sigS,
-        bytes32 _offChainDataName,
-        bytes memory _offChainDataValue,
-        uint256 _offChainDataValidity
-    ) public {//onlyMemberOwner(_member) {
-        erc1056Registry.setAttributeSigned(
-            _member,
-            _sigV,
-            _sigR,
-            _sigS,
-            _offChainDataName,
-            _offChainDataValue,
-            _offChainDataValidity
-        );
     }
 
     /******************
@@ -366,7 +321,7 @@ contract TokenRegistry is Registry, Ownable {
         uint256 newChallengeID = challengeCounter;
         Challenge memory newChallenge = Challenge({
             challenger: _challengingMember,
-            member: _challengingMember,
+            member: _challengedMember,
             /* solium-disable-next-line security/no-block-members*/
             yesVotes: now - challengerMemberTime,
             noVotes: 0,
@@ -398,21 +353,21 @@ contract TokenRegistry is Registry, Ownable {
         );
 
         // Insert challengers vote into the challenge
-        submitVote(challengeID, VoteChoice.Yes, _challengingMember);
-        return challengeID;
+        submitVote(newChallengeID, VoteChoice.Yes, _challengingMember);
+        return newChallengeID;
     }
 
     /**
     @dev                    Allow an owner to submit a vote
     @param _challengeID     The challenge ID
     @param _voteChoice      The vote choice (yes or no)
-    @param _voter           The member who is voting
+    @param _votingMember    The member who is voting (note owner is msg.sender)
     */
     function submitVote(
         uint256 _challengeID,
         VoteChoice _voteChoice,
-        address _voter
-    ) public onlyMemberOwner(_voter) {
+        address _votingMember
+    ) public onlyMemberOwner(_votingMember) {
         require(
             _voteChoice == VoteChoice.Yes || _voteChoice == VoteChoice.No,
             "submitVote - Vote must be either Yes or No"
@@ -428,20 +383,20 @@ contract TokenRegistry is Registry, Ownable {
             "submitVote - Challenge voting period has expired"
         );
         require(
-            storedChallenge.voteChoiceByMember[_voter] == VoteChoice.Null,
+            storedChallenge.voteChoiceByMember[_votingMember] == VoteChoice.Null,
             "submitVote - Member has already voted on this challenge"
         );
 
         require(
-            storedChallenge.member != _voter,
+            storedChallenge.member != _votingMember,
             "submitVote - Member can't vote on their own challenge"
         );
 
-        uint256 memberStartTime = getMembershipStartTime(_voter);
+        uint256 memberStartTime = getMembershipStartTime(_votingMember);
         // The lower the member start time (i.e. the older the member) the more vote weight
         uint256 voteWeight = storedChallenge.endTime.sub(memberStartTime);
-        storedChallenge.voteChoiceByMember[_voter] = _voteChoice;
-        storedChallenge.voteWeightByMember[_voter] = voteWeight;
+        storedChallenge.voteChoiceByMember[_votingMember] = _voteChoice;
+        storedChallenge.voteWeightByMember[_votingMember] = voteWeight;
         storedChallenge.voterCount += 1;
 
         // Count vote
@@ -451,7 +406,7 @@ contract TokenRegistry is Registry, Ownable {
             storedChallenge.noVotes = storedChallenge.noVotes.add(voteWeight);
         }
 
-        emit SubmitVote(_challengeID, msg.sender, _voter, _voteChoice, voteWeight);
+        emit SubmitVote(_challengeID, msg.sender, _votingMember, _voteChoice, voteWeight);
     }
 
     // TODO - test gas limit for this, and maybe hard code in the array size
@@ -534,6 +489,15 @@ contract TokenRegistry is Registry, Ownable {
     function withdraw(address _receiver, uint256 _amount) public onlyOwner returns (bool) {
         emit Withdrawal(_receiver, _amount);
         return reserveBank.withdraw(_receiver, _amount);
+    }
+
+    /**
+    @dev                Updates the charter for the TokenRegistry
+    @param _newCharter  The data that point to the new charter
+    */
+    function updateCharter(bytes32 _newCharter) public onlyOwner {
+        charter = _newCharter;
+        emit CharterUpdated(charter);
     }
 
     /***************

@@ -1,0 +1,67 @@
+specVersion: 0.0.2
+description: Universally shared projects registry
+repository: https://github.com/graphprotocol/curation-starter
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: TokenRegistry
+    network: ganache
+    source:
+      address: '0x0290FB167208Af455bB137780163b7B7a9a10C16' # Ropsten: 0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3 Ganache: 0x0290FB167208Af455bB137780163b7B7a9a10C16
+      abi: TokenRegistry
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/tokenRegistry.ts
+      entities:
+        - Token
+        - Challenge
+        - TokenRegistry
+        - Vote
+        - User
+      abis:
+        - name: TokenRegistry
+          file: ../contracts/abis/TokenRegistry.abi
+      eventHandlers:
+        - event: NewMember(indexed address,uint256,uint256)
+          handler: handleNewMember
+        - event: MemberExited(indexed address)
+          handler: handleMemberExited
+        - event: CharterUpdated(indexed bytes32)
+          handler: handleCharterUpdated
+        - event: Withdrawal(indexed address,uint256)
+          handler: handleWithdrawal
+        - event: TokenRegistryDeployed(indexed address,address,address,uint256,uint256,uint256,bytes32)
+          handler: handleTokenRegistryDeployed
+        - event: MemberChallenged(indexed address,indexed uint256,indexed address,uint256,bytes32)
+          handler: handleMemberChallenged
+        - event: SubmitVote(indexed uint256,indexed address,indexed address,uint8,uint256)
+          handler: handleSubmitVote
+        - event: ChallengeFailed(indexed address,indexed uint256,uint256,uint256)
+          handler: handleChallengeFailed
+        - event: ChallengeSucceeded(indexed address,indexed uint256,uint256,uint256)
+          handler: handleChallengeSucceeded
+  - kind: ethereum/contract
+    name: EthereumDIDRegistry
+    network: ganache
+    source:
+      address: '0x59d3631c86BbE35EF041872d502F218A39FBa150' # Ropsten: 0xdca7ef03e98e0dc2b855be647c39abe984fcf21b # Ganache: 0x59d3631c86BbE35EF041872d502F218A39FBa150
+      abi: EthereumDIDRegistry
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.3
+      language: wasm/assemblyscript
+      file: ./src/mappings/ethereumDIDRegistry.ts
+      entities:
+        - Token
+        - User
+      abis:
+        - name: EthereumDIDRegistry
+          file: ../contracts/abis/EthereumDIDRegistry.abi
+      eventHandlers:
+        - event: DIDOwnerChanged(indexed address,address,uint256)
+          handler: handleDIDOwnerChanged
+        - event: DIDAttributeChanged(indexed address,bytes32,bytes,uint256,uint256)
+          handler: handleDIDAttributeChanged

@@ -179,10 +179,7 @@ export default ({ children, mainStyles, ...props }) => {
         )}
       </Grid>
       {showModal && (
-        <SignupModal
-          showModal={showModal}
-          closeModal={closeModal}
-        ></SignupModal>
+        <SignupModal showModal={showModal} closeModal={closeModal} />
       )}
     </Grid>
   )
