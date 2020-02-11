@@ -113,7 +113,12 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
     throw Error(`Missing the ABI for '${contract}'`)
   }
 
-  const network = ethereum.network.name
+  let network = ethereum.network.name
+
+  if (network === "dev") {
+    network = "ganache"
+  }
+
   const address = addresses[network]
 
   if (address) {
@@ -137,7 +142,7 @@ async function addToken(_, { options }: any, context: Context) {
   const { symbol, description, image, decimals } = options
 
   const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
-  
+
   await state.dispatch("UPLOAD_IMAGE", { value: true })
 
   const metadata = JSON.stringify(
