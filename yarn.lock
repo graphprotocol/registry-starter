@@ -2921,21 +2921,6 @@
     web3 "1.2.1"
     web3-provider-engine "https://github.com/trufflesuite/provider-engine#web3-one"
 
-"@truffle/hdwallet-provider@^1.0.30":
-  version "1.0.30"
-  resolved "https://registry.yarnpkg.com/@truffle/hdwallet-provider/-/hdwallet-provider-1.0.30.tgz#55f5f21d9fbc76b3597d25f709e9f00998a91738"
-  integrity sha512-i2xNocQ8Pw8g24Q2hGRy5VLzQsAA10EC63msBEP+ldc9xGLzAV86qOboEqjf/h1PZm0LtXzs8lRfW+iF5Xdc2A==
-  dependencies:
-    any-promise "^1.3.0"
-    bindings "^1.5.0"
-    bip39 "^2.4.2"
-    ethereum-protocol "^1.0.1"
-    ethereumjs-tx "^1.0.0"
-    ethereumjs-util "^6.1.0"
-    ethereumjs-wallet "^0.6.3"
-    web3 "1.2.1"
-    web3-provider-engine "https://github.com/trufflesuite/provider-engine#web3-one"
-
 "@truffle/interface-adapter@^0.4.4":
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/@truffle/interface-adapter/-/interface-adapter-0.4.4.tgz#62c4ec0a3edb6755f5da919764b86785e7eba8ed"
