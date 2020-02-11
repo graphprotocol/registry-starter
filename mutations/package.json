@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "build": "yarn build:package && yarn build:bundle",
+    "build": "yarn build:package",
     "build:bundle": "rimraf ./bundle && webpack",
     "build:package": "tsc --outDir ./dist && rimraf ./package && mkdir ./package && cp -r ./dist ./package/dist && cp package.json ./package && cp -r ./src ./package/src",
     "es5:check": "es-check es5 ./bundle/index.js",
@@ -13,7 +13,6 @@
     "test:watch": "jest --watch --passWithNoTests"
   },
   "dependencies": {
-    "@truffle/hdwallet-provider": "^1.0.30",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
     "apollo-link": "^1.2.13",

@@ -1,15 +1,15 @@
 import ApolloClient from 'apollo-client'
 import { InMemoryCache } from 'apollo-cache-inmemory'
-import HDWalletProvider from '@truffle/hdwallet-provider'
+import { ethers } from 'ethers'
 
-import { createMutations, createMutationsLink } from '../../../@graphprotocol/mutations'
+import {
+  createMutations,
+  createMutationsLink
+} from '../../../@graphprotocol/mutations'
 
 const IpfsClient = require('ipfs-http-client')
 
-const ethereumProvider = new HDWalletProvider(
-  "myth like bonus scare over problem client lizard pioneer submit female collect",
-  "http://localhost:8545"
-)
+const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545")
 
 export const getFromIpfs = async (ipfs: any, hash: string) => {
   let result: string;
@@ -42,7 +42,7 @@ export const createApolloClient = (resolvers, config, stateBuilder) => {
     subgraph: '',
     node: 'http://localhost:5001',
     config: {
-      ethereum: ethereumProvider,
+      ethereum: provider,
       ipfs: "http://localhost:5001"
     }
   })
