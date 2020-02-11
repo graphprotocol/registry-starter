@@ -28,7 +28,8 @@ module.exports = async (deployer, network, accounts) => {
         params.challengeDeposit,
         params.applicationFee,
         params.charter,
-        didAddress, {from: owner}
+        didAddress,
+        { from: owner }
     )
     const tokenRegistry = await TokenRegistry.deployed()
     const reserveBankAddr = await tokenRegistry.reserveBank()
@@ -36,5 +37,4 @@ module.exports = async (deployer, network, accounts) => {
     console.log(`Ethr DID Address: ${didAddress}`)
     console.log(`Token Registry Address: ${tokenRegistry.address}`)
     console.log(`Reserve Bank Address: ${reserveBankAddr.toString()}`)
-
 }

@@ -14,7 +14,6 @@
     "flatten": "truffle-flattener ./contracts",
     "abis-dave": "rm -rf ./abis && docker run -v  /Users/davidkajpust/coding-no-icloud-backup/thegraph/dave/curation-starter/contracts:/abis-vol ethereum/solc:0.5.8 -o /abis-vol/abis --overwrite --abi /abis-vol/contracts/TokenRegistry.sol",
     "abis": "rm -rf ./abis && docker run -v  <INSERT_LOCAL_PATH>:/abis-vol ethereum/solc:0.5.8 -o /abis-vol/abis --overwrite --abi /abis-vol/contracts/TokenRegistry.sol"
-
   },
   "dependencies": {
     "@truffle/hdwallet-provider": "1.0.28",
@@ -23,13 +22,15 @@
     "ethereumjs-util": "^6.2.0",
     "ethers": "4.0.39",
     "js-sha3": "^0.8.0",
-    "openzeppelin-test-helpers": "0.5.1"
+    "openzeppelin-test-helpers": "0.5.1",
+    "truffle": "5.1.18"
   },
   "devDependencies": {
     "eslint": "4.15.0",
     "eslint-config-prettier": "6.5.0",
     "husky": "1.2.0",
-    "prettier": "1.18.2"
+    "prettier": "1.18.2",
+    "solium": "1.2.5"
   },
   "husky": {
     "hooks": {
