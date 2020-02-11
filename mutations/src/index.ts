@@ -4,7 +4,7 @@ import {
   MutationResolvers,
   MutationState,
   StateBuilder
-} from "../mutations-package"
+} from '../@graphprotocol/mutations'
 import { ethers, providers } from 'ethers'
 import {
   AsyncSendable,
