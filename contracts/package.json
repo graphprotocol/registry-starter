@@ -1,5 +1,5 @@
 {
-  "name": "token-registry",
+  "name": "token-registry-contracts",
   "version": "0.0.1",
   "scripts": {
     "fix-js": "eslint ./ --fix",
@@ -23,7 +23,7 @@
     "ethers": "4.0.39",
     "js-sha3": "^0.8.0",
     "openzeppelin-test-helpers": "0.5.1",
-    "truffle": "5.1.18"
+    "truffle": "^5.0.4"
   },
   "devDependencies": {
     "eslint": "4.15.0",

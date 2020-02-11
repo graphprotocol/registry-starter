@@ -1,0 +1,23 @@
+{
+  "name": "root",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "./contracts",
+      "./mutations",
+      "./subgraph",
+      "./ui"
+    ]
+  },
+  "scripts": {
+    "build": "yarn build:mutations && yarn build:subgraph && yarn build:ui",
+    "start:env": "concurrently \"docker-compose up\" \"yarn:deploy\"",
+    "start:dapp": "lerna exec --scope curation-starter -- yarn start",
+    "deploy": "yarn deploy:contracts && yarn deploy:subgraph",
+    "deploy:contracts": "lerna exec --scope token-registry-contracts -- yarn deploy",
+    "deploy:subgraph": "lerna exec --scope token-registry -- yarn deploy"
+  },
+  "devDependencies": {
+    "lerna": "3.20.2"
+  }
+}
