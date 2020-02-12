@@ -10,7 +10,7 @@ module.exports = async (deployer, network) => {
     if (network === 'development') {
         tokenHolders = config.token.ganacheTokenHolders
         tokenMinter = config.token.ganacheMinter.address
-        chainID = 9854
+        chainID = 1576478390085
     } else if (network == 'ropsten') {
         tokenHolders = config.token.testnetTokenHolders
         tokenMinter = config.token.testnetMinter.address

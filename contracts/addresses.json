@@ -10,7 +10,7 @@
       "tokenRegistry": "0x0290FB167208Af455bB137780163b7B7a9a10C16",
       "ethereumDIDRegistry": "0x59d3631c86BbE35EF041872d502F218A39FBa150",
       "mockDAI": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
-      "reserveBank": ""
+      "reserveBank": "0xf68f5498DD766A8d65c4785219d61FCC5E0E920A"
   },
   "mainnet": {}
 }
