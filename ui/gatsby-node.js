@@ -1,3 +1,8 @@
+let env = process.env.CI ? 'development' : process.env.NODE_ENV
+require("dotenv").config({
+  path: `.env.${env}`,
+})
+
 exports.onCreatePage = async ({ page, actions }) => {
   const { createPage } = actions
   // set up client-side routes
