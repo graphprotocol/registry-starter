@@ -67,19 +67,17 @@ describe("Mutation Resolvers", () => {
 
       expect(metadata.symbol).toEqual('test sym')
       expect(image).toEqual('test img')
-
     })
-
   })
 
-  describe("deleteToken resolver", () => {
+  /*describe("removeToken resolver", () => {
 
     it("Should return true", async () => {
 
-      const { data: { deleteToken }} = await client.mutate({
+      const { data: { removeToken }} = await client.mutate({
         mutation: gql`
-            mutation deleteToken ($tokenId: TokenOptions) {
-              deleteToken(tokenId: $tokenId) @client
+            mutation removeToken ($tokenId: ID) {
+              removeToken(tokenId: $tokenId) @client
             }
           `,
         variables: {
@@ -90,10 +88,8 @@ describe("Mutation Resolvers", () => {
         }
       })
 
-      expect(deleteToken).toEqual(true)
-
+      expect(removeToken).toEqual(true)
     })
-
   })
 
   describe("challengeToken resolver", () => {
@@ -131,9 +127,6 @@ describe("Mutation Resolvers", () => {
 
       expect(challengeData.description).toEqual("test desc")
       expect(challengeData.token.symbol).toEqual("test sym")
-
     })
-
-  })
-
+  })*/
 })

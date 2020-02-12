@@ -9,7 +9,6 @@
     "build:bundle": "rimraf ./bundle && webpack",
     "build:package": "tsc --outDir ./dist && rimraf ./package && mkdir ./package && cp -r ./dist ./package/dist && cp package.json ./package && cp -r ./src ./package/src",
     "es5:check": "es-check es5 ./bundle/index.js",
-    "test:env": "docker-compose up",
     "test": "jest --passWithNoTests --verbose",
     "test:watch": "jest --watch --passWithNoTests"
   },
@@ -48,11 +47,14 @@
     "webpack-cli": "^3.3.10"
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.test.json"
+      }
+    },
     "transform": {
       "^.+\\.ts?$": "ts-jest"
     },
-    "modulePathIgnorePatterns": [
-      "utils"
-    ]
+    "testRegex": "(.*(.test\\.ts))$"
   }
 }
