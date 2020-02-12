@@ -1,0 +1,50 @@
+{
+  "name": "@graphprotocol/mutations",
+  "version": "0.0.0",
+  "description": "API used for building mutation modules & dApps.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "https://github.com/graphprotocol/mutations",
+  "author": "Graph Protocol, Inc.",
+  "license": "MIT/Apache",
+  "private": false,
+  "scripts": {
+    "build": "tsc",
+    "build:ci": "tsc --project tsconfig.ci.json",
+    "prepublish": "tsc",
+    "test": "jest --passWithNoTests --verbose",
+    "test:watch": "jest --watch --passWithNoTests"
+  },
+  "devDependencies": {
+    "@babel/types": "^7.5.0",
+    "@types/jest": "^25.1.1",
+    "@types/lodash": "^4.14.149",
+    "@types/node": "^12.6.1",
+    "@types/uuid": "^3.4.6",
+    "cross-fetch": "^3.0.4",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.0.0",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "lodash": "^4.17.15",
+    "uuid": "^3.3.3"
+  },
+  "peerDependencies": {
+    "apollo-link": "^1.2.12",
+    "apollo-link-http": "^1.5.15",
+    "graphql-tag": "^2.10.1"
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": false
+      }
+    },
+    "transform": {
+      "^.+\\.ts?$": "ts-jest"
+    },
+    "testRegex": "(.*(.test\\.ts))$"
+  }
+}

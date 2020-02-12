@@ -25,7 +25,9 @@
     "graphql-tag": "^2.10.3",
     "ipfs-http-client": "^42.0.0",
     "js-sha3": "^0.8.0",
-    "rxjs": "^6.5.4"
+    "rxjs": "^6.5.4",
+    "@graphprotocol/mutations": "^0.0.0",
+    "@graphprotocol/mutations-apollo-react": "^0.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.7.5",

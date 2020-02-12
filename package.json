@@ -6,7 +6,9 @@
       "./contracts",
       "./mutations",
       "./subgraph",
-      "./ui"
+      "./ui",
+      "./@graphprotocol/mutations",
+      "./@graphprotocol/mutations-apollo-react"
     ],
     "nohoist": [
       "**/graph-ts"
