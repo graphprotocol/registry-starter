@@ -52,7 +52,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
       text:
         selectedFilter === filter.name ? (
           <div>
-            <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} />
+            <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} alt="dot" />
             {filter.displayName}
           </div>
         ) : (
@@ -77,7 +77,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
     >
       <Grid
         sx={{
-          gridTemplateColumns: 'max-content max-content max-content 1fr',
+          gridTemplateColumns: 'repeat(4, max-content)',
           alignItems: 'center',
           position: 'relative',
         }}
@@ -147,7 +147,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
                     <Box>
                       {(selectedOrder === 'createdAt_DESC' ||
                         selectedOrder === 'createdAt_ASC') && (
-                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} />
+                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} alt="dot" />
                       )}
                       Date added{' '}
                       <p
@@ -169,6 +169,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
                               ? 'rotate(180deg)'
                               : 'none',
                           }}
+                          alt="arrow-down"
                         />
                       </p>
                     </Box>
@@ -189,7 +190,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
                     <Box>
                       {(selectedOrder === 'symbol_ASC' ||
                         selectedOrder === 'symbol_DESC') && (
-                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} />
+                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} alt="dot" />
                       )}
                       Name{' '}
                       <p
@@ -211,6 +212,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
                               ? 'rotate(180deg)'
                               : 'none',
                           }}
+                          alt="arrow-down"
                         />
                       </p>
                     </Box>
@@ -230,7 +232,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
             >
               <Box
                 sx={{
-                  width: 'fit-content',
+                  width: '54px',
                   backgroundColor: orderOpen ? 'secondary' : 'transparent',
                   padding: 4,
                   marginLeft: '-17px',

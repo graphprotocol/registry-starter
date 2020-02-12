@@ -4,7 +4,6 @@ import { jsx, Box } from 'theme-ui'
 import { Helmet } from 'react-helmet'
 import emotionReset from 'emotion-reset'
 import { Global, css } from '@emotion/core'
-import { isMobile } from 'react-device-detect'
 
 import Footer from '../Footer'
 import Navigation from '../Navigation'

@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React, { useContext, useEffect } from 'react'
+import { useContext } from 'react'
 import { useQuery } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import { Grid } from '@theme-ui/components'
