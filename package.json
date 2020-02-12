@@ -23,9 +23,10 @@
     "start:ui": "lerna exec --scope curation-starter -- yarn start",
     "start:env": "concurrently \"yarn:start:subgraph\" \"yarn:deploy\"",
     "start:subgraph": "lerna exec --scope token-registry -- yarn start:env",
-    "deploy": "wait-on tcp:8020 && sleep 5 && yarn deploy:contracts && yarn deploy:subgraph",
+    "deploy": "wait-on tcp:8020 && sleep 5 && yarn deploy:contracts && yarn create:subgraph && yarn deploy:subgraph",
     "deploy:contracts": "lerna exec --scope token-registry-contracts -- yarn deploy",
     "deploy:subgraph": "lerna exec --scope token-registry -- yarn deploy:local",
+    "create:subgraph": "lerna exec --scope token-registry -- yarn create:local",
     "stop:env": "lerna exec --scope token-registry -- yarn stop",
     "reset:env": "lerna exec --scope token-registry -- yarn reset:env"
   },
