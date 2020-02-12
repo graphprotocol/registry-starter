@@ -197,15 +197,15 @@ async function editToken(_, { options }: any, context: Context) {
 
   const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
 
-  const member = ethereum.getSigner(0)
-  const ownerWallet = await ethers.Wallet.createRandom().connect(ethereum)
+  const owner = ethereum.getSigner(0)
+  const member = await ethers.Wallet.createRandom().connect(ethereum)
 
   const memberAddress = await member.getAddress()
 
   const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", member)
 
   try{
-    await setAttribute(memberAddress, ownerWallet, metadataHash, ethereumDIDRegistry)
+    await setAttribute(memberAddress, owner, metadataHash, ethereumDIDRegistry)
   }catch(err) {
     console.log(err)
   }
@@ -213,16 +213,15 @@ async function editToken(_, { options }: any, context: Context) {
   return null
 }
 
-async function deleteToken(_, args: any, context: Context) {
-
+async function removeToken(_, args: any, context: Context) {
+  const { tokenId } = args 
   const { ethereum } = context.graph.config
 
-  const member = ethereum.getSigner(0)
-  const tokenRegistry = await getContract(context, "TokenRegistry", member)
-  const address = await member.getAddress()
+  const owner = ethereum.getSigner(0)
+  const tokenRegistry = await getContract(context, "TokenRegistry", owner)
 
   try{
-    await tokenRegistry.memberExit(address)
+    await tokenRegistry.memberExit(tokenId.toString())
   }catch(err){
     console.log(err)
   }
@@ -269,7 +268,7 @@ const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {
     addToken,
     editToken,
-    deleteToken,
+    removeToken,
     challengeToken,
     voteChallenge
   }
