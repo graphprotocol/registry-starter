@@ -53,6 +53,8 @@ typings/
 
 # dotenv environment variable files
 .env*
+!ui/.env.development
+!ui/.env.production-template
 
 # gatsby files
 .cache/
@@ -79,3 +81,4 @@ subgraph/build/
 subgraph/node_modules/
 subgraph/src/types/
 subgraph/.DS_STORE
+subgraph/data
