@@ -2,13 +2,11 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "target": "esnext",
+    "target": "es2015",
     "module": "commonjs",
     "declaration": true,
     "sourceMap": true,
     "esModuleInterop": true,
-    "noEmit": true,
-    "allowJs": true,
     "lib": ["es2015", "es6", "esnext.asynciterable", "dom"]
   },
   "include": [
