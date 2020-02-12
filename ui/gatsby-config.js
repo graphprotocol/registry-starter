@@ -1,3 +1,8 @@
+let env = process.env.CI ? 'development' : process.env.NODE_ENV
+require("dotenv").config({
+  path: `.env.${env}`,
+})
+
 module.exports = {
   plugins: [
     'gatsby-plugin-react-helmet',
