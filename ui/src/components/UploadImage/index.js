@@ -156,9 +156,7 @@ const styles = {
 }
 
 UploadImage.propTypes = {
-  imageName: PropTypes.string,
-  imageUrl: PropTypes.string,
-  uploadImage: PropTypes.func,
+  setImage: PropTypes.func,
 }
 
 export default UploadImage

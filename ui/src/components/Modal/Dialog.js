@@ -64,8 +64,8 @@ const Dialog = ({
 Dialog.propTypes = {
   title: PropTypes.string,
   description: PropTypes.string,
-  children: PropTypes.any,
   showDialog: PropTypes.bool,
+  showMask: PropTypes.bool,
   closeDialog: PropTypes.func,
 }
 

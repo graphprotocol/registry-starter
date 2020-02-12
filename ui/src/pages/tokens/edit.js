@@ -91,7 +91,11 @@ const EditToken = ({ location, ...props }) => {
   return (
     <Grid>
       <Styled.h1>Edit {token.symbol}</Styled.h1>
-      <Styled.p>TODO: Need Copy</Styled.p>
+      <Styled.p>
+        Edit data about a token on the Ethereum Tokens Registry. Make sure the
+        token exists and all information is accurate to mitigate the risk of the
+        token being challenged.
+      </Styled.p>
       <Box sx={{ maxWidth: '504px', width: '100%', my: 7 }}>
         <TokenForm
           token={token}

@@ -1,4 +1,5 @@
 /** @jsx jsx */
+import PropTypes from 'prop-types'
 import { useState, useEffect, Fragment } from 'react'
 import { jsx, Styled, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
@@ -11,24 +12,24 @@ import SignupModal from '../../components/Modal'
 import Menu from '../../components/Select/Menu'
 import Caret from '../../images/caret.svg'
 import Arrows from '../../images/arrows.svg'
+import { FILTERS, ORDER_BY, ORDER_DIRECTION } from '../../utils/constants'
 
-export const FILTERS = [
-  {
-    name: 'All',
-    displayName: 'All Tokens',
-  },
-  {
-    name: 'Challenged',
-    displayName: 'Challenged Tokens',
-  },
-]
-
-export default ({ children, setFilter, setOrder, location, ...props }) => {
+const Navigation = ({
+  children,
+  setFilter,
+  setOrderBy,
+  setOrderDirection,
+  location,
+  ...props
+}) => {
   const { account } = useWeb3React()
   const [showModal, setShowModal] = useState(false)
   const [userAccount, setUserAccount] = useState(account)
-  const [selectedFilter, setSelectedFilter] = useState(FILTERS[0].name)
-  const [selectedOrder, setSelectedOrder] = useState('createdAt_DESC')
+  const [selectedFilter, setSelectedFilter] = useState(FILTERS['All Tokens'])
+  const [selectedOrderBy, setSelectedOrderBy] = useState(ORDER_BY['Date added'])
+  const [selectedOrderDirection, setSelectedOrderDirection] = useState(
+    ORDER_DIRECTION.DESC
+  )
   const [filterOpen, setFilterOpen] = useState(false)
   const [orderOpen, setOrderOpen] = useState(false)
   const openModal = () => setShowModal(true)
@@ -47,21 +48,75 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
     metamaskAccountChange(accounts => setUserAccount(accounts[0]))
   }, [account])
 
-  const items = FILTERS.map(filter => {
+  const filterItems = Object.keys(FILTERS).map(filter => {
     return {
       text:
-        selectedFilter === filter.name ? (
+        selectedFilter === FILTERS[filter] ? (
           <div>
             <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} alt="dot" />
-            {filter.displayName}
+            {filter}
           </div>
         ) : (
-          filter.displayName
+          filter
         ),
       handleSelect: () => {
-        setSelectedFilter(filter.name)
-        setFilter(filter.name)
+        setSelectedFilter(FILTERS[filter])
+        setFilter(FILTERS[filter])
       },
+    }
+  })
+
+  const orderItems = Object.keys(ORDER_BY).map(order => {
+    return {
+      text: (
+        <Box>
+          {selectedOrderBy === ORDER_BY[order] && (
+            <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} alt="dot" />
+          )}
+          {order}
+          {selectedOrderBy === ORDER_BY[order] && (
+            <p
+              sx={{
+                variant: 'text.small',
+                display: 'inline',
+                color: 'blackFaded',
+                fontWeight: 'body',
+                ml: 2,
+              }}
+            >
+              {ORDER_BY[order] === 'symbol' ? 'a-z' : 'Recent'}
+              <img
+                src="/arrow-down.png"
+                sx={{
+                  width: '8px',
+                  height: 'auto',
+                  ml: 1,
+                  transform:
+                    selectedOrderDirection === ORDER_DIRECTION.ASC
+                      ? 'rotate(180deg)'
+                      : 'none',
+                }}
+                alt="arrow-down"
+              />
+            </p>
+          )}
+        </Box>
+      ),
+      handleSelect: () => {
+        if (selectedOrderBy === ORDER_BY[order]) {
+          const orderDirection =
+            selectedOrderDirection === ORDER_DIRECTION.DESC
+              ? ORDER_DIRECTION.ASC
+              : ORDER_DIRECTION.DESC
+          setSelectedOrderDirection(orderDirection)
+          setOrderDirection(orderDirection)
+        } else {
+          setSelectedOrderDirection(ORDER_DIRECTION.DESC)
+          setOrderDirection(ORDER_DIRECTION.DESC)
+          setSelectedOrderBy(ORDER_BY[order])
+        }
+      },
+      delay: 500,
     }
   })
 
@@ -96,7 +151,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
         {props.path === '/' && (
           <Fragment>
             <Menu
-              items={items}
+              items={filterItems}
               menuStyles={{ top: '48px', left: '8px' }}
               setOpen={setFilterOpen}
             >
@@ -141,94 +196,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
             <Menu
               menuStyles={{ top: '50px', left: '-17px' }}
               setOpen={setOrderOpen}
-              items={[
-                {
-                  text: (
-                    <Box>
-                      {(selectedOrder === 'createdAt_DESC' ||
-                        selectedOrder === 'createdAt_ASC') && (
-                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} alt="dot" />
-                      )}
-                      Date added{' '}
-                      <p
-                        sx={{
-                          variant: 'text.small',
-                          display: 'inline',
-                          color: 'blackFaded',
-                          fontWeight: 'body',
-                        }}
-                      >
-                        Recent
-                        <img
-                          src="/arrow-down.png"
-                          sx={{
-                            width: '8px',
-                            height: 'auto',
-                            ml: 1,
-                            transform: selectedOrder.includes('ASC')
-                              ? 'rotate(180deg)'
-                              : 'none',
-                          }}
-                          alt="arrow-down"
-                        />
-                      </p>
-                    </Box>
-                  ),
-                  handleSelect: () => {
-                    if (selectedOrder === 'createdAt_DESC') {
-                      setSelectedOrder('createdAt_ASC')
-                      setOrder('createdAt_ASC')
-                    } else {
-                      setSelectedOrder('createdAt_DESC')
-                      setOrder('createdAt_DESC')
-                    }
-                  },
-                  delay: 500,
-                },
-                {
-                  text: (
-                    <Box>
-                      {(selectedOrder === 'symbol_ASC' ||
-                        selectedOrder === 'symbol_DESC') && (
-                        <img src="/dot.svg" sx={{ ml: -4, pr: 2 }} alt="dot" />
-                      )}
-                      Name{' '}
-                      <p
-                        sx={{
-                          variant: 'text.small',
-                          display: 'inline',
-                          color: 'blackFaded',
-                          fontWeight: 'body',
-                        }}
-                      >
-                        a-z
-                        <img
-                          src="/arrow-down.png"
-                          sx={{
-                            width: '8px',
-                            height: 'auto',
-                            ml: 1,
-                            transform: selectedOrder.includes('ASC')
-                              ? 'rotate(180deg)'
-                              : 'none',
-                          }}
-                          alt="arrow-down"
-                        />
-                      </p>
-                    </Box>
-                  ),
-                  handleSelect: () => {
-                    if (selectedOrder === 'symbol_DESC') {
-                      setSelectedOrder('symbol_ASC')
-                      setOrder('symbol_ASC')
-                    } else {
-                      setSelectedOrder('symbol_DESC')
-                      setOrder('symbol_DESC')
-                    }
-                  },
-                  delay: 500,
-                },
-              ]}
+              items={orderItems}
             >
               <Box
                 sx={{
@@ -295,10 +263,7 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
         </Link>
         {userAccount ? (
           <Fragment>
-            <Link
-              to={`/profile/ck670yk6d8u490935r8v72pa6`} //should be userAccount
-              sx={{ textAlign: 'right' }}
-            >
+            <Link to={`/profile/${userAccount}`} sx={{ textAlign: 'right' }}>
               <img
                 src="/user.png"
                 alt="User"
@@ -389,3 +354,12 @@ export default ({ children, setFilter, setOrder, location, ...props }) => {
     </Grid>
   )
 }
+
+Navigation.propTypes = {
+  setFilter: PropTypes.func,
+  setOrderBy: PropTypes.func,
+  setOrderDirection: PropTypes.func,
+  location: PropTypes.any,
+}
+
+export default Navigation

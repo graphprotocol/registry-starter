@@ -3,28 +3,13 @@ import PropTypes from 'prop-types'
 import { jsx } from 'theme-ui'
 import { navigate } from 'gatsby'
 
-const Button = ({
-  to,
-  text,
-  variant,
-  onClick,
-  isDisabled,
-  loading,
-  icon,
-  ...props
-}) => {
+const Button = ({ to, text, variant, onClick, isDisabled, icon, ...props }) => {
   return (
     <button
       sx={{
         variant: `buttons.${variant}`,
         opacity: isDisabled ? 0.32 : 1,
-        pointerEvents: isDisabled || loading ? 'none' : 'all',
-        bg:
-          loading &&
-          (variant === 'primary'
-            ? 'rgba(76, 102, 255, 0.32) !important'
-            : 'rgba(255, 255, 255, 0.32) !important'),
-        color: loading && 'secondary',
+        pointerEvents: isDisabled ? 'none' : 'all',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -34,13 +19,6 @@ const Button = ({
     >
       {icon && <img sx={iconStyles} src={`/${icon}`} alt={'icon'} />}
       {text}
-      {loading && (
-        <img
-          src="/dots.png"
-          sx={{ pt: 1, pl: 2, width: '24px' }}
-          alt="dots icon"
-        />
-      )}
     </button>
   )
 }

@@ -5,12 +5,12 @@ import Field from '../Field'
 import Button from '../Button'
 import UploadImage from '../UploadImage'
 
-const TokenForm = ({ token, setValue, isDisabled, handleSubmit }) => (
+const TokenForm = ({ token, setValue, isDisabled, isNew, handleSubmit }) => (
   <form onSubmit={handleSubmit}>
     <Field
       type="input"
-      title="Token symbol"
-      placeholder="Text"
+      title="Token Symbol"
+      placeholder="Example: ETH"
       charsCount={10}
       value={token.symbol}
       setValue={value => setValue('symbol', value)}
@@ -25,28 +25,28 @@ const TokenForm = ({ token, setValue, isDisabled, handleSubmit }) => (
     />
     <Field
       type="input"
-      title="Contract address"
-      placeholder="Enter Address"
+      title="Contract Address"
+      placeholder="Enter address"
       charsCount={42}
       value={token.address}
       setValue={value => setValue('address', value)}
     />
     <Box sx={{ my: 6 }}>
       <p sx={{ variant: 'text.small', color: 'secondary', mb: 2 }}>
-        Token logo (optional)
+        Token Logo (optional)
       </p>
       <UploadImage setImage={setValue} />
     </Box>
     <Field
       type="input"
-      title="Decimals"
+      title="Number of Decimals"
       placeholder="Enter amount"
       charsCount={10}
       value={token.decimals}
       setValue={value => setValue('decimals', value)}
     />
     <Button
-      text="Save changes"
+      text={isNew ? 'Add Token' : 'Update Token'}
       variant="primary"
       isDisabled={isDisabled}
       onClick={handleSubmit}
@@ -59,6 +59,7 @@ TokenForm.propTypes = {
   setValue: PropTypes.func,
   handleSubmit: PropTypes.func,
   isDisabled: PropTypes.bool,
+  isNew: PropTypes.bool,
 }
 
 export default TokenForm

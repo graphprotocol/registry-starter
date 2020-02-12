@@ -48,14 +48,19 @@ const NewToken = ({ ...props }) => {
 
   return (
     <Grid>
-      <Styled.h1>Add a Token</Styled.h1>
-      <Styled.p>TODO: Need Copy</Styled.p>
       <Box sx={{ maxWidth: '504px', width: '100%', my: 7 }}>
+        <Styled.h1>Add a Token</Styled.h1>
+        <Styled.p sx={{ mt: 2, mb: 6 }}>
+          Add a token to the Ethereum Tokens Registry. Make sure the token is
+          live on mainnet and all information about the token is accurate, to
+          mitigate risk of the token being challenged.
+        </Styled.p>
         <TokenForm
           token={token}
           setValue={setValue}
           handleSubmit={handleSubmit}
           isDisabled={isDisabled}
+          isNew={true}
         />
       </Box>
     </Grid>
