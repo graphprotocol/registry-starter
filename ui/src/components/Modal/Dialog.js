@@ -1,8 +1,6 @@
 /** @jsx jsx */
 import PropTypes from 'prop-types'
-import { useState, Fragment, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
-import { Grid } from '@theme-ui/components'
 import { Dialog as ReachDialog } from '@reach/dialog'
 import '@reach/dialog/styles.css'
 

@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
@@ -12,6 +12,7 @@ import Dialog from '../components/Modal/Dialog'
 import Select from '../components/Select'
 import Field from '../components/Field'
 import Menu from '../components/Select/Menu'
+import TokenList from '../components/Select/TokenList'
 import { navigate } from 'gatsby'
 
 const TOKEN_QUERY = gql`
@@ -43,16 +44,17 @@ const TOKEN_QUERY = gql`
 `
 
 const Token = ({ location }) => {
-  const [isKeepOpen, setIsKeepOpen] = useState(false)
-  const [isRemoveOpen, setIsRemoveOpen] = useState(false)
   const [isChallengeOpen, setIsChallengeOpen] = useState(false)
   const [showChallengeDialog, setShowChallengeDialog] = useState(false)
-  const closeChallengeDialog = () => setShowChallengeDialog(false)
+  const [showKeepDialog, setShowKeepDialog] = useState(false)
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false)
   const [isChallengeDisabled, setIsChallengeDisabled] = useState(false)
   const [challenge, setChallenge] = useState({
     description: '',
     token: null,
   })
+  const [tokensVoted, setTokensVoted] = useState([])
+  const [choice, setChoice] = useState('')
 
   const setValue = (field, value) => {
     setChallenge(state => ({
@@ -70,7 +72,17 @@ const Token = ({ location }) => {
   const handleChallenge = () => {
     // TODO: call challenge function
     console.log('Handle challenge clicked')
-    closeChallengeDialog()
+    setShowChallengeDialog(false)
+  }
+
+  const handleVote = choice => {
+    console.log('Handle choice clicked: ', choice)
+    if (choice === 'yes') {
+      setShowKeepDialog(false)
+    } else {
+      setShowRemoveDialog(false)
+    }
+    setChoice(choice)
   }
 
   const tokenId = location ? location.pathname.split('/').slice(-1)[0] : ''
@@ -108,8 +120,7 @@ const Token = ({ location }) => {
         />
         <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
         <Menu
-          top="60px"
-          right="0"
+          menuStyles={{ top: '60px', right: '0' }}
           items={[
             {
               text: 'Challenge',
@@ -197,7 +208,7 @@ const Token = ({ location }) => {
               title="Challenge"
               description="Challenge to remove token. Price: 10 DAI, etc etc"
               showDialog={showChallengeDialog}
-              closeDialog={closeChallengeDialog}
+              closeDialog={() => setShowChallengeDialog(false)}
               showMask={isChallengeOpen}
             >
               <Select
@@ -207,8 +218,8 @@ const Token = ({ location }) => {
                 }
                 isPlaceholder={!challenge.token}
                 tokens={token.owner.tokens}
-                setValue={setValue}
-                setIsOpen={setIsChallengeOpen}
+                setValue={value => setValue('token', value)}
+                setOpen={setIsChallengeOpen}
                 sx={{ mb: 6 }}
               />
               <Field
@@ -227,6 +238,56 @@ const Token = ({ location }) => {
               />
             </Dialog>
           )}
+          {showKeepDialog && (
+            <Dialog
+              title="Keep"
+              description={`You are voting to keep ${token.symbol}`}
+              showDialog={showKeepDialog}
+              closeDialog={() => setShowKeepDialog(false)}
+            >
+              <TokenList
+                title="Vote on behalf of"
+                tokens={token.owner.tokens}
+                setIsOpen={value => setShowKeepDialog(value)}
+                isMultiselect={true}
+                selected={tokensVoted}
+                setValue={value => setTokensVoted(value)}
+              />
+              <Divider sx={{ mb: 3 }} />
+              <Button
+                variant="primary"
+                text="Submit"
+                isDisabled={tokensVoted.length === 0}
+                onClick={() => handleVote('yes')}
+                sx={{ ml: 'auto' }}
+              />
+            </Dialog>
+          )}
+          {showRemoveDialog && (
+            <Dialog
+              title="Remove"
+              description={`You are voting to remove ${token.symbol}`}
+              showDialog={showRemoveDialog}
+              closeDialog={() => setShowRemoveDialog(false)}
+            >
+              <TokenList
+                title="Vote on behalf of"
+                tokens={token.owner.tokens}
+                setIsOpen={value => setShowRemoveDialog(value)}
+                isMultiselect={true}
+                selected={tokensVoted}
+                setValue={value => setTokensVoted(value)}
+              />
+              <Divider sx={{ mb: 3 }} />
+              <Button
+                variant="primary"
+                text="Submit"
+                isDisabled={tokensVoted.length === 0}
+                onClick={() => handleVote('no')}
+                sx={{ ml: 'auto' }}
+              />
+            </Dialog>
+          )}
         </Box>
         <Box
           sx={{
@@ -236,93 +297,137 @@ const Token = ({ location }) => {
           }}
         >
           {token.isChallenged && (
-            <Box>
-              <Styled.h5 sx={{ mb: 4 }}>Active Challenge</Styled.h5>
-              <Grid columns={['1fr 1fr max-content', 3]} gap={3} my={5}>
-                <Box>
-                  <p sx={{ variant: 'text.smaller' }}>Ends in</p>
-                  <Styled.p>3d 6h</Styled.p>
-                </Box>
-                <Box>
-                  <p sx={{ variant: 'text.smaller' }}>Voters</p>
-                  <Styled.p>{token.totalVotes}</Styled.p>
-                </Box>
-                <Box>
-                  <p sx={{ variant: 'text.smaller' }}>Challenged by</p>
-                  <Link to={`/profile/${token.owner.id}`}>
-                    <Styled.p
-                      sx={{ color: 'secondary', fontWeight: 'heading' }}
-                    >
-                      {`${token.owner.id.slice(0, 6)}...${token.owner.id.slice(
-                        -6
-                      )}`}
-                    </Styled.p>
-                  </Link>
-                </Box>
-              </Grid>
-              <Box my={5}>
-                <p sx={{ variant: 'text.smaller' }}>Description</p>
-                <Styled.p>{description}</Styled.p>
-              </Box>
-              <Box my={5}>
-                <p sx={{ variant: 'text.smaller' }}>Vote</p>
-                <Grid
-                  columns={2}
-                  sx={{
-                    mt: 1,
-                    mb: 6,
-                    gridTemplateColumns: 'max-content max-content',
-                  }}
-                >
-                  {/* <MultiSelect
-                    setValue={projects => voteOnProject(projects, 'keep')}
-                    title="Vote on behalf of"
-                    subtitle="You can select multiple projects"
-                    items={userData ? userData.user.projects : []}
-                    variant="round"
-                    setOpen={value => {
-                      setIsKeepOpen(value)
-                    }}
-                    styles={{
-                      pointerEvents: isRemoveOpen ? 'none' : 'all',
-                      cursor: isRemoveOpen ? 'auto' : 'pointer',
-                    }}
-                  > */}
-                  <Button
-                    variant="secondary"
-                    text="Keep"
-                    sx={{
-                      backgroundColor: isKeepOpen ? 'secondary' : 'white',
-                      color: isKeepOpen ? 'white' : 'secondary',
-                      opacity: isRemoveOpen ? 0.48 : 1,
-                    }}
-                  />
-                  {/* <MultiSelect
-                  setValue={projects => voteOnProject(projects, 'remove')}
-                  title="Vote on behalf of"
-                  subtitle="You can select multiple projects"
-                  items={userData ? userData.user.projects : []}
-                  variant="round"
-                  setOpen={value => {
-                    setIsRemoveOpen(value)
-                  }}
-                  styles={{
-                    pointerEvents: isKeepOpen && 'none',
-                    cursor: isKeepOpen && 'auto',
-                  }}
-                > */}
-                  <Button
-                    variant="secondary"
-                    text="Remove"
-                    sx={{
-                      backgroundColor: isRemoveOpen ? 'secondary' : 'white',
-                      color: isRemoveOpen ? 'white' : 'secondary',
-                      opacity: isKeepOpen ? 0.48 : 1,
-                    }}
-                  />
+            <Fragment>
+              <Box>
+                <Styled.h5 sx={{ mb: 4 }}>Active Challenge</Styled.h5>
+                <Grid columns={['1fr 1fr max-content', 3]} gap={3} my={5}>
+                  <Box>
+                    <p sx={{ variant: 'text.smaller' }}>Ends in</p>
+                    <Styled.p>3d 6h</Styled.p>
+                  </Box>
+                  <Box>
+                    <p sx={{ variant: 'text.smaller' }}>Voters</p>
+                    <Styled.p>{token.totalVotes}</Styled.p>
+                  </Box>
+                  <Box>
+                    <p sx={{ variant: 'text.smaller' }}>Challenged by</p>
+                    <Link to={`/profile/${token.owner.id}`}>
+                      <Styled.p
+                        sx={{ color: 'secondary', fontWeight: 'heading' }}
+                      >
+                        {`${token.owner.id.slice(
+                          0,
+                          6
+                        )}...${token.owner.id.slice(-6)}`}
+                      </Styled.p>
+                    </Link>
+                  </Box>
                 </Grid>
+                <Box my={5}>
+                  <p sx={{ variant: 'text.smaller' }}>Description</p>
+                  <Styled.p>{description}</Styled.p>
+                </Box>
+                {(choice.length === 0 || tokensVoted.length === 0) && (
+                  <Box my={5}>
+                    <p sx={{ variant: 'text.smaller' }}>Vote</p>
+                    <Grid
+                      columns={2}
+                      sx={{
+                        mt: 1,
+                        mb: 6,
+                        gridTemplateColumns: 'max-content max-content',
+                      }}
+                    >
+                      <Button
+                        variant="secondary"
+                        text="Keep"
+                        onClick={() => setShowKeepDialog(true)}
+                      />
+                      <Button
+                        variant="secondary"
+                        text="Remove"
+                        onClick={() => setShowRemoveDialog(true)}
+                      />
+                    </Grid>
+                  </Box>
+                )}
               </Box>
-            </Box>
+              {choice.length > 0 && tokensVoted.length > 0 && (
+                <Box>
+                  <p sx={{ variant: 'text.smaller' }}>Your votes</p>
+                  <Grid
+                    sx={{
+                      gridTemplateColumns: '30px 1fr max-content',
+                      alignItems: 'center',
+                      my: 4,
+                    }}
+                  >
+                    <img
+                      src="/user.png"
+                      alt="Token"
+                      sx={{
+                        height: '24px',
+                        width: '24px',
+                        objectFit: 'contain',
+                      }}
+                    />
+                    <Styled.p
+                      sx={{
+                        textTransform: 'capslock',
+                        fontWeight: 'heading',
+                      }}
+                    >
+                      {choice === 'yes' ? 'Keep' : 'Remove'}
+                    </Styled.p>
+                    <Link
+                      onClick={() => {
+                        if (choice === 'yes') {
+                          setShowKeepDialog(true)
+                        } else {
+                          setShowRemoveDialog(true)
+                        }
+                      }}
+                    >
+                      Add vote
+                    </Link>
+                  </Grid>
+                  <Divider />
+                  {tokensVoted.map(tokenVoted => (
+                    <Grid
+                      sx={{
+                        gridTemplateColumns: '30px 1fr max-content',
+                        alignItems: 'center',
+                        my: 4,
+                      }}
+                    >
+                      <img
+                        src={tokenVoted.image}
+                        alt="Token"
+                        sx={{
+                          height: '24px',
+                          width: '24px',
+                          objectFit: 'contain',
+                        }}
+                      />
+                      <Styled.p
+                        sx={{
+                          textTransform: 'capslock',
+                        }}
+                      >
+                        {tokenVoted.symbol}
+                      </Styled.p>
+                      <Styled.p
+                        sx={{
+                          variant: 'text.smaller',
+                        }}
+                      >
+                        2020-02-07
+                      </Styled.p>
+                    </Grid>
+                  ))}
+                </Box>
+              )}
+            </Fragment>
           )}
         </Box>
       </Grid>

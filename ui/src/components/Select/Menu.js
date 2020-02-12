@@ -4,14 +4,21 @@ import PropTypes from 'prop-types'
 import { jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 
-import Link from '../Link'
-
-const Menu = ({ children, items, top, right, ...props }) => {
+const Menu = ({
+  children,
+  items,
+  top,
+  right,
+  setOpen,
+  menuStyles,
+  ...props
+}) => {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
     const handleClick = () => {
       setIsOpen(false)
+      setOpen && setOpen(false)
     }
     window.addEventListener('click', handleClick)
 
@@ -26,12 +33,13 @@ const Menu = ({ children, items, top, right, ...props }) => {
         onClick={e => {
           e.stopPropagation()
           setIsOpen(!isOpen)
+          setOpen && setOpen(!isOpen)
         }}
       >
         {children}
       </Box>
       {isOpen && (
-        <Box sx={{ ...listStyles, top: top, right: right }}>
+        <Box sx={{ ...listStyles, ...menuStyles }}>
           {items &&
             items.map((item, index) => (
               <Box
@@ -39,7 +47,15 @@ const Menu = ({ children, items, top, right, ...props }) => {
                 onClick={e => {
                   e.stopPropagation()
                   item.handleSelect && item.handleSelect(e)
-                  setIsOpen(false)
+                  if (item.delay) {
+                    setTimeout(() => {
+                      setIsOpen(false)
+                      setOpen && setOpen(false)
+                    }, item.delay)
+                  } else {
+                    setIsOpen(false)
+                    setOpen && setOpen(false)
+                  }
                 }}
                 key={index}
               >
@@ -50,7 +66,7 @@ const Menu = ({ children, items, top, right, ...props }) => {
                     sx={iconStyles}
                   />
                 )}
-                <Link onClick={() => console.log('clicked')}>{item.text}</Link>
+                {item.text}
               </Box>
             ))}
         </Box>
@@ -73,9 +89,9 @@ const listStyles = {
 }
 
 const linkStyles = {
-  textDecoration: 'none',
   display: 'block',
-  color: '#4C66FF',
+  fontFamily: 'body',
+  color: 'secondary',
   fontSize: '1rem',
   fontWeight: 'bold',
   letterSpacing: '0.31px',
@@ -103,6 +119,7 @@ Menu.propTypes = {
       text: PropTypes.any,
       handleSelect: PropTypes.func,
       icon: PropTypes.string,
+      delay: PropTypes.number,
     })
   ),
 }

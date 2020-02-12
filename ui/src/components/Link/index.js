@@ -24,6 +24,9 @@ const Link = ({ to, children, onClick, ...props }) => {
               marginLeft: 3,
             },
           },
+          '&:focus': {
+            outline: 'none',
+          },
         }}
         {...props}
         activeStyle={{}}

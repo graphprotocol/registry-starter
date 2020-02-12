@@ -1,5 +1,4 @@
 /** @jsx jsx */
-import React from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 

@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import { useRef, forwardRef } from 'react'
+import { useRef } from 'react'
 import PropTypes from 'prop-types'
 import { jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
@@ -32,7 +32,9 @@ const Field = ({
         borderColor: 'whiteFaded',
       }}
     >
-      <p sx={{ variant: 'text.small', color: 'secondary' }}>{title}</p>
+      {title && (
+        <p sx={{ variant: 'text.small', color: 'secondary' }}>{title}</p>
+      )}
       <Grid
         sx={{
           gridTemplateColumns: ['1fr', '1fr max-content', '1fr max-content'],

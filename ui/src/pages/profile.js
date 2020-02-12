@@ -11,7 +11,6 @@ import { metamaskAccountChange } from '../services/ethers'
 
 import Divider from '../components/Divider'
 import Section from '../components/Section'
-import Card from '../components/Card'
 import Button from '../components/Button'
 
 const PROFILE_QUERY = gql`
