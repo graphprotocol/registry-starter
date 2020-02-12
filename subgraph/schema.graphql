@@ -35,8 +35,11 @@ type Challenge @entity {
     token: Token
     owner: Bytes
     votes: [Vote!] @derivedFrom(field: "challenge")
-    resolved: Boolean! # This is when the challenge is resolved, which is different from end time
-
+    # This is when the challenge is resolved, which is different from end time. When we are past
+    # the end time, we can implicitly calculate votesFor and votesAgainst, and determine if it 
+    # passed or failed. Resolved means it is called in the smart contract, and the challenge
+    # is deleted from storage
+    resolved: Boolean!
     createdAt: Int # DateTime! @createdAt
 }
 

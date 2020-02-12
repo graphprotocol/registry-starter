@@ -77,7 +77,10 @@ contract('tokenRegistry', () => {
                 )
 
                 const challengeID = tx.logs[0].args.challengeID.toString()
-                assert(await tokenRegistry.memberChallengeExists(member4Address), 'Challenge was not created')
+                assert(
+                    await tokenRegistry.memberChallengeExists(member4Address),
+                    'Challenge was not created'
+                )
 
                 await tokenRegistry.submitVote(challengeID, voteChoice.Yes, member2Address, {
                     from: owner2Address
@@ -95,9 +98,12 @@ contract('tokenRegistry', () => {
                 )
 
                 // Increase time so challenge can be resolved
-                await utils.increaseTime(utils.votePeriod +1)
-                assert(await tokenRegistry.challengeCanBeResolved(challengeID), 'Challenge could not be resolved')
-                await tokenRegistry.resolveChallenge(challengeID, {from: owner1Address})
+                await utils.increaseTime(utils.votePeriod + 1)
+                assert(
+                    await tokenRegistry.challengeCanBeResolved(challengeID),
+                    'Challenge could not be resolved'
+                )
+                await tokenRegistry.resolveChallenge(challengeID, { from: owner1Address })
 
                 // Check member has been removed
                 assert(!(await tokenRegistry.isMember(member4Address)), 'Member was not removed')

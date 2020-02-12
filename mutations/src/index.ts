@@ -111,7 +111,7 @@ const addressMap = {
   TokenRegistry: "tokenRegistry",
 }
 
-const addressesByNetwork = require('../../contracts/addresses.json')
+const addresses = require('../../contracts/addresses.json')
 
 async function getContract(context: Context, contract: string, signer: ethers.Signer) {
   const { ethereum } = context.graph.config
@@ -122,23 +122,16 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
     throw new Error(`Missing the ABI for '${contract}'`)
   }
 
-  const network = "dev" //ethereum.network.name
-  const addresses = addressesByNetwork[network]
+  let network = ethereum.network.name
 
-  if (!addresses) {
+  if (network === "dev") {
+    network = "ganache"
+  }
+
+  const address = addresses[network]
+
+  if (!address) {
     throw new Error(`Missing addresses for network '${network}'`)
-  }
-
-  const addressName = addressMap[contract]
-
-  if(!addressName) {
-    throw new Error(`Missing address name mapping for '${contract}'`)
-  }
-
-  const address = addresses[addressName]
-
-  if(!address) {
-    throw new Error(`Missing address for '${addressName}'`)
   }
 
   const instance = new ethers.Contract(
@@ -158,7 +151,7 @@ async function addToken(_, { options }: any, context: Context) {
   const { symbol, description, image, decimals } = options
 
   const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
-  
+
   await state.dispatch("UPLOAD_IMAGE", { value: true })
 
   const metadata = JSON.stringify(
