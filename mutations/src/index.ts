@@ -157,18 +157,17 @@ async function addToken(_, { options }: any, context: Context) {
 
   await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
-  const member = ethereum.getSigner(0)
-  const ownerWallet = await ethers.Wallet.createRandom().connect(ethereum)
+  const owner = ethereum.getSigner(0)
+  const member = await ethers.Wallet.createRandom().connect(ethereum)
 
-  const tokenRegistryContract = await getContract(context, "TokenRegistry", ownerWallet)
-  const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", ownerWallet)
-
-  const daiContract = await getContract(context, "Dai", ownerWallet)
+  const tokenRegistryContract = await getContract(context, "TokenRegistry", owner)
+  const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", owner)
+  const daiContract = await getContract(context, "Dai", owner)
 
   try {
     await applySignedWithAttribute(
       member,
-      ownerWallet,
+      owner,
       metadataHash,
       tokenRegistryContract,
       ethereumDIDContract,
