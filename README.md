@@ -13,6 +13,7 @@ Prerequisites:
 * `nvm`  
 * `yarn`  
 * `docker-compose`  
+* **Docker Daemon Running!**
 
 Run these commands from the root directory:  
 * Install Dependencies  
