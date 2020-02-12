@@ -114,9 +114,9 @@ export function handleSubmitVote(event: SubmitVote): void {
   vote.save()
 
   let challenge = Challenge.load(event.params.challengeID.toString())
-  if (voteChoice == 'Yes') {
+  if (voteChoice) {
     challenge.votesFor = challenge.votesFor + vote.weight
-  } else if (voteChoice == 'No') {
+  } else {
     challenge.votesAgainst = challenge.votesAgainst + vote.weight
   }
 
@@ -158,12 +158,12 @@ export function handleChallengeSucceeded(event: ChallengeSucceeded): void {
   store.remove('Token', event.params.member.toHexString())
 }
 
-function getVoteChoice(voteChoice: number): string {
-  let value = 'Null'
+function getVoteChoice(voteChoice: number): boolean {
+  let value = false
   if (voteChoice == 1) {
-    value = 'Yes'
+    value = true
   } else if (voteChoice == 2) {
-    value = 'No'
+    value = false
   }
   return value
 }
