@@ -23,6 +23,8 @@ Run these commands from the root directory:
   * `yarn build`  
 * Start  
   * `yarn start`  
+  * Wait for everything to start & deploy...
+  * Visit `http://localhost:8080`
 
 If you'd like to completely reset your local environment, run `yarn reset:env`.  
 
