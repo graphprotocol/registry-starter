@@ -229,11 +229,8 @@ export const setAttribute = async (memberAddress, ownerWallet, ethDIDContract) =
       memberAddress,
       '0x' + stringToBytes32(offChainDataName),
       mockIPFSData,
-      '0x' + maxValidity,
-      { from: ownerAddress }
+      '0x' + maxValidity
   )
-  const event = tx.logs[0]
-  console.log(event)
 
 }
 
