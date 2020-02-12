@@ -17,7 +17,9 @@
   "scripts": {
     "build": "yarn build:mutations && yarn build:subgraph",
     "build:ci": "yarn build:mutations && yarn build:subgraph && yarn build:ui:ci",
-    "build:mutations": "lerna exec --scope token-registry-mutations -- yarn build",
+    "build:mutations": "yarn build:mutations:package && yarn build:mutations:react:package && lerna exec --scope token-registry-mutations -- yarn build",
+    "build:mutations:package": "lerna exec --scope @graphprotocol/mutations -- yarn build",
+    "build:mutations:react:package": "lerna exec --scope @graphprotocol/mutations-apollo-react -- yarn build",
     "build:subgraph": "lerna exec --scope token-registry -- yarn build",
     "build:ui": "lerna exec --scope curation-starter -- yarn build",
     "build:ui:ci": "lerna exec --scope curation-starter -- yarn build:ci",
