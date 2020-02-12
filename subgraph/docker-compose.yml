@@ -41,6 +41,6 @@ services:
     image: 'trufflesuite/ganache-cli:v6.8.2'
     ports:
       - '8545:8545'
-    command: --db=/db -l 9900000 --networkId 1576478390085 --deterministic --hostname=0.0.0.0
+    command: --db=/db -l 9900000 --networkId 9545 --deterministic --hostname=0.0.0.0
     volumes:
       - ./data/chain-db:/db
