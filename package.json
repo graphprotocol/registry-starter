@@ -19,13 +19,19 @@
     "build:subgraph": "lerna exec --scope token-registry -- yarn build",
     "build:ui": "lerna exec --scope curation-starter -- yarn build",
     "build:ui:ci": "lerna exec --scope curation-starter -- yarn build:ci",
-    "start:env": "concurrently \"docker-compose up\" \"yarn:deploy\"",
+    "start": "concurrently \"yarn:start:ui\" \"yarn:start:env\"",
     "start:ui": "lerna exec --scope curation-starter -- yarn start",
-    "deploy": "yarn deploy:contracts && yarn deploy:subgraph",
+    "start:env": "concurrently \"yarn:start:subgraph\" \"yarn:deploy\"",
+    "start:subgraph": "lerna exec --scope token-registry -- yarn start:env",
+    "deploy": "wait-on tcp:8020 && sleep 5 && yarn deploy:contracts && yarn deploy:subgraph",
     "deploy:contracts": "lerna exec --scope token-registry-contracts -- yarn deploy",
-    "deploy:subgraph": "lerna exec --scope token-registry -- yarn deploy"
+    "deploy:subgraph": "lerna exec --scope token-registry -- yarn deploy:local",
+    "stop:env": "lerna exec --scope token-registry -- yarn stop",
+    "reset:env": "lerna exec --scope token-registry -- yarn reset:env"
   },
   "devDependencies": {
-    "lerna": "3.20.2"
+    "concurrently": "5.1.0",
+    "lerna": "3.20.2",
+    "wait-on": "4.0.0"
   }
 }
