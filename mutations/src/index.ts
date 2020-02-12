@@ -105,7 +105,7 @@ const abis = {
 }
 
 const addressMap = {
-  Dai: "mockDAIs",
+  Dai: "mockDAI",
   EthereumDIDRegistry: "ethereumDIDRegistry",
   ReserveBank: "reserveBank",
   TokenRegistry: "tokenRegistry",
@@ -147,7 +147,7 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
   }
 
   const instance = new ethers.Contract(
-    address, abi, signer
+    address, abi, ethereum.getSigner()
   )
   instance.connect(ethereum)
 
@@ -179,25 +179,25 @@ async function addToken(_, { options }: any, context: Context) {
 
   await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
-  // const userWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(0)).connect(ethereum)
-  // const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath(1)).connect(ethereum)
+  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + "0").connect(ethereum)
+  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath+ "1").connect(ethereum)
 
-  // const tokenRegistryContract = await getContract(context, "TokenRegistry", userWallet)
-  // const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", userWallet)
+  const tokenRegistryContract = await getContract(context, "TokenRegistry", ownerWallet)
+  const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", ownerWallet)
 
-  // const daiContract = await getContract(context, "Dai", userWallet)
+  const daiContract = await getContract(context, "Dai", ownerWallet)
 
-  // try{
-  //   await applySignedWithAttribute(
-  //     userWallet,
-  //     ownerWallet,
-  //     tokenRegistryContract,
-  //     ethereumDIDContract,
-  //     daiContract
-  //   )
-  // }catch(err) {
-  //   console.log(err)
-  // }
+  try{
+    await applySignedWithAttribute(
+      memberWallet,
+      ownerWallet,
+      tokenRegistryContract,
+      ethereumDIDContract,
+      daiContract
+    )
+  }catch(err) {
+    console.log(err)
+  }
 
 }
 
@@ -219,17 +219,13 @@ async function editToken(_, { options }: any, context: Context) {
   )
 
   const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
-
-  // TODO: How to generate/get ethers wallet from user?
-  // TODO: Who is 'owner'?
-
-  // Seems to be working
   
-  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + 1).connect(ethereum)
+  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + "1").connect(ethereum)
+  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + "0").connect(ethereum)
 
-  const memberAddress = await ethereum.getSigner().getAddress()
+  const memberAddress = await memberWallet.getAddress()
 
-  const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", ethereum.getSigner())
+  const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", memberWallet)
 
   try{
     await setAttribute(memberAddress, ownerWallet, ethereumDIDRegistry)
@@ -248,7 +244,7 @@ async function deleteToken(_, args: any, context: Context) {
 
   const tokenRegistry = await getContract(context, "TokenRegistry", memberWallet)
 
-  const address = await ethereum.getSigner().getAddress()
+  const address = await memberWallet.getAddress()
 
   try{
     await tokenRegistry.memberExit(address)
