@@ -17,7 +17,7 @@ services:
       postgres_pass: let-me-in
       postgres_db: graph-node
       ipfs: 'ipfs:5001'
-      ethereum: 'private:http://ganache:8545'
+      ethereum: 'ganache:http://ganache:8545'
       RUST_LOG: info
       RUST_BACKTRACE: 1
   ipfs:
