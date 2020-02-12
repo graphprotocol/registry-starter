@@ -1,55 +1,3 @@
-type Token {
-    id: ID! @id
-    symbol: String!
-    description: String!
-    image: String
-    decimals: Int
-    address: String
-
-    owner: User
-    isChallenged: Boolean
-    challenges: [Challenge]
-    isWhitelistedMember: Boolean
- 
-    totalVotes: Int
-    reputation: Int
-
-    votes: [Vote] @derivedFrom(field: "tokenID")
-    createdAt: DateTime! @createdAt
-}
-
-type Challenge {
-    id: ID! @id
-    description: String
-    createdAt: DateTime! @createdAt
-    votesFor: Int
-    votesAgainst: Int
-    token: Token
-    owner: String
-    resolved: Boolean
-    votes: [Vote] @derivedFrom(field: "challengeID")
-}
-
-type Vote {
-    id: ID! @id
-    challenge: Challenge!
-    choice: Choice!
-}
-
-type User {
-  id: ID! @id
-  name: String
-  bio: String
-  tokens: [Token]
-  challenges: [Challenge] 
-  votes: [Vote] @relation(name: "UserVote")
-}
-
-enum Choice {
-  RemoveToken
-  KeepToken
-}
-
 input TokenOptions {
   symbol: String!
   description: String!
@@ -68,7 +16,6 @@ input VoteOptions {
 }
 
 type Mutation {
-
   addToken(
     options: TokenOptions!
   ): Token!
