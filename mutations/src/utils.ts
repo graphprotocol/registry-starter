@@ -246,7 +246,7 @@ const createDaiDomainSeparator = async (daiContract) => {
   const hashedName = keccak256(daiName)
   const hashedVersion = keccak256(daiVersion)
 
-  // ChainID of uint256 9854 used for development, in bytes32
+  // ChainID of uint256 1576478390085 used for development, in bytes32
   const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
   const daiAddress = daiContract.address
   console.log("DAI ADDR: ", daiAddress)

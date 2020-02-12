@@ -2,6 +2,7 @@
   "name": "token-registry-contracts",
   "version": "0.0.1",
   "scripts": {
+    "deploy": "truffle migrate",
     "fix-js": "eslint ./ --fix",
     "fix-sol": "solium -d contracts/ --fix",
     "lint-js": "eslint ./",
