@@ -41,6 +41,7 @@
     "theme-ui": "^0.3.1"
   },
   "devDependencies": {
+    "dotenv": "8.2.0",
     "prettier": "^1.19.1"
   },
   "keywords": [
@@ -49,6 +50,7 @@
   "license": "MIT",
   "scripts": {
     "build": "gatsby build",
+    "build:ci": "CI=true gatsby build",
     "develop": "gatsby develop -p 8080",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "start": "npm run develop",
