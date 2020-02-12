@@ -4,7 +4,7 @@ import { ethers } from 'ethers'
 import {
   createMutations,
   createMutationsLink
-} from '../../../@graphprotocol/mutations'
+} from '@graphprotocol/mutations'
 
 const IpfsClient = require('ipfs-http-client')
 
