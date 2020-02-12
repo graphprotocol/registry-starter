@@ -72,7 +72,7 @@ const stateBuilder: StateBuilder<State, EventMap> = {
 
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
-    return new Web3Provider(provider)
+    return new Web3Provider(provider, provider["_network"])
   },
   ipfs: (endpoint: string) => {
     const url = new URL(endpoint)
@@ -103,6 +103,13 @@ const abis = {
 
 const addresses = require('token-registry-contracts/addresses.json')
 
+const addressMap = {
+  Dai: "mockDAI",
+  EthereumDIDRegistry: "ethereumDIDRegistry",
+  ReserveBank: "reserveBank",
+  TokenRegistry: "tokenRegistry",
+}
+
 async function getContract(context: Context, contract: string, signer: ethers.Signer) {
   const { ethereum } = context.graph.config
 
@@ -112,20 +119,26 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
     throw new Error(`Missing the ABI for '${contract}'`)
   }
 
-  let network = ethereum.network.name
-
-  if (network === "dev") {
-    network = "ganache"
+  const network = await ethereum.getNetwork()
+  let networkName = network.name
+  if (networkName === "dev") {
+    networkName = "ganache"
   }
 
-  const address = addresses[network]
+  const networkAddresses = addresses[networkName]
+
+  if (!networkAddresses) {
+    throw new Error(`Missing addresses for network '${networkName}'`)
+  }
+
+  const address = networkAddresses[addressMap[contract]]
 
   if (!address) {
-    throw new Error(`Missing addresses for network '${network}'`)
+    throw new Error(`Missing contract address for '${contract}' on network '${networkName}'`)
   }
 
   const instance = new ethers.Contract(
-    address, abi, ethereum.getSigner()
+    address, abi, signer
   )
   instance.connect(ethereum)
 
@@ -140,7 +153,7 @@ async function addToken(_, { options }: any, context: Context) {
 
   const { symbol, description, image, decimals } = options
 
-  const imageHash = await uploadToIpfs(ipfs, image)
+  const imageHash = 'bar' // await uploadToIpfs(ipfs, image)
 
   await state.dispatch("UPLOAD_IMAGE", { value: true })
 
@@ -153,10 +166,8 @@ async function addToken(_, { options }: any, context: Context) {
     })
   )
 
-  console.log('here')
-  const metadataHash = await uploadToIpfs(ipfs, metadata)
+  const metadataHash = 'foo' // = await uploadToIpfs(ipfs, metadata)
 
-  console.log('here')
   await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
   const owner = ethereum.getSigner(0)
