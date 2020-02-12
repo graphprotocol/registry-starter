@@ -2,7 +2,7 @@
 import gql from 'graphql-tag'
 import { BehaviorSubject } from 'rxjs'
 
-import resolvers from '..'
+import mutationsModule from '..'
 import {
   getFromIpfs,
   TokenMetadata,
@@ -14,11 +14,7 @@ describe("Mutation Resolvers", () => {
 
   const observer = new BehaviorSubject<any>({} as any)
 
-  const client = createApolloClient(
-    resolvers.resolvers,
-    resolvers.config,
-    resolvers.stateBuilder
-  )
+  const client = createApolloClient(mutationsModule)
 
   let publishedValue: any
 

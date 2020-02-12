@@ -140,21 +140,23 @@ async function addToken(_, { options }: any, context: Context) {
 
   const { symbol, description, image, decimals } = options
 
-  const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
+  const imageHash = await uploadToIpfs(ipfs, image)
 
   await state.dispatch("UPLOAD_IMAGE", { value: true })
 
-  const metadata = JSON.stringify(
-    {
+  const metadata = Buffer.from(
+    JSON.stringify({
       symbol,
       description,
       image: imageHash,
       decimals
-    }
+    })
   )
 
-  const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
+  console.log('here')
+  const metadataHash = await uploadToIpfs(ipfs, metadata)
 
+  console.log('here')
   await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
   const owner = ethereum.getSigner(0)
@@ -164,6 +166,7 @@ async function addToken(_, { options }: any, context: Context) {
   const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", owner)
   const daiContract = await getContract(context, "Dai", owner)
 
+  console.log("HERE")
   try {
     await applySignedWithAttribute(
       member,
@@ -184,7 +187,7 @@ async function editToken(_, { options }: any, context: Context) {
 
   const { symbol, description, image, decimals } = options
 
-  const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
+  const imageHash = await uploadToIpfs(ipfs, image)
 
   const metadata = JSON.stringify(
     {
@@ -195,7 +198,7 @@ async function editToken(_, { options }: any, context: Context) {
     }
   )
 
-  const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
+  const metadataHash = await uploadToIpfs(ipfs, metadata)
 
   const owner = ethereum.getSigner(0)
   const member = await ethers.Wallet.createRandom().connect(ethereum)
@@ -240,7 +243,7 @@ async function challengeToken(_, { options: { description, token } }: any, conte
     token
   })
 
-  const { path: challengeHash }: { path: string } = await uploadToIpfs(ipfs, challenge)
+  const challengeHash = await uploadToIpfs(ipfs, challenge)
 
   await state.dispatch('UPLOAD_CHALLENGE', { challengeHash })
 
@@ -287,12 +290,12 @@ export {
   UploadMetadataEvent
 }
 
-const uploadToIpfs = async (ipfs: any, element: string) => {
+const uploadToIpfs = async (ipfs: any, data: any): Promise<string> => {
   let result;
 
-  for await (const returnedValue of ipfs.add(element)) {
+  for await (const returnedValue of ipfs.add(data)) {
     result = returnedValue
   }
 
-  return result
+  return result.path
 }
