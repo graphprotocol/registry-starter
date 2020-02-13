@@ -4,6 +4,8 @@ import { Styled, jsx, Box } from 'theme-ui'
 import { Dialog as ReachDialog } from '@reach/dialog'
 import '@reach/dialog/styles.css'
 
+import Close from '../../images/close.svg'
+
 const Dialog = ({
   children,
   title,
@@ -40,8 +42,7 @@ const Dialog = ({
           }}
         />
       )}
-      <img
-        src="/close.svg"
+      <Close
         alt="close"
         onClick={closeDialog}
         sx={{

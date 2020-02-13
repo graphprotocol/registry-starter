@@ -14,6 +14,7 @@ import { walletconnect } from '../../connectors'
 
 import QRCode from './QRCode'
 import Divider from '../Divider'
+import Close from '../../images/close.svg'
 
 const Modal = ({ showModal, closeModal }) => {
   const { account, activate } = useWeb3React()
@@ -107,8 +108,7 @@ const Modal = ({ showModal, closeModal }) => {
           }}
         />
       )}
-      <img
-        src="/close.svg"
+      <Close
         alt="close"
         onClick={closeModal}
         sx={{

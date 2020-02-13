@@ -306,7 +306,7 @@ const Token = ({ location }) => {
                     <Styled.p>3d 6h</Styled.p>
                   </Box>
                   <Box>
-                    <p sx={{ variant: 'text.smaller' }}>Voters</p>
+                    <p sx={{ variant: 'text.smaller' }}>Votes</p>
                     <Styled.p>{token.totalVotes}</Styled.p>
                   </Box>
                   <Box>

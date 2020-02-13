@@ -5,6 +5,7 @@ import { Styled, jsx } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 
 import ipfs from '../../services/ipfs'
+import Close from '../../images/close.svg'
 
 const UploadImage = ({ setImage }) => {
   const [uploadingImage, setUploadingImage] = useState(false)
@@ -80,8 +81,7 @@ const UploadImage = ({ setImage }) => {
             alt={imageName}
           />
           <Styled.p>{imageName}</Styled.p>
-          <img
-            src="/close.svg"
+          <Close
             alt="Close"
             sx={{
               transform: 'rotate(90deg)',

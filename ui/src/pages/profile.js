@@ -100,6 +100,7 @@ const Profile = ({ location }) => {
             gridTemplateColumns: '80px 1fr',
             alignItems: 'center',
           }}
+          gap={[1, 3]}
         >
           <Box>
             <img
