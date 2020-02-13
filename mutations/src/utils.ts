@@ -214,7 +214,7 @@ export const applySignedWithAttribute = async (
     setAttributeSignedSig.r,
     setAttributeSignedSig.s,
     '0x' + stringToBytes32(offChainDataName),
-    metadataIpfsHash,
+    Buffer.from(metadataIpfsHash),
     '0x' + maxValidity
   )
 }
@@ -251,7 +251,6 @@ const createDaiDomainSeparator = async (daiContract: Contract) => {
   // ChainID of uint256 9545 used for development, in bytes32
   const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
   const daiAddress = daiContract.address
-  console.log("DAI ADDR: ", daiAddress)
   const paddedDaiAddress = leftPad(stripHexPrefix(daiAddress))
   const data = domain + hashedName + hashedVersion + paddedChainID + paddedDaiAddress
   const hash = Buffer.from(keccak256.arrayBuffer(Buffer.from(data, 'hex')))

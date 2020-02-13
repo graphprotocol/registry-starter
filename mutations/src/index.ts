@@ -72,7 +72,7 @@ const stateBuilder: StateBuilder<State, EventMap> = {
 
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
-    return new Web3Provider(provider, provider["_network"])
+    return provider as Web3Provider
   },
   ipfs: (endpoint: string) => {
     const url = new URL(endpoint)
@@ -153,7 +153,7 @@ async function addToken(_, { options }: any, context: Context) {
 
   const { symbol, description, image, decimals } = options
 
-  const imageHash = 'bar' // await uploadToIpfs(ipfs, image)
+  const imageHash = await uploadToIpfs(ipfs, image)
 
   await state.dispatch("UPLOAD_IMAGE", { value: true })
 
@@ -166,7 +166,7 @@ async function addToken(_, { options }: any, context: Context) {
     })
   )
 
-  const metadataHash = 'foo' // = await uploadToIpfs(ipfs, metadata)
+  const metadataHash = await uploadToIpfs(ipfs, metadata)
 
   await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
@@ -177,7 +177,6 @@ async function addToken(_, { options }: any, context: Context) {
   const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", owner)
   const daiContract = await getContract(context, "Dai", owner)
 
-  console.log("HERE")
   try {
     await applySignedWithAttribute(
       member,
@@ -187,8 +186,9 @@ async function addToken(_, { options }: any, context: Context) {
       ethereumDIDContract,
       daiContract
     )
-  } catch(err) {
+  } catch (err) {
     console.log(err)
+    throw err
   }
 }
 
@@ -222,6 +222,7 @@ async function editToken(_, { options }: any, context: Context) {
     await setAttribute(memberAddress, owner, metadataHash, ethereumDIDRegistry)
   }catch(err) {
     console.log(err)
+    throw err
   }
 
   return null
@@ -238,6 +239,7 @@ async function removeToken(_, args: any, context: Context) {
     await tokenRegistry.memberExit(tokenId.toString())
   }catch(err){
     console.log(err)
+    throw err
   }
 
   return true
