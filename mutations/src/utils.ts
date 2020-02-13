@@ -223,7 +223,11 @@ export const applySignedWithAttribute = async (
     setAttributeSignedSig.s,
     '0x' + stringToBytes32(offChainDataName),
     metadataIpfsBytes,
-    '0x' + maxValidity
+    '0x' + maxValidity,
+    {
+      gasLimit: 1000000,
+      gasPrice: ethers.utils.parseUnits('1.0', 'gwei')
+    }
   )
 
   return tx
