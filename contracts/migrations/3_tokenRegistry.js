@@ -19,7 +19,7 @@ module.exports = async (deployer, network, accounts) => {
     }
 
     let daiAddress = (await Token.deployed()).address
-    
+
     // On first deploy, reserve bank is address 0xf68f5498dd766a8d65c4785219d61fcc5e0e920a
     await deployer.deploy(
         TokenRegistry,

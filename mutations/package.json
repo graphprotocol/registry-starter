@@ -7,7 +7,7 @@
   "scripts": {
     "build": "yarn build:package",
     "build:bundle": "rimraf ./bundle && webpack",
-    "build:package": "tsc --outDir ./dist && rimraf ./package && mkdir ./package && cp -r ./dist ./package/dist && cp package.json ./package && cp -r ./src ./package/src",
+    "build:package": "tsc --outDir ./dist && rimraf ./package && mkdir ./package && cp -r ./dist ./package/dist && cp package.json ./package",
     "es5:check": "es-check es5 ./bundle/index.js",
     "test": "jest --passWithNoTests --verbose",
     "test:watch": "jest --watch --passWithNoTests"

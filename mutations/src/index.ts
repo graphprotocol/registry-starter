@@ -307,6 +307,17 @@ async function voteChallenge(_, args: any, context: Context) {
   return true
 }
 
+const uploadToIpfs = async (ipfs: any, data: any): Promise<string> => {
+  let result;
+
+  for await (const returnedValue of ipfs.add(data)) {
+    result = returnedValue
+  }
+
+  return result.path
+}
+
+
 const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {
     uploadImage,
@@ -329,14 +340,4 @@ export {
   EventMap,
   UploadImageEvent,
   UploadMetadataEvent
-}
-
-const uploadToIpfs = async (ipfs: any, data: any): Promise<string> => {
-  let result;
-
-  for await (const returnedValue of ipfs.add(data)) {
-    result = returnedValue
-  }
-
-  return result.path
 }
