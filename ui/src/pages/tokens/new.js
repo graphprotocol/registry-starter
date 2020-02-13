@@ -2,8 +2,32 @@
 import { useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
+import { useMutation } from '@apollo/react-hooks'
+import { gql } from 'apollo-boost'
 
 import TokenForm from '../../components/TokenForm'
+
+const ADD_TOKEN = gql`
+  mutation addToken(
+    $symbol: String!
+    $description: String!
+    $image: String
+    $decimals: Int
+  ) {
+    addToken(
+      symbol: $symbol
+      description: $description
+      image: $image
+      decimals: $decimals
+    ) {
+      id
+      symbol
+      image
+      description
+      decimals
+    }
+  }
+`
 
 const NewToken = ({ ...props }) => {
   const [isDisabled, setIsDisabled] = useState(true)
@@ -12,19 +36,11 @@ const NewToken = ({ ...props }) => {
     description: '',
     address: '',
     decimals: '',
-    imageName: '',
-    imageUrl: '',
+    image: '',
   })
+  const [addToken, { data, loading }] = useMutation(ADD_TOKEN)
 
   const setValue = (field, value) => {
-    if (field === 'image') {
-      return setToken(state => ({
-        ...state,
-        imageUrl: value.url,
-        imageName: value.name,
-      }))
-    }
-
     setToken(state => ({
       ...state,
       [field]: value,
@@ -42,20 +58,26 @@ const NewToken = ({ ...props }) => {
   }, [token])
 
   const handleSubmit = () => {
-    //TODO: handle submit logic here
-    console.log('Submitted')
+    //TODO: Hook up migrations
+    addToken({ variables: { ...token } })
   }
 
   return (
     <Grid>
-      <Styled.h1>Add a Token</Styled.h1>
-      <Styled.p>TODO: Need Copy</Styled.p>
       <Box sx={{ maxWidth: '504px', width: '100%', my: 7 }}>
+        <Styled.h1>Add a Token</Styled.h1>
+        <Styled.p sx={{ mt: 2, mb: 6 }}>
+          Add a token to the Ethereum Tokens Registry. Make sure the token is
+          live on mainnet and all information about the token is accurate, to
+          mitigate risk of the token being challenged.
+        </Styled.p>
         <TokenForm
           token={token}
           setValue={setValue}
           handleSubmit={handleSubmit}
           isDisabled={isDisabled}
+          isNew={true}
+          isLoading={loading}
         />
       </Box>
     </Grid>

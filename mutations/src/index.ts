@@ -162,7 +162,7 @@ async function addToken(_, { options }: any, context: Context) {
 
   const { state } = context.graph
 
-  const { symbol, description, image, decimals } = options
+  const { symbol, description, image, decimals, address } = options
 
   const imageHash = await uploadToIpfs(ipfs, image)
 
@@ -173,7 +173,8 @@ async function addToken(_, { options }: any, context: Context) {
       symbol,
       description,
       image: imageHash,
-      decimals
+      decimals,
+      address
     })
   )
 

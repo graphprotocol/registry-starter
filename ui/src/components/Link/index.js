@@ -56,7 +56,6 @@ const Link = ({ to, children, onClick, ...props }) => {
 
 Link.propTypes = {
   to: PropTypes.string,
-  children: PropTypes.any,
   onClick: PropTypes.func,
 }
 

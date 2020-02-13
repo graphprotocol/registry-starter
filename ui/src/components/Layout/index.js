@@ -7,12 +7,14 @@ import { Global, css } from '@emotion/core'
 
 import Footer from '../Footer'
 import Navigation from '../Navigation'
+import { FILTERS, ORDER_BY, ORDER_DIRECTION } from '../../utils/constants'
 
 export const ReactContext = createContext()
 
-const LayoutTemplate = ({ children, mainStyles, ...props }) => {
-  const [filter, setFilter] = useState('All')
-  const [order, setOrder] = useState('')
+const LayoutTemplate = ({ children, ...props }) => {
+  const [filter, setFilter] = useState(FILTERS['All Tokens'])
+  const [orderBy, setOrderBy] = useState(ORDER_BY['Date added'])
+  const [orderDirection, setOrderDirection] = useState(ORDER_DIRECTION.DESC)
 
   const styles = {
     maxWidth: '1246px',
@@ -23,7 +25,13 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
   }
 
   return (
-    <ReactContext.Provider value={{ filter: filter, order: order }}>
+    <ReactContext.Provider
+      value={{
+        filter: filter,
+        orderBy: orderBy,
+        orderDirection: orderDirection,
+      }}
+    >
       <Global
         styles={css`
           ${emotionReset}
@@ -47,7 +55,8 @@ const LayoutTemplate = ({ children, mainStyles, ...props }) => {
         </Helmet>
         <Navigation
           setFilter={setFilter}
-          setOrder={setOrder}
+          setOrderBy={setOrderBy}
+          setOrderDirection={setOrderDirection}
           sx={styles}
           {...props}
         />

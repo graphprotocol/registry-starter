@@ -8,8 +8,12 @@ import { ReactContext } from '../components/Layout'
 import Card from '../components/Card'
 
 const TOKENS_QUERY = gql`
-  query tokens($isChallenged: Boolean, $orderBy: TokenOrderByInput) {
-    tokens(where: { isChallenged: $isChallenged }, orderBy: $orderBy) {
+  query tokens(
+    $where: Token_filter
+    $orderBy: Token_orderBy
+    $orderDirection: OrderDirection
+  ) {
+    tokens(where: $where, orderBy: $orderBy, orderDirection: $orderDirection) {
       id
       symbol
       image
@@ -28,11 +32,16 @@ const IndexPage = () => {
       ? { ...variables, orderBy: context.order }
       : { ...variables }
 
-  const { data, loading } = useQuery(TOKENS_QUERY, {
+  const { data, loading, error } = useQuery(TOKENS_QUERY, {
     variables: variables,
   })
 
-  if (loading) {
+  if (loading || !data) {
+    return <div />
+  }
+
+  if (error) {
+    console.error('Error with Apollo query: ', error)
     return <div />
   }
 

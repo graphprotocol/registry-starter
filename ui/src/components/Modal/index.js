@@ -14,8 +14,9 @@ import { walletconnect } from '../../connectors'
 
 import QRCode from './QRCode'
 import Divider from '../Divider'
+import Close from '../../images/close.svg'
 
-const Modal = ({ children, showModal, closeModal }) => {
+const Modal = ({ showModal, closeModal }) => {
   const { account, activate } = useWeb3React()
 
   // TODO: Error state in the UI
@@ -27,9 +28,7 @@ const Modal = ({ children, showModal, closeModal }) => {
   const [uri, setUri] = useState('')
   const [isWalletEnabled, setIsWalletEnabled] = useState(false)
 
-  // TODO: reset the view to the main wallet selection view
-
-  // set up uri listener for walletconnect
+  // set up the uri listener for walletconnect
   useEffect(() => {
     if (walletExists()) {
       setIsWalletEnabled(true)
@@ -109,8 +108,7 @@ const Modal = ({ children, showModal, closeModal }) => {
           }}
         />
       )}
-      <img
-        src="/close.svg"
+      <Close
         alt="close"
         onClick={closeModal}
         sx={{
@@ -210,7 +208,6 @@ const iconStyles = {
 }
 
 Modal.propTypes = {
-  children: PropTypes.any,
   showModal: PropTypes.bool,
   closeModal: PropTypes.func,
 }
