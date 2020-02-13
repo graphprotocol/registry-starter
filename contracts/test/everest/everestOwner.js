@@ -4,9 +4,9 @@ const helpers = require('../helpers.js')
 const utils = require('../utils.js')
 
 contract('TokenRegistry', accounts => {
-    const newMemberWallet = utils.ethersWallet(utils.walletPaths.nine) // throw away wallet
-    const ownerWallet = utils.ethersWallet(utils.walletPaths.one)
-    const registryOwnerWallet = utils.ethersWallet(utils.walletPaths.zero)
+    const newMemberWallet = utils.wallets.nine() // throw away wallet
+    const ownerWallet = utils.wallets.one()
+    const registryOwnerWallet = utils.wallets.zero()
     const registryOwnerAddress = registryOwnerWallet.signingKey.address
 
     describe('TokenRegistry owner functionality. Functions: withdraw(), updateCharter()', () => {
