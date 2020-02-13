@@ -5,7 +5,14 @@ import Field from '../Field'
 import Button from '../Button'
 import UploadImage from '../UploadImage'
 
-const TokenForm = ({ token, setValue, isDisabled, isNew, handleSubmit }) => (
+const TokenForm = ({
+  token,
+  setValue,
+  isDisabled,
+  isNew,
+  isLoading,
+  handleSubmit,
+}) => (
   <form onSubmit={handleSubmit}>
     <Field
       type="input"
@@ -35,7 +42,7 @@ const TokenForm = ({ token, setValue, isDisabled, isNew, handleSubmit }) => (
       <p sx={{ variant: 'text.small', color: 'secondary', mb: 2 }}>
         Token Logo (optional)
       </p>
-      <UploadImage setImage={setValue} />
+      <UploadImage setValue={setValue} />
     </Box>
     <Field
       type="input"
@@ -49,6 +56,7 @@ const TokenForm = ({ token, setValue, isDisabled, isNew, handleSubmit }) => (
       text={isNew ? 'Add Token' : 'Update Token'}
       variant="primary"
       isDisabled={isDisabled}
+      isLoading={isLoading}
       onClick={handleSubmit}
     />
   </form>
@@ -60,6 +68,7 @@ TokenForm.propTypes = {
   handleSubmit: PropTypes.func,
   isDisabled: PropTypes.bool,
   isNew: PropTypes.bool,
+  isLoading: PropTypes.bool,
 }
 
 export default TokenForm

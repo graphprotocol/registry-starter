@@ -3,7 +3,16 @@ import PropTypes from 'prop-types'
 import { jsx } from 'theme-ui'
 import { navigate } from 'gatsby'
 
-const Button = ({ to, text, variant, onClick, isDisabled, icon, ...props }) => {
+const Button = ({
+  to,
+  text,
+  variant,
+  onClick,
+  isDisabled,
+  isLoading,
+  icon,
+  ...props
+}) => {
   return (
     <button
       sx={{
@@ -35,6 +44,7 @@ Button.propTypes = {
   variant: PropTypes.string,
   onClick: PropTypes.func,
   isDisabled: PropTypes.bool,
+  isLoading: PropTypes.bool,
   icon: PropTypes.string,
 }
 

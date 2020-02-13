@@ -3,50 +3,42 @@ import { useState } from 'react'
 import PropTypes from 'prop-types'
 import { Styled, jsx } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
+import { useMutation } from '@apollo/react-hooks'
+import { gql } from 'apollo-boost'
 
-import ipfs from '../../services/ipfs'
 import Close from '../../images/close.svg'
 
-const UploadImage = ({ setImage }) => {
-  const [uploadingImage, setUploadingImage] = useState(false)
-  const [imageUrl, setImageUrl] = useState('')
-  const [imageName, setImageName] = useState('')
-
-  const uploadImage = async (e, field) => {
-    const image = e.target.files[0]
-    if (image) {
-      setUploadingImage(true)
-      const reader = new window.FileReader()
-      reader.readAsArrayBuffer(image)
-      reader.onloadend = async () => {
-        const buffer = await Buffer.from(reader.result)
-        await ipfs.add(buffer, async (err, res) => {
-          if (err) {
-            console.error('Error saving doc to IPFS: ', err)
-          }
-          if (res) {
-            const url = `${process.env.GATSBY_IPFS_HTTP_URI}/api/v0/cat?arg=${res[0].hash}`
-            setUploadingImage(false)
-            setImageUrl(url)
-            setImageName(image.name)
-            setImage({ url: url, name: image.name })
-          }
-        })
-      }
+const UPLOAD_IMAGE = gql`
+  mutation uploadImage($image: File!) {
+    uploadImage(image: $image) {
+      image
     }
+  }
+`
+
+const UploadImage = ({ setValue }) => {
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const [image, setImage] = useState('')
+  const [uploadImage, { data, loading }] = useMutation(UPLOAD_IMAGE)
+
+  const handleUpload = async (e, field) => {
+    // TODO: Hook up the mutation
+    const image = e.target.files[0]
+    uploadImage({ variables: { image } })
+    // setUploadingImage(loading)
+    // setImage(data && data.image)
   }
 
   const removeImage = e => {
     e.preventDefault()
     e.stopPropagation()
-    setImageUrl('')
-    setImageName('')
+    setImage('')
   }
 
   return (
     <label
       sx={
-        imageName && imageUrl
+        image
           ? {
               ...styles.label,
               border: 'none',
@@ -71,16 +63,15 @@ const UploadImage = ({ setImage }) => {
         name="upload-image"
         type="file"
         accept="image/*"
-        onChange={uploadImage}
+        onChange={handleUpload}
       />
-      {imageUrl && imageName ? (
+      {image ? (
         <Grid sx={styles.grid} gap={0}>
           <img
-            src={imageUrl}
+            src={`/${image}`}
             sx={{ height: '60px', width: '60px', position: 'relative' }}
-            alt={imageName}
+            alt="Token logo"
           />
-          <Styled.p>{imageName}</Styled.p>
           <Close
             alt="Close"
             sx={{

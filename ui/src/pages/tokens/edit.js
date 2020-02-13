@@ -4,6 +4,7 @@ import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
+import { useMutation } from '@apollo/react-hooks'
 
 import TokenForm from '../../components/TokenForm'
 
@@ -20,23 +21,48 @@ const TOKEN_QUERY = gql`
   }
 `
 
+const EDIT_TOKEN = gql`
+  mutation editToken(
+    $symbol: String!
+    $description: String!
+    $image: String
+    $decimals: Int
+  ) {
+    editToken(
+      symbol: $symbol
+      description: $description
+      image: $image
+      decimals: $decimals
+    ) {
+      id
+      symbol
+      image
+      description
+      decimals
+    }
+  }
+`
+
 const EditToken = ({ location, ...props }) => {
   const tokenId = location ? location.pathname.split('/')[2] : ''
-  const { loading, error, data } = useQuery(TOKEN_QUERY, {
-    variables: {
-      id: tokenId,
-    },
-  })
-
   const [isDisabled, setIsDisabled] = useState(true)
   const [token, setToken] = useState({
     symbol: '',
     description: '',
     address: '',
     decimals: '',
-    imageName: '',
-    imageUrl: '',
+    image: '',
   })
+
+  const { loading, error, data } = useQuery(TOKEN_QUERY, {
+    variables: {
+      id: tokenId,
+    },
+  })
+  const [
+    editToken,
+    { data: mutationData, loading: mutationLoading },
+  ] = useMutation(EDIT_TOKEN)
 
   useEffect(() => {
     if (data) {
@@ -46,27 +72,12 @@ const EditToken = ({ location, ...props }) => {
         symbol: tokenObj ? tokenObj.symbol : '',
         description: tokenObj ? tokenObj.description : '',
         decimals: tokenObj ? tokenObj.decimals : '',
-        imageName:
-          tokenObj && tokenObj.image
-            ? tokenObj.image
-                .split('/')
-                .slice(-1)
-                .join('')
-            : '',
-        imageUrl: tokenObj ? tokenObj.image : '',
+        image: '',
       }))
     }
   }, [data])
 
   const setValue = (field, value) => {
-    if (field === 'image') {
-      return setToken(state => ({
-        ...state,
-        imageUrl: value.url,
-        imageName: value.name,
-      }))
-    }
-
     setToken(state => ({
       ...state,
       [field]: value,
@@ -85,7 +96,7 @@ const EditToken = ({ location, ...props }) => {
 
   const handleSubmit = () => {
     //TODO: handle submit logic here
-    console.log('Submitted')
+    editToken({ variables: { ...token } })
   }
 
   return (
