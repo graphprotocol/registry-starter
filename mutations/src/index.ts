@@ -76,7 +76,7 @@ const stateBuilder: StateBuilder<State, EventMap> = {
 
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
-    return provider as Web3Provider
+    return new Web3Provider(provider)
   },
   ipfs: (endpoint: string) => {
     const url = new URL(endpoint)
