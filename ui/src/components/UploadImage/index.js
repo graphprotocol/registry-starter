@@ -10,23 +10,27 @@ import Close from '../../images/close.svg'
 
 const UPLOAD_IMAGE = gql`
   mutation uploadImage($image: File!) {
-    uploadImage(image: $image) {
-      image
-    }
+    uploadImage(image: $image) @client
   }
 `
 
 const UploadImage = ({ setValue }) => {
-  const [uploadingImage, setUploadingImage] = useState(false)
   const [image, setImage] = useState('')
-  const [uploadImage, { data, loading }] = useMutation(UPLOAD_IMAGE)
+  const [uploadImage, { loading }] = useMutation(UPLOAD_IMAGE, {
+    onError: error => {
+      console.error('Error uploading image to IPFS: ', error)
+    },
+    onCompleted: data => {
+      if (data) {
+        setImage(data.uploadImage)
+      }
+    },
+  })
 
   const handleUpload = async (e, field) => {
     // TODO: Hook up the mutation
     const image = e.target.files[0]
     uploadImage({ variables: { image } })
-    // setUploadingImage(loading)
-    // setImage(data && data.image)
   }
 
   const removeImage = e => {
@@ -100,7 +104,7 @@ const UploadImage = ({ setValue }) => {
           gap={2}
         >
           <p sx={{ variant: 'large' }}>Upload image</p>
-          {uploadingImage && <div>loading..</div>}
+          {loading && <div>loading..</div>}
         </Grid>
       )}
     </label>

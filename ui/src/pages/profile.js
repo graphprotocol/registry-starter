@@ -8,41 +8,11 @@ import { useWeb3React } from '@web3-react/core'
 // import ThreeBox from '3box'
 
 import { metamaskAccountChange } from '../services/ethers'
+import { PROFILE_QUERY } from '../apollo/queries'
 
 import Divider from '../components/Divider'
 import Section from '../components/Section'
 import Button from '../components/Button'
-
-const PROFILE_QUERY = gql`
-  query profile($id: ID!) {
-    user(id: $id) {
-      id
-      name
-      bio
-      tokens {
-        id
-        symbol
-        image
-      }
-      challenges {
-        id
-        token {
-          symbol
-          image
-        }
-      }
-      votes {
-        id
-        challenge {
-          token {
-            symbol
-            image
-          }
-        }
-      }
-    }
-  }
-`
 
 const Profile = ({ location }) => {
   const [profile, setProfile] = useState(null)

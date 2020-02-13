@@ -17,8 +17,8 @@ const Button = ({
     <button
       sx={{
         variant: `buttons.${variant}`,
-        opacity: isDisabled ? 0.32 : 1,
-        pointerEvents: isDisabled ? 'none' : 'all',
+        opacity: isDisabled || isLoading ? 0.32 : 1,
+        pointerEvents: isDisabled || isLoading ? 'none' : 'all',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

@@ -1,27 +1,11 @@
 /** @jsx jsx */
 import { useContext } from 'react'
 import { useQuery } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
 import { Grid } from '@theme-ui/components'
 import { jsx } from 'theme-ui'
 import { ReactContext } from '../components/Layout'
 import Card from '../components/Card'
-
-const TOKENS_QUERY = gql`
-  query tokens(
-    $where: Token_filter
-    $orderBy: Token_orderBy
-    $orderDirection: OrderDirection
-  ) {
-    tokens(where: $where, orderBy: $orderBy, orderDirection: $orderDirection) {
-      id
-      symbol
-      image
-      description
-      isChallenged
-    }
-  }
-`
+import { TOKENS_QUERY } from '../apollo/queries'
 
 const IndexPage = () => {
   const context = useContext(ReactContext)

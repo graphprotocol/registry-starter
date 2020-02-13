@@ -35,7 +35,9 @@ const mutations = createMutations({
   },
 })
 
-const queryLink = createHttpLink({ uri: `${networkURI}/subgraphs/name/graphprotocol/registry-starter` })
+const queryLink = createHttpLink({
+  uri: `${networkURI}/subgraphs/name/nena/registrylala`,
+})
 
 const mutationLink = createMutationsLink({ mutations })
 

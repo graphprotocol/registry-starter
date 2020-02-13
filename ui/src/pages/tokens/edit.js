@@ -6,42 +6,8 @@ import { useQuery } from '@apollo/react-hooks'
 import { gql } from 'apollo-boost'
 import { useMutation } from '@apollo/react-hooks'
 
+import { TOKEN_QUERY, EDIT_TOKEN } from '../../apollo/queries'
 import TokenForm from '../../components/TokenForm'
-
-const TOKEN_QUERY = gql`
-  query token($id: ID!) {
-    token(where: { id: $id }) {
-      id
-      symbol
-      image
-      description
-      decimals
-      address
-    }
-  }
-`
-
-const EDIT_TOKEN = gql`
-  mutation editToken(
-    $symbol: String!
-    $description: String!
-    $image: String
-    $decimals: Int
-  ) {
-    editToken(
-      symbol: $symbol
-      description: $description
-      image: $image
-      decimals: $decimals
-    ) {
-      id
-      symbol
-      image
-      description
-      decimals
-    }
-  }
-`
 
 const EditToken = ({ location, ...props }) => {
   const tokenId = location ? location.pathname.split('/')[2] : ''
@@ -62,7 +28,44 @@ const EditToken = ({ location, ...props }) => {
   const [
     editToken,
     { data: mutationData, loading: mutationLoading },
-  ] = useMutation(EDIT_TOKEN)
+  ] = useMutation(EDIT_TOKEN, {
+    refetchQueries: [
+      {
+        query: TOKEN_QUERY,
+        variables: {
+          id: tokenId,
+        },
+      },
+    ],
+    optimisticResponse: {
+      addToken: true,
+    },
+    update: (proxy, result) => {
+      console.log('RESULT: ', result)
+      const data = cloneDeep(
+        proxy.readQuery(
+          {
+            query: TOKEN_QUERY,
+            variables: {},
+          },
+          true
+        )
+      )
+
+      if (result.data && result.data.addToken) {
+        console.log('RESULT.DATA ', result.data)
+        // data.tokens.push(token)
+      }
+      proxy.writeQuery({
+        query: TOKEN_QUERY,
+        data,
+        variables: {},
+      })
+    },
+    onError: error => {
+      console.error(error)
+    },
+  })
 
   useEffect(() => {
     if (data) {

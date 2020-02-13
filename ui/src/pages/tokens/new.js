@@ -2,32 +2,11 @@
 import { useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
-import { useMutation } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
+import { cloneDeep } from 'lodash.clonedeep'
+import { useMutation } from '@graphprotocol/mutations-apollo-react'
 
+import { TOKENS_QUERY, ADD_TOKEN } from '../../apollo/queries'
 import TokenForm from '../../components/TokenForm'
-
-const ADD_TOKEN = gql`
-  mutation addToken(
-    $symbol: String!
-    $description: String!
-    $image: String
-    $decimals: Int
-  ) {
-    addToken(
-      symbol: $symbol
-      description: $description
-      image: $image
-      decimals: $decimals
-    ) {
-      id
-      symbol
-      image
-      description
-      decimals
-    }
-  }
-`
 
 const NewToken = ({ ...props }) => {
   const [isDisabled, setIsDisabled] = useState(true)
@@ -38,7 +17,48 @@ const NewToken = ({ ...props }) => {
     decimals: '',
     image: '',
   })
-  const [addToken, { data, loading }] = useMutation(ADD_TOKEN)
+  const [addToken, { data, loading, error, state }] = useMutation(ADD_TOKEN, {
+    refetchQueries: [
+      {
+        query: TOKENS_QUERY,
+        variables: {},
+      },
+    ],
+    optimisticResponse: {
+      addToken: true,
+    },
+    update: (proxy, result) => {
+      console.log('RESULT: ', result)
+      const data = cloneDeep(
+        proxy.readQuery(
+          {
+            query: TOKENS_QUERY,
+            variables: {},
+          },
+          true
+        )
+      )
+
+      if (result.data && result.data.addToken) {
+        console.log('RESULT.DATA ', result.data)
+        console.log('DATA: ', data)
+        // data.tokens.push(token)
+      }
+      proxy.writeQuery({
+        query: TOKENS_QUERY,
+        data,
+        variables: {},
+      })
+    },
+    onError: error => {
+      console.error(error)
+    },
+  })
+
+  console.log('DATA: ', data)
+  console.log('LOADING: ', loading)
+  console.log('ERROR: ', error)
+  console.log('STATE: ', state)
 
   const setValue = (field, value) => {
     setToken(state => ({
@@ -57,8 +77,11 @@ const NewToken = ({ ...props }) => {
     )
   }, [token])
 
-  const handleSubmit = () => {
-    //TODO: Hook up migrations
+  const handleSubmit = e => {
+    console.log('INSIDE of handleSubmit')
+    e.preventDefault()
+    console.log('TOKEN: ', token)
+
     addToken({ variables: { ...token } })
   }
 
