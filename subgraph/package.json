@@ -35,10 +35,11 @@
     "create": "graph create davekaj/tokenRegistry --node https://api.thegraph.com/deploy/",
     "create:local": "graph create davekaj/tokenRegistry --node http://127.0.0.1:8020 || true",
     "codegen": "graph codegen --output-dir src/types/",
-    "build": "yarn codegen && graph build",
-    "deploy": "graph deploy graphprotocol/tokenRegistry --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
-    "deploy:staging": "graph deploy graphprotocol/tokenRegistry --ipfs https://api.staging.thegraph.com/ipfs/ --node https://api.staging.thegraph.com/deploy/",
-    "deploy:local": "graph deploy davekaj/tokenRegistry --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
-    "watch:local": "graph deploy graphprotocol/tokenRegistry --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
+    "create-local": "graph create davekaj/registry-starter --node http://127.0.0.1:8020",
+    "build": "graph build",
+    "deploy-local": "graph deploy davekaj/registry-starter --debug --ipfs http://localhost:5001 --node http://127.0.0.1:8020",
+    "deploy": "graph deploy graphprotocol/registry-starter --ipfs https://api.thegraph.com/ipfs/ --node https://api.thegraph.com/deploy/",
+    "deploy-staging": "graph deploy graphprotocol/registry-starter --ipfs https://api.staging.thegraph.com/ipfs/ --node https://api.staging.thegraph.com/deploy/",
+    "watch-local": "graph deploy graphprotocol/registry-starter --watch --debug --node http://127.0.0.1:8020/ --ipfs http://localhost:5001"
   }
 }

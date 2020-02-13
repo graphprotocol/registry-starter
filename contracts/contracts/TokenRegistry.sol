@@ -450,9 +450,10 @@ contract TokenRegistry is Registry, Ownable {
         bool moreThanOneVote = storedChallenge.voterCount > 1;
         if (didPass && moreThanOneVote) {
 
-            // Transfer challenge deposit to challenger for winning challenge
+            // Transfer challenge deposit and losers application fee
+            // to challenger for winning challenge
             require(
-                withdraw(storedChallenge.challenger, challengeDeposit),
+                withdraw(storedChallenge.challenger, challengeDeposit + applicationFee),
                 "resolveChallenge - Rewarding challenger failed"
             );
             deleteMember(storedChallenge.member);
@@ -463,8 +464,7 @@ contract TokenRegistry is Registry, Ownable {
                 storedChallenge.noVotes
             );
         } else {
-            // Transfer challenge deposit to challengee. This keeps the token balance the same
-            // whether or not the challenge fails.
+            // Transfer challenge deposit to challengee
             require(
                 withdraw(storedChallenge.challenger, challengeDeposit),
                 "resolveChallenge - Rewarding challenger failed"
