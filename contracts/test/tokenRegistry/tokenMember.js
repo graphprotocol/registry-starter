@@ -47,3 +47,5 @@ contract('TokenRegistry', () => {
         })
     })
 })
+
+// TODO - no double join

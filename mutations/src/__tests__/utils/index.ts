@@ -8,7 +8,10 @@ import {
 
 const IpfsClient = require('ipfs-http-client')
 
-const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545")
+export const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545', {
+  name: 'dev',
+  chainId: 9545
+})
 
 export const getFromIpfs = async (ipfs: any, hash: string) => {
   let result: string;
@@ -31,13 +34,9 @@ export interface TokenMetadata {
 
 export const ipfsClient = new IpfsClient({ host: 'localhost', port: '5001' })
   
-export const createApolloClient = (resolvers, config, stateBuilder) => {
+export const createApolloClient = mutationsModule => {
   const mutations = createMutations({
-    mutations: {
-      resolvers,
-      config,
-      stateBuilder
-    },
+    mutations: mutationsModule,
     subgraph: '',
     node: 'http://localhost:5001',
     config: {

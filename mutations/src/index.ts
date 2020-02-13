@@ -10,7 +10,11 @@ import {
   AsyncSendable,
   Web3Provider
 } from "ethers/providers"
-import { applySignedWithAttribute, setAttribute } from './utils'
+import {
+  applySignedWithAttribute,
+  ipfsHexHash,
+  setAttribute
+} from './utils'
 const ipfsHttpClient = require('ipfs-http-client')
 
 interface UploadImageEvent extends EventPayload {
@@ -70,12 +74,9 @@ const stateBuilder: StateBuilder<State, EventMap> = {
   }
 }
 
-const mnemonic = "myth like bonus scare over problem client lizard pioneer submit female collect"
-const accountPath = "m/44'/60'/0'/0/"
-
 const config = {
   ethereum: (provider: AsyncSendable): Web3Provider => {
-    return new Web3Provider(provider)
+    return provider as Web3Provider
   },
   ipfs: (endpoint: string) => {
     const url = new URL(endpoint)
@@ -93,16 +94,18 @@ type Config = typeof config
 type Context = MutationContext<Config, State, EventMap>
 
 const abis = {
-  Context: require('../../contracts/build/contracts/Context.json').abi,
-  Dai: require('../../contracts/build/contracts/Dai.json').abi,
-  EthereumDIDRegistry: require('../../contracts/build/contracts/EthereumDIDRegistry.json').abi,
-  LibNote: require('../../contracts/build/contracts/LibNote.json').abi,
-  Ownable: require('../../contracts/build/contracts/Ownable.json').abi,
-  Registry: require('../../contracts/build/contracts/Registry.json').abi,
-  ReserveBank: require('../../contracts/build/contracts/ReserveBank.json').abi,
-  SafeMath: require('../../contracts/build/contracts/SafeMath.json').abi,
-  TokenRegistry: require('../../contracts/build/contracts/TokenRegistry.json').abi
+  Context: require('token-registry-contracts/build/contracts/Context.json').abi,
+  Dai: require('token-registry-contracts/build/contracts/Dai.json').abi,
+  EthereumDIDRegistry: require('token-registry-contracts/build/contracts/EthereumDIDRegistry.json').abi,
+  LibNote: require('token-registry-contracts/build/contracts/LibNote.json').abi,
+  Ownable: require('token-registry-contracts/build/contracts/Ownable.json').abi,
+  Registry: require('token-registry-contracts/build/contracts/Registry.json').abi,
+  ReserveBank: require('token-registry-contracts/build/contracts/ReserveBank.json').abi,
+  SafeMath: require('token-registry-contracts/build/contracts/SafeMath.json').abi,
+  TokenRegistry: require('token-registry-contracts/build/contracts/TokenRegistry.json').abi
 }
+
+const addresses = require('token-registry-contracts/addresses.json')
 
 const addressMap = {
   Dai: "mockDAI",
@@ -110,8 +113,6 @@ const addressMap = {
   ReserveBank: "reserveBank",
   TokenRegistry: "tokenRegistry",
 }
-
-const addressesByNetwork = require('../../contracts/addresses.json')
 
 async function getContract(context: Context, contract: string, signer: ethers.Signer) {
   const { ethereum } = context.graph.config
@@ -122,36 +123,37 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
     throw new Error(`Missing the ABI for '${contract}'`)
   }
 
-  let network = ethereum.network.name
-
-  if (network === "dev") {
-    network = "ganache"
+  const network = await ethereum.getNetwork()
+  let networkName = network.name
+  if (networkName === "dev") {
+    networkName = "ganache"
   }
 
-  const addresses = addressesByNetwork[network]
+  const networkAddresses = addresses[networkName]
 
-  if (!addresses) {
-    throw new Error(`Missing addresses for network '${network}'`)
+  if (!networkAddresses) {
+    throw new Error(`Missing addresses for network '${networkName}'`)
   }
 
-  const addressName = addressMap[contract]
+  const address = networkAddresses[addressMap[contract]]
 
-  if(!addressName) {
-    throw new Error(`Missing address name mapping for '${contract}'`)
-  }
-
-  const address = addresses[addressName]
-
-  if(!address) {
-    throw new Error(`Missing address for '${addressName}'`)
+  if (!address) {
+    throw new Error(`Missing contract address for '${contract}' on network '${networkName}'`)
   }
 
   const instance = new ethers.Contract(
-    address, abi, ethereum.getSigner()
+    address, abi, signer
   )
   instance.connect(ethereum)
 
   return instance
+}
+
+async function uploadImage(_, { image }: any, context: Context) {
+
+  const { ipfs } = context.graph.config
+
+  return await uploadToIpfs(ipfs, image)
 }
 
 async function addToken(_, { options }: any, context: Context) {
@@ -162,43 +164,45 @@ async function addToken(_, { options }: any, context: Context) {
 
   const { symbol, description, image, decimals } = options
 
-  const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
+  const imageHash = await uploadToIpfs(ipfs, image)
 
   await state.dispatch("UPLOAD_IMAGE", { value: true })
 
-  const metadata = JSON.stringify(
-    {
+  const metadata = Buffer.from(
+    JSON.stringify({
       symbol,
       description,
       image: imageHash,
       decimals
-    }
+    })
   )
 
-  const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
+  const metadataHash = await uploadToIpfs(ipfs, metadata)
 
   await state.dispatch("UPLOAD_METADATA", { metadataHash })
 
-  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + "0").connect(ethereum)
-  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath+ "1").connect(ethereum)
+  const owner = ethereum.getSigner(0)
+  const member = await ethers.Wallet.createRandom().connect(ethereum)
 
-  const tokenRegistryContract = await getContract(context, "TokenRegistry", ownerWallet)
-  const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", ownerWallet)
+  const tokenRegistryContract = await getContract(context, "TokenRegistry", owner)
+  const ethereumDIDContract = await getContract(context, "EthereumDIDRegistry", owner)
+  const daiContract = await getContract(context, "Dai", owner)
 
-  const daiContract = await getContract(context, "Dai", ownerWallet)
-
-  try{
+  try {
     await applySignedWithAttribute(
-      memberWallet,
-      ownerWallet,
+      member,
+      owner,
+      metadataHash,
       tokenRegistryContract,
       ethereumDIDContract,
       daiContract
     )
-  }catch(err) {
+  } catch (err) {
     console.log(err)
+    throw err
   }
 
+  return true
 }
 
 async function editToken(_, { options }: any, context: Context) {
@@ -207,7 +211,7 @@ async function editToken(_, { options }: any, context: Context) {
 
   const { symbol, description, image, decimals } = options
 
-  const { path: imageHash }: { path: string } = await uploadToIpfs(ipfs, image)
+  const imageHash = await uploadToIpfs(ipfs, image)
 
   const metadata = JSON.stringify(
     {
@@ -218,61 +222,76 @@ async function editToken(_, { options }: any, context: Context) {
     }
   )
 
-  const { path: metadataHash }: { path: string } = await uploadToIpfs(ipfs, metadata)
-  
-  const ownerWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + "1").connect(ethereum)
-  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + "0").connect(ethereum)
+  const metadataHash = await uploadToIpfs(ipfs, metadata)
 
-  const memberAddress = await memberWallet.getAddress()
+  const owner = ethereum.getSigner(0)
+  const member = await ethers.Wallet.createRandom().connect(ethereum)
+  const memberAddress = await member.getAddress()
 
-  const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", memberWallet)
+  const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", member)
 
-  try{
-    await setAttribute(memberAddress, ownerWallet, ethereumDIDRegistry)
-  }catch(err) {
+  try {
+    await setAttribute(
+      memberAddress,
+      owner,
+      metadataHash,
+      ethereumDIDRegistry
+    )
+  } catch (err) {
     console.log(err)
-  }
-  
-  return null
-}
-
-async function deleteToken(_, args: any, context: Context) {
-
-  const { ethereum } = context.graph.config
-
-  const memberWallet = await ethers.Wallet.fromMnemonic(mnemonic, accountPath + 0).connect(ethereum)
-
-  const tokenRegistry = await getContract(context, "TokenRegistry", memberWallet)
-
-  const address = await memberWallet.getAddress()
-
-  try{
-    await tokenRegistry.memberExit(address)
-  }catch(err){
-    console.log(err)
+    throw err
   }
 
   return true
 }
 
-async function challengeToken(_, { options: { description, token } }: any, context: Context) {
+async function removeToken(_, args: any, context: Context) {
+  const { tokenId } = args 
+  const { ethereum } = context.graph.config
 
+  const owner = ethereum.getSigner(0)
+  const tokenRegistry = await getContract(context, "TokenRegistry", owner)
+
+  try {
+    await tokenRegistry.memberExit(tokenId.toString())
+  } catch (err) {
+    console.log(err)
+    throw err
+  }
+
+  return true
+}
+
+async function challengeToken(_, { options }: any, context: Context) {
   const { ipfs, ethereum } = context.graph.config
-
   const { state } = context.graph
+  const {
+    description,
+    challengingToken,
+    challengedToken
+  } = options
 
   const challenge = JSON.stringify({
     description,
-    token
+    challengedToken
   })
 
-  const { path: challengeHash }: { path: string } = await uploadToIpfs(ipfs, challenge)
+  const challengeHash = await uploadToIpfs(ipfs, challenge)
 
   await state.dispatch('UPLOAD_CHALLENGE', { challengeHash })
 
   const tokenRegistry = await getContract(context, "TokenRegistry", ethereum.getSigner())
-  
-  //tokenRegistry.challenge( ... )
+
+  try {
+    await tokenRegistry.challenge(
+      challengingToken,
+      challengedToken,
+      ipfsHexHash(challengeHash)
+    )
+  } catch (err) {
+    console.log(err)
+    throw err
+  }
 
   return true
 }
@@ -288,13 +307,23 @@ async function voteChallenge(_, args: any, context: Context) {
   return true
 }
 
+const uploadToIpfs = async (ipfs: any, data: any): Promise<string> => {
+  let result;
+
+  for await (const returnedValue of ipfs.add(data)) {
+    result = returnedValue
+  }
+
+  return result.path
+}
 
 
 const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {
+    uploadImage,
     addToken,
     editToken,
-    deleteToken,
+    removeToken,
     challengeToken,
     voteChallenge
   }
@@ -311,14 +340,4 @@ export {
   EventMap,
   UploadImageEvent,
   UploadMetadataEvent
-}
-
-const uploadToIpfs = async (ipfs: any, element: string) => {
-  let result;
-
-  for await (const returnedValue of ipfs.add(element)) {
-    result = returnedValue
-  }
-
-  return result
 }

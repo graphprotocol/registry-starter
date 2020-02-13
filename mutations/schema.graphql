@@ -6,7 +6,8 @@ input TokenOptions {
 }
 
 input ChallengeOptions {
-  token: Token!
+  challengingToken: Token!,
+  challengedToken: Token!,
   description: String
 }
 
@@ -16,13 +17,17 @@ input VoteOptions {
 }
 
 type Mutation {
+  uploadImage(
+    image: String
+  ): String!
+
   addToken(
     options: TokenOptions!
-  ): Token!
+  ): Boolean!
 
   editToken(
     options: TokenOptions!
-  ): Token!
+  ): Boolean!
 
   removeToken(
     tokenId: ID!
@@ -30,9 +35,9 @@ type Mutation {
 
   challengeToken(
     options: ChallengeOptions!
-  ): Challenge!
+  ): Boolean!
 
   voteChallenge(
     options: VoteOptions!
-  ): Vote!
+  ): Boolean!
 }
