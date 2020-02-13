@@ -204,8 +204,9 @@ contract TokenRegistry is Registry, Ownable {
         erc1056Registry.changeOwnerSigned(_newMember, _sigV[0], _sigR[0], _sigS[0], _owner);
 
         // Approve the TokenRegistry to transfer on the owners behalf
-        // Nonce starts at 0. Expiry = 0 is infinite. true is unlimited allowance
-        approvedToken.permit(_owner, address(this), 0, 0, true, _sigV[1], _sigR[1], _sigS[1]);
+        // Expiry = 0 is infinite. true is unlimited allowance
+        uint256 nonce = approvedToken.nonces(_owner); 
+        approvedToken.permit(_owner, address(this), nonce, 0, true, _sigV[1], _sigR[1], _sigS[1]);
 
         // Transfers tokens from owner to the reserve bank
         require(
@@ -413,7 +414,6 @@ contract TokenRegistry is Registry, Ownable {
         emit SubmitVote(_challengeID, msg.sender, _votingMember, _voteChoice, voteWeight);
     }
 
-    // TODO - test gas limit for this, and maybe hard code in the array size
     /**
     @dev                    Submit many votes from owner with multiple members they own
     @param _challengeID     The challenge ID
@@ -427,7 +427,7 @@ contract TokenRegistry is Registry, Ownable {
     ) public {
         require(
             _voteChoices.length == _voters.length,
-            "SubmitVotes - Arrays must be equal"
+            "submitVotes - Arrays must be equal"
         );
         for (uint256 i; i < _voteChoices.length; i++){
             submitVote(_challengeID, _voteChoices[i], _voters[i]);

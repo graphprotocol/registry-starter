@@ -18,50 +18,11 @@ contract('TokenRegistry', () => {
         })
 
         it('Should prevent a member from double joining', async () => {
-            // Do the normal way of signing up through helpers.applySignedWithAttribute
-            // await helpers.applySignedWithAttribute(newMemberWallet, ownerWallet1)
-
-            // TODO - why doesn't this work, try out other reverts
-            // Build the TX again to pass into expectRevert
-            // const ownerAddress = ownerWallet.signingKey.address
-            // const newMemberAddress = newMemberWallet.signingKey.address
-            // const tokenRegistry = await TokenRegistry.deployed()
-            // const token = await Token.deployed()
-    
-            // // Get the signature for changing ownership on ERC-1056 Registry
-            // const applySignedSig = await module.exports.applySigned(newMemberWallet, ownerWallet)
-            // // Get the signature for permitting TokenRegistry to transfer DAI on users behalf
-            // const permitSig = await module.exports.daiPermit(ownerWallet, tokenRegistry.address)
-    
-            // const setAttributeData =
-            //     Buffer.from('setAttribute').toString('hex') +
-            //     utils.stringToBytes32(offChainDataName) +
-            //     utils.stripHexPrefix(utils.mockIPFSData) +
-            //     maxValidity
-            // // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
-            // const setAttributeSignedSig = await module.exports.setAttributeSigned(
-            //     newMemberWallet,
-            //     ownerWallet,
-            //     setAttributeData
-            // )
-
-            // await utils.expectRevert(
-            //     tokenRegistry.applySignedWithAttribute(
-            //         newMemberAddress,
-            //         [applySignedSig.v, permitSig.v],
-            //         [applySignedSig.r, permitSig.r],
-            //         [applySignedSig.s, permitSig.s],
-            //         ownerAddress,
-            //         setAttributeSignedSig.v,
-            //         setAttributeSignedSig.r,
-            //         setAttributeSignedSig.s,
-            //         '0x' + utils.stringToBytes32(offChainDataName),
-            //         utils.mockIPFSData,
-            //         '0x' + maxValidity,
-            //         { from: ownerAddress }
-            //     ),
-            //     'applySignedInternal - This member already exists'
-            // )
+            // Should fail when trying to apply again
+            await utils.expectRevert(
+                helpers.applySignedWithAttribute(newMemberWallet, ownerWallet1),
+                'applySignedInternal - This member already exists'
+            )
         })
 
         it('should allow a member to exit', async () => {
@@ -86,5 +47,3 @@ contract('TokenRegistry', () => {
         })
     })
 })
-
-// TODO - no double join

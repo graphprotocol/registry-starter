@@ -32,6 +32,7 @@ const helpers = {
             utils.stringToBytes32(offChainDataName) +
             utils.stripHexPrefix(utils.mockIPFSData) +
             maxValidity
+        
         // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
         const setAttributeSignedSig = await module.exports.setAttributeSigned(
             newMemberWallet,
@@ -121,6 +122,7 @@ const helpers = {
         const sig = await module.exports.signDataDIDRegistry(
             memberAddress,
             memberPrivateKey,
+            memberAddress,
             Buffer.from('changeOwner').toString('hex') + utils.stripHexPrefix(ownerAddress),
             'changeOwner'
         )
@@ -149,22 +151,24 @@ const helpers = {
     // Note owner is signer, because ownership has already been changed over
     setAttributeSigned: async (newMemberWallet, ownerWallet, data) => {
         const memberAddress = newMemberWallet.signingKey.address
-        const ownerPrivateKey = Buffer.from(
+        const signerAddress = ownerWallet.signingKey.address
+        const signerPrivateKey = Buffer.from(
             utils.stripHexPrefix(ownerWallet.signingKey.privateKey),
             'hex'
         )
         const sig = await module.exports.signDataDIDRegistry(
             memberAddress,
-            ownerPrivateKey,
+            signerPrivateKey,
+            signerAddress,
             data,
             'setAttribute'
         )
         return sig
     },
 
-    signDataDIDRegistry: async (identity, signingKey, data, functionName) => {
+    signDataDIDRegistry: async (identity, signingKey, signingAddress, data, functionName) => {
         const didReg = await EthereumDIDRegistry.deployed()
-        const nonce = await didReg.nonce(identity)
+        const nonce = await didReg.nonce(signingAddress)
         const paddedNonce = utils.leftPad(Buffer.from([nonce], 64).toString('hex'))
         let dataToSign
 
@@ -334,8 +338,6 @@ const helpers = {
         const reserveBankBalanceAfterChallenge = await token.balanceOf(reserveBankAddress)
         const challengerBalanceAfterChallenge = await token.balanceOf(challengerOwner)
         const challengeeBalanceAfterChallenge = await token.balanceOf(challengeeOwner)
-
-        // TODO - challenger vs challengee win, check what needs to be done for balances
 
         // Increase time so challenge can be resolved
         await utils.increaseTime(utils.votePeriod + 1)

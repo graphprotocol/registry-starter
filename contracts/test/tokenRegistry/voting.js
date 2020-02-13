@@ -1,5 +1,3 @@
-
-
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
 const helpers = require('../helpers.js')
 const utils = require('../utils.js')
@@ -40,50 +38,88 @@ contract('tokenRegistry', () => {
     }
     const fakeDetails = '0x5555555555555555555555555555555555555555555555555555555555554444'
 
-    describe(
-        'Test voting require statements and functionality',
-        () => {
-            // Set up 5 Tokens
-            before(async () => {
-                await helpers.applySignedWithAttribute(member1Wallet, owner1Wallet)
-                await helpers.applySignedWithAttribute(member2Wallet, owner2Wallet)
-                await helpers.applySignedWithAttribute(member3Wallet, owner3Wallet)
-                await helpers.applySignedWithAttribute(member4Wallet, owner4Wallet)
-                await helpers.applySignedWithAttribute(member5Wallet, owner5Wallet)
-            })
+    describe('Test voting require statements and functionality', () => {
+        // Set up 5 Tokens
+        before(async () => {
+            await helpers.applySignedWithAttribute(member1Wallet, owner1Wallet)
+            await helpers.applySignedWithAttribute(member2Wallet, owner2Wallet)
+            await helpers.applySignedWithAttribute(member3Wallet, owner3Wallet)
+            await helpers.applySignedWithAttribute(member4Wallet, owner4Wallet)
+            await helpers.applySignedWithAttribute(member5Wallet, owner5Wallet)
+        })
+        it('Voting on a challenge that does not exist fails', async () => {
+            const tokenRegistry = await TokenRegistry.deployed()
+            const fakeChallengeID = 500
+            await utils.expectRevert(
+                tokenRegistry.submitVote(fakeChallengeID, voteChoice.Yes, member1Address, {
+                    from: owner1Address
+                }),
+                `submitVote - Challenge does not exist`
+            )
+        })
+        it('Voting must be yes or no, any other choice fails', async () => {
+            const tokenRegistry = await TokenRegistry.deployed()
+            const challengeID = await helpers.challenge(
+                member1Address,
+                member5Address,
+                fakeDetails,
+                owner1Address
+            )
 
-            it('Voting on an expired challenge fails', async () => {
-                // TODO
+            await utils.expectRevert(
+                tokenRegistry.submitVote(challengeID, 0, member1Address, {
+                    from: owner1Address
+                }),
+                `submitVote - Vote must be either Yes or No`
+            )
+
+            // For access outside of an enum, the error is invalid opcode
+            await utils.expectRevert(
+                tokenRegistry.submitVote(challengeID, 3, member1Address, {
+                    from: owner1Address
+                }),
+                `invalid opcode`
+            )
+        })
+
+        it('Double voting on a challenge fails', async () => {
+            const tokenRegistry = await TokenRegistry.deployed()
+            const challengeID = await tokenRegistry.getChallengeID(member5Address)
+
+            await tokenRegistry.submitVote(challengeID, 1, member2Address, {
+                from: owner2Address
             })
-            it('Voting must be yes or no, any other choice fails', async () => {
-                // TODO
-            })
-            it('Voting on a challenge that does not exit fails', async () => {
-                // TODO
-            })
-            it('Double voting on a challenge fails', async () => {
-                // TODO
-            })
-            it('Voting by a non-member fails', async () => {
-                // TODO
-            })
-            it('Voting on an expired challenge fails', async () => {
-                // TODO
-            })
-        }
-    )
+            await utils.expectRevert(
+                tokenRegistry.submitVote(challengeID, 1, member2Address, {
+                    from: owner2Address
+                }),
+                `submitVote - Member has already voted on this challenge`
+            )
+        })
+
+        it('Voting by a non-member fails', async () => {
+            const tokenRegistry = await TokenRegistry.deployed()
+            const challengeID = await tokenRegistry.getChallengeID(member5Address)
+            await utils.expectRevert(
+                tokenRegistry.submitVote(challengeID, 1, nonMemberAddress, {
+                    from: nonMemberAddress
+                }),
+                `onlyMemberOwner - Address is not a member`
+            )
+        })
+        it('Voting on an expired challenge fails', async () => {
+            const tokenRegistry = await TokenRegistry.deployed()
+            const challengeID = await tokenRegistry.getChallengeID(member5Address)
+
+            // Increase time, but do not resolve challenge yet
+            await utils.increaseTime(utils.votePeriod + 1)
+            await utils.expectRevert(
+                tokenRegistry.submitVote(challengeID, 1, member3Address, {
+                    from: owner3Address
+                }),
+                `submitVote - Challenge voting period has expired`
+            )
+
+        })
+    })
 })
-
-
-/* TODOS
-votings
-- cant vote on an expired challenge
-- must vote yes or no
-- cant vote on a non existant challenge
-- cant double vote
-- cant vote own challenge DONE
-- non members cant vote
-- submitVotes
-    - just test the function that you can vote for multiple
-    - test arrays must be equal length
-*/

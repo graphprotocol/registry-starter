@@ -81,12 +81,6 @@ contract('tokenRegistry', () => {
                     !(await tokenRegistry.memberChallengeExists(member5Address)),
                     'Challenge was removed as expected'
                 )
-
-                // Reapply, get back on list
-                // TODO - the problem here is, reapplying, we get in a weird state that doesnt work. ORRRR Maybe this case means that we wont let you reapply, which might
-                // acutlally be okay
-                // because of the identity standard.
-                // await helpers.applySignedWithAttribute(owner5Wallet, owner5Wallet)
             })
 
             it('should allow a member to be challenged, win, and stay', async () => {
