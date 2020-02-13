@@ -65,7 +65,7 @@ export const signDataDIDRegistry = async (
   ethDIDContract: Contract
 ) => {
   const nonce = await ethDIDContract.nonce(identity)
-  const paddedNonce = leftPad(Buffer.from([nonce]).toString('hex'))
+  const paddedNonce = leftPad(Buffer.from([nonce], 64).toString('hex'))
   let dataToSign
 
   if (functionName == 'changeOwner') {
@@ -189,10 +189,12 @@ export const applySignedWithAttribute = async (
   // Get the signature for permitting TokenRegistry to transfer DAI on users behalf
   const permitSig = await daiPermit(owner, tokenRegistryContract.address, daiContract)
 
+  const metadataIpfsBytes = Buffer.from(metadataIpfsHash, 'hex')
+
   const setAttributeData =
     Buffer.from('setAttribute').toString('hex') +
     stringToBytes32(offChainDataName) +
-    stripHexPrefix(metadataIpfsHash) +
+    stripHexPrefix(metadataIpfsBytes.toString()) +
     maxValidity
 
   // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
@@ -214,7 +216,7 @@ export const applySignedWithAttribute = async (
     setAttributeSignedSig.r,
     setAttributeSignedSig.s,
     '0x' + stringToBytes32(offChainDataName),
-    Buffer.from(metadataIpfsHash),
+    metadataIpfsBytes,
     '0x' + maxValidity
   )
 }
@@ -233,7 +235,7 @@ export const setAttribute = async (
   const tx = await fromOwner.setAttribute(
     memberAddress,
     '0x' + stringToBytes32(offChainDataName),
-    metadataIpfsHash,
+    Buffer.from(metadataIpfsHash, 'hex'),
     '0x' + maxValidity
   )
   return tx
