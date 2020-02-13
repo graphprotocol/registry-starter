@@ -35,7 +35,7 @@ const mutations = createMutations({
   }
 })
 
-const queryLink = createHttpLink({ uri: `${networkURI}/subgraphs/name/davekaj/tokenRegistry` })
+const queryLink = createHttpLink({ uri: `${networkURI}/subgraphs/name/graphprotocol/registry-starter` })
 
 const mutationLink = createMutationsLink({ mutations })
 

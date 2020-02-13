@@ -1,20 +1,21 @@
 import { keccak256 } from 'js-sha3'
-import { ecsign } from 'ethereumjs-util'
+import { ethers, Contract, Signer } from 'ethers'
+import base from 'base-x'
 
 const DAI_PERMIT_TYPEHASH = 'ea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb'
 const offChainDataName = 'TokenData'
 const maxValidity = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-const mockIPFSData = '0xbabbabb9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9'
 
-export const setAttributeSigned = async (newMemberWallet, ownerWallet, data, ethDIDContract) => {
-  const memberAddress = newMemberWallet.signingKey.address
-  const ownerPrivateKey = Buffer.from(
-    stripHexPrefix(ownerWallet.signingKey.privateKey),
-    'hex'
-  )
+export const setAttributeSigned = async (
+  newMember: Signer,
+  owner: Signer,
+  data: string,
+  ethDIDContract: Contract
+) => {
+  const memberAddress = await newMember.getAddress()
   const sig = await signDataDIDRegistry(
     memberAddress,
-    ownerPrivateKey,
+    owner,
     data,
     'setAttribute',
     ethDIDContract
@@ -22,34 +23,34 @@ export const setAttributeSigned = async (newMemberWallet, ownerWallet, data, eth
   return sig
 }
 
-export const daiPermit = async (holderWallet, spenderAddress, daiContract) => {
-  const holderAddress = holderWallet.signingKey.address
+export const daiPermit = async (
+  holder: Signer,
+  spenderAddress: string,
+  daiContract: Contract
+) => {
+  const holderAddress = await holder.getAddress()
   const nonce = (await daiContract.nonces(holderAddress)).toString()
-  const holderPrivateKey = Buffer.from(
-    stripHexPrefix(holderWallet.signingKey.privateKey),
-    'hex'
-  )
   const sig = await signPermit(
     holderAddress,
     spenderAddress,
-    holderPrivateKey,
+    holder,
     nonce,
     daiContract
   )
   return sig
 }
 
-export const applySigned = async (newMemberWallet, ownerWallet, ethDIDContract) => {
-  const memberAddress = newMemberWallet.signingKey.address
-  const memberPrivateKey = Buffer.from(
-    stripHexPrefix(newMemberWallet.signingKey.privateKey),
-    'hex'
-  )
+export const applySigned = async (
+  newMember: Signer,
+  owner: Signer,
+  ethDIDContract: Contract
+) => {
+  const newMemberAddress = await newMember.getAddress()
+  const ownerAddress = await owner.getAddress()
 
-  const ownerAddress = ownerWallet.signingKey.address
   const sig = await signDataDIDRegistry(
-    memberAddress,
-    memberPrivateKey,
+    newMemberAddress,
+    newMember,
     Buffer.from('changeOwner').toString('hex') + stripHexPrefix(ownerAddress),
     'changeOwner',
     ethDIDContract
@@ -57,9 +58,15 @@ export const applySigned = async (newMemberWallet, ownerWallet, ethDIDContract) 
   return sig
 }
 
-export const signDataDIDRegistry = async (identity, signingKey, data, functionName, ethDIDContract) => {
+export const signDataDIDRegistry = async (
+  identity: string,
+  signer: Signer,
+  data: string,
+  functionName: string,
+  ethDIDContract: Contract
+) => {
   const nonce = await ethDIDContract.nonce(identity)
-  const paddedNonce = leftPad(Buffer.from([nonce]).toString('hex'))
+  const paddedNonce = leftPad(Buffer.from([nonce], 64).toString('hex'))
   let dataToSign
 
   if (functionName == 'changeOwner') {
@@ -77,24 +84,26 @@ export const signDataDIDRegistry = async (identity, signingKey, data, functionNa
       stripHexPrefix(identity) +
       data
   }
-  console.log("PREV")
-  const hash = Buffer.from(keccak256.arrayBuffer(Buffer.from(dataToSign, 'hex')))
 
-  console.log("BEFORE ")
-  const signature = ecsign(hash, signingKey)
-
-  console.log("AFTER ")
+  const hash = Buffer.from(keccak256(Buffer.from(dataToSign, 'hex')), 'hex')
+  const signature = await signer.signMessage(hash)
+  const splitSig = ethers.utils.splitSignature(signature)
 
   return {
-    r: '0x' + signature.r.toString('hex'),
-    s: '0x' + signature.s.toString('hex'),
-    v: signature.v
+    r: splitSig.r,
+    s: splitSig.s,
+    v: splitSig.v
   }
 }
 
-export const signPermit = async (holderAddress, spenderAddress, holderPrivateKey, nonce, daiContract) => {
+export const signPermit = async (
+  holderAddress: string,
+  spenderAddress: string,
+  holder: Signer,
+  nonce: string,
+  daiContract: Contract
+) => {
   const paddedNonce = leftPad(Buffer.from([nonce]).toString('hex'))
-  console.log("PADDED NONCE: ", paddedNonce)
   // We set expiry to 0 always, as that will be default for the TokenRegistry calling
   const paddedExpiry = leftPad(Buffer.from([0]).toString('hex'))
   // We set to 1 == true, as that will be default for the TokenRegistry calling
@@ -130,14 +139,9 @@ export const signPermit = async (holderAddress, spenderAddress, holderPrivateKey
   /*  Expected hashedStruct value:
       01b930e8948f5be49f019425c83bcf1657b07efb06fb959192051e9c412abace
   */
-  console.log("STRUCT ENCODED: ", structEncoded)
   const hashedStruct = Buffer.from(keccak256.arrayBuffer(Buffer.from(structEncoded, 'hex')))
   const stringHashedStruct = hashedStruct.toString('hex')
-  console.log("HASHES STRUCT: ", stringHashedStruct)
-
   const stringDomainSeparator = DAI_DOMAIN_SEPARATOR.toString('hex')
-  console.log("Domain Separator: ", stringDomainSeparator)
-
 
   /*  Expected digestData value on first test run (dependant on mock dai address)
       Where mock dai addr = 0xCfEB869F69431e42cdB54A4F4f105C19C080A601
@@ -150,17 +154,21 @@ export const signPermit = async (holderAddress, spenderAddress, holderPrivateKey
   */
   const digestData = '1901' + stringDomainSeparator + stringHashedStruct
 
+  // TODO: need to utilize "Sign Typed Data V4" here instead.
+  //       https://gitcoin.co/issue/MetaMask/Hackathons/2/3865
+  //       https://metamask.github.io/metamask-docs/API_Reference/Signing_Data/Sign_Typed_Data_v4
+  //       https://github.com/mosendo/gasless/blob/7688283021bbdb1c99b6951944345af0ba06e036/app/src/utils/relayer.js#L38-L79
+
   /*  Expected digest value and first test deploy on ganache:
       fc60391b0087e420dc8e15ae01ef93d0814572bbd80b3111248897d3a0d9f941
   */
-  const digest = Buffer.from(keccak256.arrayBuffer(Buffer.from(digestData, 'hex')))
-  console.log("DIGESt: ", digest.toString('hex'))
-
-  const signature = ecsign(digest, holderPrivateKey)
+  const digest = Buffer.from(keccak256(Buffer.from(digestData, 'hex')), 'hex')
+  const signature = await holder.signMessage(digest)
+  const splitSig = ethers.utils.splitSignature(signature)
   return {
-    r: '0x' + signature.r.toString('hex'),
-    s: '0x' + signature.s.toString('hex'),
-    v: signature.v
+    r: splitSig.r,
+    s: splitSig.s,
+    v: splitSig.v
   }
 }
 
@@ -169,37 +177,36 @@ export const stringToBytes32 = str => {
   return buffstr + '0'.repeat(64 - buffstr.length)
 }
 
-export const applySignedWithAttribute = async (newMemberWallet,
-  ownerWallet,
-  tokenRegistryContract,
-  ethDIDContract,
-  daiContract
+export const applySignedWithAttribute = async (
+  newMember: Signer,
+  owner: Signer,
+  metadataIpfsHash: string,
+  tokenRegistryContract: Contract,
+  ethDIDContract: Contract,
+  daiContract: Contract
 ) => {
 
-  const ownerAddress = ownerWallet.signingKey.address
-  const memberAddress = newMemberWallet.signingKey.address
-
-  console.log("HERE")
+  const ownerAddress = await owner.getAddress()
+  const memberAddress = await newMember.getAddress()
 
   // Get the signature for changing ownership on ERC-1056 Registry
-  const applySignedSig = await applySigned(newMemberWallet, ownerWallet, ethDIDContract)
-
-  console.log("FIRST")
+  const applySignedSig = await applySigned(newMember, owner, ethDIDContract)
 
   // Get the signature for permitting TokenRegistry to transfer DAI on users behalf
-  const permitSig = await daiPermit(ownerWallet, tokenRegistryContract.address, daiContract)
+  const permitSig = await daiPermit(owner, tokenRegistryContract.address, daiContract)
 
-  console.log("SECOND")
+  const metadataIpfsBytes = Buffer.from(metadataIpfsHash, 'hex')
 
   const setAttributeData =
     Buffer.from('setAttribute').toString('hex') +
     stringToBytes32(offChainDataName) +
-    stripHexPrefix(mockIPFSData) +
+    stripHexPrefix(metadataIpfsBytes.toString()) +
     maxValidity
+
   // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
   const setAttributeSignedSig = await setAttributeSigned(
-    newMemberWallet,
-    ownerWallet,
+    newMember,
+    owner,
     setAttributeData,
     ethDIDContract
   )
@@ -215,26 +222,34 @@ export const applySignedWithAttribute = async (newMemberWallet,
     setAttributeSignedSig.r,
     setAttributeSignedSig.s,
     '0x' + stringToBytes32(offChainDataName),
-    mockIPFSData,
+    metadataIpfsBytes,
     '0x' + maxValidity
   )
 
-  console.log(tx.receipt.rawLogs)
-
+  return tx
 }
 
-export const setAttribute = async (memberAddress, ownerWallet, ethDIDContract) => {
-  const ownerAddress = ownerWallet.signingKey.address
-  const tx = await ethDIDContract.setAttribute(
-      memberAddress,
-      '0x' + stringToBytes32(offChainDataName),
-      mockIPFSData,
-      '0x' + maxValidity
+export const setAttribute = async (
+  memberAddress: string,
+  owner: Signer,
+  metadataIpfsHash: string,
+  ethDIDContract: Contract
+) => {
+  const fromOwner = new ethers.Contract(
+    ethDIDContract.address,
+    ethDIDContract.interface,
+    owner
   )
-
+  const tx = await fromOwner.setAttribute(
+    memberAddress,
+    '0x' + stringToBytes32(offChainDataName),
+    Buffer.from(metadataIpfsHash, 'hex'),
+    '0x' + maxValidity
+  )
+  return tx
 }
 
-const createDaiDomainSeparator = async (daiContract) => {
+const createDaiDomainSeparator = async (daiContract: Contract) => {
   const domain = keccak256(
     'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
   )
@@ -246,22 +261,32 @@ const createDaiDomainSeparator = async (daiContract) => {
   // ChainID of uint256 9545 used for development, in bytes32
   const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
   const daiAddress = daiContract.address
-  console.log("DAI ADDR: ", daiAddress)
   const paddedDaiAddress = leftPad(stripHexPrefix(daiAddress))
   const data = domain + hashedName + hashedVersion + paddedChainID + paddedDaiAddress
   const hash = Buffer.from(keccak256.arrayBuffer(Buffer.from(data, 'hex')))
   return hash
 }
 
-
-const stripHexPrefix = str => {
+const stripHexPrefix = (str: string) => {
   if (str.startsWith('0x')) {
     return str.slice(2)
   }
   return str
 }
 
-const leftPad = (data, size = 64) => {
+const leftPad = (data: string, size = 64) => {
   if (data.length === size) return data
   return '0'.repeat(size - data.length) + data
+}
+
+// convert ipfsHash to Hex string
+export const ipfsHexHash = (ipfsHash: string) => {
+  const base58 = base('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz')
+  return (
+    '0x' +
+    base58
+      .decode(ipfsHash)
+      .slice(2)
+      .toString('hex')
+  )
 }
