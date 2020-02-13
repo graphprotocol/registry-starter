@@ -7,7 +7,8 @@ import {
   getFromIpfs,
   TokenMetadata,
   ipfsClient,
-  createApolloClient
+  createApolloClient,
+  provider
 } from './utils'
 
 describe("Mutation Resolvers", () => {
@@ -66,7 +67,7 @@ describe("Mutation Resolvers", () => {
     })
   })
 
-  /*describe("removeToken resolver", () => {
+  describe("removeToken resolver", () => {
 
     it("Should return true", async () => {
 
@@ -101,12 +102,8 @@ describe("Mutation Resolvers", () => {
         variables: {
           options: {
             description: "test desc",
-            token: {
-              symbol: 'test sym',
-              description: 'test description',
-              image: "test img",
-              decimals: 'test decimals'
-            }
+            challengingToken: "0x28644b4d1dd1995a21007222a9ec02fb2a4fa950",
+            challengedToken: await provider.getSigner(0).getAddress()
           }
         },
         context: {
@@ -124,5 +121,5 @@ describe("Mutation Resolvers", () => {
       expect(challengeData.description).toEqual("test desc")
       expect(challengeData.token.symbol).toEqual("test sym")
     })
-  })*/
+  })
 })

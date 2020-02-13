@@ -8,7 +8,7 @@ import {
 
 const IpfsClient = require('ipfs-http-client')
 
-const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545', {
+export const provider = new ethers.providers.JsonRpcProvider('http://localhost:8545', {
   name: 'dev',
   chainId: 9545
 })

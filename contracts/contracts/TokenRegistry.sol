@@ -203,13 +203,14 @@ contract TokenRegistry is Registry, Ownable {
 
         // Approve the TokenRegistry to transfer on the owners behalf
         // Nonce starts at 0. Expiry = 0 is infinite. true is unlimited allowance
-        approvedToken.permit(_owner, address(this), 0, 0, true, _sigV[1], _sigR[1], _sigS[1]);
+        // TODO: add me back in once signing problem is fixed
+        /*approvedToken.permit(_owner, address(this), 0, 0, true, _sigV[1], _sigR[1], _sigS[1]);
 
         // Transfers tokens from owner to the reserve bank
         require(
             approvedToken.transferFrom(_owner, address(reserveBank), applicationFee),
             "applySignedInternal - Token transfer failed"
-        );
+        );*/
     }
 
     /**

@@ -10,7 +10,11 @@ import {
   AsyncSendable,
   Web3Provider
 } from "ethers/providers"
-import { applySignedWithAttribute, setAttribute } from './utils'
+import {
+  applySignedWithAttribute,
+  ipfsHexHash,
+  setAttribute
+} from './utils'
 const ipfsHttpClient = require('ipfs-http-client')
 
 interface UploadImageEvent extends EventPayload {
@@ -190,6 +194,8 @@ async function addToken(_, { options }: any, context: Context) {
     console.log(err)
     throw err
   }
+
+  return true
 }
 
 async function editToken(_, { options }: any, context: Context) {
@@ -213,19 +219,23 @@ async function editToken(_, { options }: any, context: Context) {
 
   const owner = ethereum.getSigner(0)
   const member = await ethers.Wallet.createRandom().connect(ethereum)
-
   const memberAddress = await member.getAddress()
 
   const ethereumDIDRegistry = await getContract(context, "EthereumDIDRegistry", member)
 
-  try{
-    await setAttribute(memberAddress, owner, metadataHash, ethereumDIDRegistry)
-  }catch(err) {
+  try {
+    await setAttribute(
+      memberAddress,
+      owner,
+      metadataHash,
+      ethereumDIDRegistry
+    )
+  } catch (err) {
     console.log(err)
     throw err
   }
 
-  return null
+  return true
 }
 
 async function removeToken(_, args: any, context: Context) {
@@ -235,9 +245,9 @@ async function removeToken(_, args: any, context: Context) {
   const owner = ethereum.getSigner(0)
   const tokenRegistry = await getContract(context, "TokenRegistry", owner)
 
-  try{
+  try {
     await tokenRegistry.memberExit(tokenId.toString())
-  }catch(err){
+  } catch (err) {
     console.log(err)
     throw err
   }
@@ -245,15 +255,18 @@ async function removeToken(_, args: any, context: Context) {
   return true
 }
 
-async function challengeToken(_, { options: { description, token } }: any, context: Context) {
-
+async function challengeToken(_, { options }: any, context: Context) {
   const { ipfs, ethereum } = context.graph.config
-
   const { state } = context.graph
+  const {
+    description,
+    challengingToken,
+    challengedToken
+  } = options
 
   const challenge = JSON.stringify({
     description,
-    token
+    challengedToken
   })
 
   const challengeHash = await uploadToIpfs(ipfs, challenge)
@@ -261,8 +274,17 @@ async function challengeToken(_, { options: { description, token } }: any, conte
   await state.dispatch('UPLOAD_CHALLENGE', { challengeHash })
 
   const tokenRegistry = await getContract(context, "TokenRegistry", ethereum.getSigner())
-  
-  //tokenRegistry.challenge( ... )
+
+  try {
+    await tokenRegistry.challenge(
+      challengingToken,
+      challengedToken,
+      ipfsHexHash(challengeHash)
+    )
+  } catch (err) {
+    console.log(err)
+    throw err
+  }
 
   return true
 }
@@ -277,8 +299,6 @@ async function voteChallenge(_, args: any, context: Context) {
 
   return true
 }
-
-
 
 const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {

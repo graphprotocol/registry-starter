@@ -1,5 +1,6 @@
 import { keccak256 } from 'js-sha3'
 import { ethers, Contract, Signer } from 'ethers'
+import base from 'base-x'
 
 const DAI_PERMIT_TYPEHASH = 'ea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb'
 const offChainDataName = 'TokenData'
@@ -84,7 +85,7 @@ export const signDataDIDRegistry = async (
       data
   }
 
-  const hash = Buffer.from(keccak256.arrayBuffer(Buffer.from(dataToSign, 'hex')))
+  const hash = Buffer.from(keccak256(Buffer.from(dataToSign, 'hex')), 'hex')
   const signature = await signer.signMessage(hash)
   const splitSig = ethers.utils.splitSignature(signature)
 
@@ -153,10 +154,15 @@ export const signPermit = async (
   */
   const digestData = '1901' + stringDomainSeparator + stringHashedStruct
 
+  // TODO: need to utilize "Sign Typed Data V4" here instead.
+  //       https://gitcoin.co/issue/MetaMask/Hackathons/2/3865
+  //       https://metamask.github.io/metamask-docs/API_Reference/Signing_Data/Sign_Typed_Data_v4
+  //       https://github.com/mosendo/gasless/blob/7688283021bbdb1c99b6951944345af0ba06e036/app/src/utils/relayer.js#L38-L79
+
   /*  Expected digest value and first test deploy on ganache:
       fc60391b0087e420dc8e15ae01ef93d0814572bbd80b3111248897d3a0d9f941
   */
-  const digest = Buffer.from(keccak256.arrayBuffer(Buffer.from(digestData, 'hex')))
+  const digest = Buffer.from(keccak256(Buffer.from(digestData, 'hex')), 'hex')
   const signature = await holder.signMessage(digest)
   const splitSig = ethers.utils.splitSignature(signature)
   return {
@@ -219,6 +225,8 @@ export const applySignedWithAttribute = async (
     metadataIpfsBytes,
     '0x' + maxValidity
   )
+
+  return tx
 }
 
 export const setAttribute = async (
@@ -269,4 +277,16 @@ const stripHexPrefix = (str: string) => {
 const leftPad = (data: string, size = 64) => {
   if (data.length === size) return data
   return '0'.repeat(size - data.length) + data
+}
+
+// convert ipfsHash to Hex string
+export const ipfsHexHash = (ipfsHash: string) => {
+  const base58 = base('123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz')
+  return (
+    '0x' +
+    base58
+      .decode(ipfsHash)
+      .slice(2)
+      .toString('hex')
+  )
 }
