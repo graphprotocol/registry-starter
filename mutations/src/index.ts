@@ -156,13 +156,11 @@ async function uploadImage(_, { image }: any, context: Context) {
   return await uploadToIpfs(ipfs, image)
 }
 
-async function addToken(_, { options }: any, context: Context) {
+async function addToken(_, { symbol, description, image, decimals, address }: any, context: Context) {
 
   const { ipfs, ethereum } = context.graph.config
 
   const { state } = context.graph
-
-  const { symbol, description, image, decimals, address } = options
 
   const imageHash = await uploadToIpfs(ipfs, image)
 

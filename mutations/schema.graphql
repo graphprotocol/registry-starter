@@ -25,7 +25,11 @@ type Mutation {
   ): String!
 
   addToken(
-    options: TokenOptions!
+    symbol: String!
+    description: String!
+    image: File
+    decimals: Int
+    address: String
   ): Boolean!
 
   editToken(
