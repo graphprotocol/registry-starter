@@ -57,10 +57,7 @@ contract EthereumDIDRegistry {
         internal
         returns (address)
     {
-        bytes32 ethSigHash = keccak256(
-            abi.encodePacked("\x19Ethereum Signed Message:\n32", hash)
-        );
-        address signer = ecrecover(ethSigHash, sigV, sigR, sigS);
+        address signer = ecrecover(hash, sigV, sigR, sigS);
         require(signer == identityOwner(identity), "Signer must be the identity owner");
         nonce[signer]++;
         return signer;

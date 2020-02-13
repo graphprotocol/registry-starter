@@ -212,7 +212,7 @@ contract TokenRegistry is Registry, Ownable {
         require(
             approvedToken.transferFrom(_owner, address(reserveBank), applicationFee),
             "applySignedInternal - Token transfer failed"
-        );*/
+        );
     }
 
     /**

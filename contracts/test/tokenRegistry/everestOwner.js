@@ -1,5 +1,5 @@
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
-const Token = artifacts.require('dai.sol')
+const Token = artifacts.require('Dai.sol')
 const helpers = require('../helpers.js')
 const utils = require('../utils.js')
 
