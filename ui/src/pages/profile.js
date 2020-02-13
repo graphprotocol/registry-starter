@@ -15,7 +15,7 @@ import Button from '../components/Button'
 
 const PROFILE_QUERY = gql`
   query profile($id: ID!) {
-    user(where: { id: $id }) {
+    user(id: $id) {
       id
       name
       bio
@@ -79,11 +79,16 @@ const Profile = ({ location }) => {
     },
   })
 
-  if (loading && !error) {
+  if (loading) {
     return <div />
   }
 
-  const user = data.user
+  if (error) {
+    console.error('Error with apollo query: ', error)
+    return <div />
+  }
+
+  const user = data && data.user
 
   const displayProfileId = profileId.slice(0, 6) + '...' + profileId.slice(-6)
 
@@ -95,6 +100,7 @@ const Profile = ({ location }) => {
             gridTemplateColumns: '80px 1fr',
             alignItems: 'center',
           }}
+          gap={[1, 3]}
         >
           <Box>
             <img

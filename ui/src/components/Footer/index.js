@@ -1,18 +1,18 @@
 /** @jsx jsx */
-import { jsx, Styled } from 'theme-ui'
+import { jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 
 const Footer = ({ ...props }) => {
   return (
     <Grid sx={rootStyles} {...props}>
-      <Styled.p sx={{ textAlign: ['center', 'left', 'left'] }}>
+      <Box sx={{ textAlign: ['center', 'left', 'left'] }}>
         <a
           href="https://github.com/graphprotocol/curation-starter"
           target="_blank"
           rel="noopener noreferrer"
           sx={{ display: 'inline-block', textDecoration: 'none' }}
         >
-          <p sx={{ variant: 'text.smaller' }}>
+          <p sx={{ variant: 'text.smaller', lineHeight: '0.75rem' }}>
             <img
               src="/github.png"
               alt="Github"
@@ -27,7 +27,7 @@ const Footer = ({ ...props }) => {
             Github
           </p>
         </a>
-      </Styled.p>
+      </Box>
       <Grid
         sx={{
           textAlign: 'right',

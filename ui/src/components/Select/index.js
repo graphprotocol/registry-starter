@@ -89,6 +89,7 @@ Select.propTypes = {
   tokens: PropTypes.any,
   selected: PropTypes.string,
   setValue: PropTypes.func,
+  setOpen: PropTypes.func,
   isPlaceholder: PropTypes.bool,
 }
 

@@ -187,10 +187,18 @@ const listStyles = {
 
 TokenList.propTypes = {
   title: PropTypes.string,
-  text: PropTypes.string,
-  tokens: PropTypes.any,
+  tokens: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      symbol: PropTypes.string,
+      image: PropTypes.string,
+    })
+  ),
   selected: PropTypes.any,
+  setIsOpen: PropTypes.func,
   setValue: PropTypes.func,
+  isMultiselect: PropTypes.bool,
+  isPlaceholder: PropTypes.bool,
 }
 
 export default TokenList

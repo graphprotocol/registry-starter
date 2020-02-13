@@ -1,8 +1,11 @@
+scalar File
+
 input TokenOptions {
   symbol: String!
   description: String!
-  image: String
+  image: File
   decimals: Int
+  address: String
 }
 
 input ChallengeOptions {
@@ -18,7 +21,7 @@ input VoteOptions {
 
 type Mutation {
   uploadImage(
-    image: String
+    image: File!
   ): String!
 
   addToken(
