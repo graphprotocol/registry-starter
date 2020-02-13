@@ -203,13 +203,14 @@ contract TokenRegistry is Registry, Ownable {
 
         // Approve the TokenRegistry to transfer on the owners behalf
         // Nonce starts at 0. Expiry = 0 is infinite. true is unlimited allowance
-        approvedToken.permit(_owner, address(this), 0, 0, true, _sigV[1], _sigR[1], _sigS[1]);
+        // TODO: add me back in once signing problem is fixed
+        /*approvedToken.permit(_owner, address(this), 0, 0, true, _sigV[1], _sigR[1], _sigS[1]);
 
         // Transfers tokens from owner to the reserve bank
         require(
             approvedToken.transferFrom(_owner, address(reserveBank), applicationFee),
             "applySignedInternal - Token transfer failed"
-        );
+        );*/
     }
 
     /**
@@ -450,9 +451,10 @@ contract TokenRegistry is Registry, Ownable {
         bool moreThanOneVote = storedChallenge.voterCount > 1;
         if (didPass && moreThanOneVote) {
 
-            // Transfer challenge deposit to challenger for winning challenge
+            // Transfer challenge deposit and losers application fee
+            // to challenger for winning challenge
             require(
-                withdraw(storedChallenge.challenger, challengeDeposit),
+                withdraw(storedChallenge.challenger, challengeDeposit + applicationFee),
                 "resolveChallenge - Rewarding challenger failed"
             );
             deleteMember(storedChallenge.member);
@@ -463,8 +465,7 @@ contract TokenRegistry is Registry, Ownable {
                 storedChallenge.noVotes
             );
         } else {
-            // Transfer challenge deposit to challengee. This keeps the token balance the same
-            // whether or not the challenge fails.
+            // Transfer challenge deposit to challengee
             require(
                 withdraw(storedChallenge.challenger, challengeDeposit),
                 "resolveChallenge - Rewarding challenger failed"

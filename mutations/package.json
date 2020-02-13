@@ -7,9 +7,8 @@
   "scripts": {
     "build": "yarn build:package",
     "build:bundle": "rimraf ./bundle && webpack",
-    "build:package": "tsc --outDir ./dist && rimraf ./package && mkdir ./package && cp -r ./dist ./package/dist && cp package.json ./package && cp -r ./src ./package/src",
+    "build:package": "tsc --outDir ./dist && rimraf ./package && mkdir ./package && cp -r ./dist ./package/dist && cp package.json ./package",
     "es5:check": "es-check es5 ./bundle/index.js",
-    "test:env": "docker-compose up",
     "test": "jest --passWithNoTests --verbose",
     "test:watch": "jest --watch --passWithNoTests"
   },
@@ -17,6 +16,7 @@
     "@graphprotocol/mutations": "^0.0.0",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
+    "token-registry-contracts": "^0.0.1",
     "apollo-link": "^1.2.13",
     "apollo-link-http": "^1.5.16",
     "apollo-link-state": "^0.4.2",
@@ -47,11 +47,14 @@
     "webpack-cli": "^3.3.10"
   },
   "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.test.json"
+      }
+    },
     "transform": {
       "^.+\\.ts?$": "ts-jest"
     },
-    "modulePathIgnorePatterns": [
-      "utils"
-    ]
+    "testRegex": "(.*(.test\\.ts))$"
   }
 }
