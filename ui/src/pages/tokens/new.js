@@ -28,7 +28,6 @@ const NewToken = ({ ...props }) => {
       addToken: true,
     },
     update: (proxy, result) => {
-      console.log('RESULT: ', result)
       const data = cloneDeep(
         proxy.readQuery(
           {
@@ -55,11 +54,6 @@ const NewToken = ({ ...props }) => {
     },
   })
 
-  console.log('DATA: ', data)
-  console.log('LOADING: ', loading)
-  console.log('ERROR: ', error)
-  console.log('STATE: ', state)
-
   const setValue = (field, value) => {
     setToken(state => ({
       ...state,
@@ -78,10 +72,7 @@ const NewToken = ({ ...props }) => {
   }, [token])
 
   const handleSubmit = e => {
-    console.log('INSIDE of handleSubmit')
     e.preventDefault()
-    console.log('TOKEN: ', token)
-
     addToken({ variables: { ...token } })
   }
 

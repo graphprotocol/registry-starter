@@ -136,7 +136,8 @@ async function getContract(
 
   const network = await ethereum.getNetwork()
   let networkName = network.name
-  if (networkName === 'dev') {
+
+  if (networkName === 'dev' || networkName === 'unknown') {
     networkName = 'ganache'
   }
 
@@ -278,14 +279,17 @@ async function removeToken(_, args: any, context: Context) {
   return true
 }
 
-async function challengeToken(_, { options }: any, context: Context) {
+async function challengeToken(
+  _,
+  { challengingTokenAddress, challengedTokenAddress, description }: any,
+  context: Context,
+) {
   const { ipfs, ethereum } = context.graph.config
   const { state } = context.graph
-  const { description, challengingToken, challengedToken } = options
 
   const challenge = JSON.stringify({
     description,
-    challengedToken,
+    challengedTokenAddress,
   })
 
   const challengeHash = await uploadToIpfs(ipfs, challenge)
@@ -300,8 +304,8 @@ async function challengeToken(_, { options }: any, context: Context) {
 
   try {
     await tokenRegistry.challenge(
-      challengingToken,
-      challengedToken,
+      challengingTokenAddress,
+      challengedTokenAddress,
       ipfsHexHash(challengeHash),
     )
   } catch (err) {

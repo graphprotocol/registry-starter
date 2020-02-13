@@ -29,6 +29,34 @@ export const TOKEN_QUERY = gql`
   }
 `
 
+export const TOKEN_DETAILS_QUERY = gql`
+  query token($id: ID!) {
+    token(where: { id: $id }) {
+      id
+      symbol
+      image
+      description
+      isChallenged
+      decimals
+      address
+      totalVotes
+      owner {
+        id
+        tokens {
+          id
+          symbol
+          image
+        }
+      }
+      challenges {
+        id
+        resolved
+        description
+      }
+    }
+  }
+`
+
 export const ADD_TOKEN = gql`
   mutation addToken(
     $symbol: String!
@@ -62,6 +90,26 @@ export const EDIT_TOKEN = gql`
       decimals: $decimals
       address: $address
     ) @client
+  }
+`
+
+export const CHALLENGE_TOKEN = gql`
+  mutation challengeToken(
+    $challengingTokenAddress: String!
+    $challengedTokenAddress: String!
+    $description: String
+  ) {
+    challengeToken(
+      challengingTokenAddress: $challengingTokenAddress
+      challengedTokenAddress: $challengedTokenAddress
+      description: $description
+    ) @client
+  }
+`
+
+export const REMOVE_TOKEN = gql`
+  mutation removeToken($tokenId: String!) {
+    removeToken(tokenId: $tokenId) @client
   }
 `
 

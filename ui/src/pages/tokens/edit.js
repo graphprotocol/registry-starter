@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
 import { useMutation } from '@apollo/react-hooks'
 
 import { TOKEN_QUERY, EDIT_TOKEN } from '../../apollo/queries'
@@ -41,7 +40,6 @@ const EditToken = ({ location, ...props }) => {
       addToken: true,
     },
     update: (proxy, result) => {
-      console.log('RESULT: ', result)
       const data = cloneDeep(
         proxy.readQuery(
           {
