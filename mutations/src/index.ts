@@ -149,6 +149,13 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
   return instance
 }
 
+async function uploadImage(_, { image }: any, context: Context) {
+
+  const { ipfs } = context.graph.config
+
+  return await uploadToIpfs(ipfs, image)
+}
+
 async function addToken(_, { options }: any, context: Context) {
 
   const { ipfs, ethereum } = context.graph.config
@@ -302,6 +309,7 @@ async function voteChallenge(_, args: any, context: Context) {
 
 const resolvers: MutationResolvers<Config, State, EventMap>= {
   Mutation: {
+    uploadImage,
     addToken,
     editToken,
     removeToken,
