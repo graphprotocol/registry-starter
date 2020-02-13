@@ -17,6 +17,10 @@ input VoteOptions {
 }
 
 type Mutation {
+  uploadImage(
+    image: String
+  ): String!
+
   addToken(
     options: TokenOptions!
   ): Boolean!
