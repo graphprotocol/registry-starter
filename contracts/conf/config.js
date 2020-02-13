@@ -13,7 +13,9 @@ const walletPaths = {
     six: "m/44'/60'/0'/0/6",
     seven: "m/44'/60'/0'/0/7",
     eight: "m/44'/60'/0'/0/8",
-    nine: "m/44'/60'/0'/0/9"
+    nine: "m/44'/60'/0'/0/9",
+    ten: "m/44'/60'/0'/0/10"
+
 }
 
 const wallets = {
@@ -27,6 +29,7 @@ const wallets = {
     seven: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.seven),
     eight: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.eight),
     nine: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.nine),
+    ten: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.ten),
 }
 const config = {
     tokenRegistryParams: {

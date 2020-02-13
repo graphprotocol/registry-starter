@@ -10,6 +10,8 @@ const paramConfig = config.tokenRegistryParams
 const utils = {
     /****** Constants ******/
     applyFeeBN: new BN(paramConfig.applicationFee),
+    challengeDepositBN: new BN(paramConfig.challengeDeposit),
+
     ZERO_ADDRESS: constants.ZERO_ADDRESS,
 
     mockIPFSData: '0xbabbabb9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
