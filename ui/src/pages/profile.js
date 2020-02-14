@@ -3,9 +3,8 @@ import { useState, useEffect, Fragment } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
-import { useWeb3React } from '@web3-react/core'
-// import ThreeBox from '3box'
+import { useAccount } from '../hooks'
+import ThreeBox from '3box'
 
 import { metamaskAccountChange } from '../services/ethers'
 import { PROFILE_QUERY } from '../apollo/queries'
@@ -16,22 +15,22 @@ import Button from '../components/Button'
 
 const Profile = ({ location }) => {
   const [profile, setProfile] = useState(null)
-
-  const { account } = useWeb3React()
+  const { account, setAccount } = useAccount()
 
   useEffect(() => {
     async function getProfile() {
-      //   const threeBoxProfile = await ThreeBox.getProfile(account)
-      //   const threeBoxAccounts = await ThreeBox.getVerifiedAccounts(
-      //     threeBoxProfile
-      //   )
-      //   if (threeBoxProfile && Object.keys(threeBoxProfile).length > 0) {
-      //     setProfile(state => ({
-      //       ...state,
-      //       ...threeBoxProfile,
-      //       accounts: threeBoxAccounts,
-      //     }))
-      //   }
+      const threeBoxProfile = await ThreeBox.getProfile(account)
+      console.log('threeBoxProfile: ', threeBoxProfile)
+      const threeBoxAccounts = await ThreeBox.getVerifiedAccounts(
+        threeBoxProfile
+      )
+      if (threeBoxProfile && Object.keys(threeBoxProfile).length > 0) {
+        setProfile(state => ({
+          ...state,
+          ...threeBoxProfile,
+          accounts: threeBoxAccounts,
+        }))
+      }
     }
     metamaskAccountChange(() => {
       if (typeof window !== 'undefined') {
@@ -55,7 +54,6 @@ const Profile = ({ location }) => {
 
   if (error) {
     console.error('Error with apollo query: ', error)
-    return <div />
   }
 
   const user = data && data.user

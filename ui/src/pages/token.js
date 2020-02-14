@@ -5,7 +5,6 @@ import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
 import { navigate } from 'gatsby'
 import { useMutation } from '@graphprotocol/mutations-apollo-react'
-import { useWeb3React } from '@web3-react/core'
 
 import {
   TOKEN_DETAILS_QUERY,
@@ -13,6 +12,7 @@ import {
   REMOVE_TOKEN,
   VOTE_CHALLENGE
 } from '../apollo/queries'
+import { useAccount } from '../hooks'
 
 import Divider from '../components/Divider'
 import Link from '../components/Link'
@@ -24,7 +24,7 @@ import Menu from '../components/Select/Menu'
 import TokenList from '../components/Select/TokenList'
 
 const Token = ({ location }) => {
-  const { account } = useWeb3React()
+  const { account, setAccount } = useAccount()
   const [isChallengeOpen, setIsChallengeOpen] = useState(false)
   const [showChallengeDialog, setShowChallengeDialog] = useState(false)
   const [showKeepDialog, setShowKeepDialog] = useState(false)

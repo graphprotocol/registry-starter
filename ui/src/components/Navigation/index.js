@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import { useState, useEffect, Fragment } from 'react'
 import { jsx, Styled, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
-import { useWeb3React } from '@web3-react/core'
 import { navigate } from 'gatsby'
 import { isMobile } from 'react-device-detect'
 
+import { useAccount } from '../../hooks'
 import { metamaskAccountChange } from '../../services/ethers'
 import { FILTERS, ORDER_BY, ORDER_DIRECTION } from '../../utils/constants'
 
@@ -23,9 +23,7 @@ const Navigation = ({
   location,
   ...props
 }) => {
-  const { account } = useWeb3React()
   const [showModal, setShowModal] = useState(false)
-  const [userAccount, setUserAccount] = useState(account)
   const [selectedFilter, setSelectedFilter] = useState(FILTERS['All Tokens'])
   const [selectedOrderBy, setSelectedOrderBy] = useState(ORDER_BY['Date added'])
   const [selectedOrderDirection, setSelectedOrderDirection] = useState(
@@ -33,19 +31,10 @@ const Navigation = ({
   )
   const [filterOpen, setFilterOpen] = useState(false)
   const [orderOpen, setOrderOpen] = useState(false)
-
-  const openModal = () => setShowModal(true)
-  const closeModal = () => {
-    if (account) {
-      setUserAccount(account)
-    }
-    setShowModal(false)
-  }
+  const { account, setAccount } = useAccount()
 
   useEffect(() => {
-    if (account) {
-      setUserAccount(account)
-    }
+    // Listen for changing MM accounts
     metamaskAccountChange(accounts => setUserAccount(accounts[0]))
   }, [account])
 
@@ -166,7 +155,7 @@ const Navigation = ({
         </Grid>
         {!isMobile && (
           <Grid
-            columns={userAccount ? [2, 3] : 2}
+            columns={account ? [2, 3] : 2}
             sx={{ alignItems: 'center' }}
             gap={0}
           >
@@ -184,7 +173,7 @@ const Navigation = ({
                 },
               }}
             >
-              {userAccount ? (
+              {account ? (
                 <img
                   src="/plus.png"
                   alt="plus"
@@ -194,12 +183,9 @@ const Navigation = ({
                 <span>Add a token</span>
               )}
             </Link>
-            {userAccount ? (
+            {account ? (
               <Fragment>
-                <Link
-                  to={`/profile/${userAccount}`}
-                  sx={{ textAlign: 'right' }}
-                >
+                <Link to={`/profile/${account}`} sx={{ textAlign: 'right' }}>
                   <img
                     src="/user.png"
                     alt="User"
@@ -217,7 +203,7 @@ const Navigation = ({
                   items={[
                     {
                       text: 'Your Tokens',
-                      handleSelect: () => navigate(`/profile/${userAccount}`),
+                      handleSelect: () => navigate(`/profile/${account}`),
                       icon: '/user.png',
                     },
                     {
@@ -226,7 +212,7 @@ const Navigation = ({
                           <Box
                             onClick={e => {
                               e.preventDefault()
-                              openModal()
+                              setShowModal(true)
                             }}
                           >
                             Change wallet
@@ -259,7 +245,7 @@ const Navigation = ({
                         </span>
                       ),
                       handleSelect: () =>
-                        window.open(`https://3box.io/${userAccount}`, '_blank'),
+                        window.open(`https://3box.io/${account}`, '_blank'),
                     },
                   ]}
                   sx={{ justifySelf: 'center', cursor: 'pointer' }}
@@ -280,13 +266,16 @@ const Navigation = ({
               </Fragment>
             ) : (
               <Box sx={{ justifySelf: 'flex-end' }}>
-                <Link onClick={() => openModal()}>Sign In </Link>
+                <Link onClick={() => setShowModal(true)}>Sign In </Link>
               </Box>
             )}
           </Grid>
         )}
         {showModal && (
-          <SignupModal showModal={showModal} closeModal={closeModal} />
+          <SignupModal
+            showModal={showModal}
+            closeModal={() => setShowModal(false)}
+          />
         )}
       </Grid>
       {props.path === '/' && isMobile && (
