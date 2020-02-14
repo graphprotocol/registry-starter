@@ -1,24 +1,5 @@
 scalar File
 
-input TokenOptions {
-  symbol: String!
-  description: String!
-  image: File
-  decimals: Int
-  address: String
-}
-
-input ChallengeOptions {
-  challengingTokenAddress: String!
-  challengedTokenAddress: String!
-  description: String
-}
-
-input VoteOptions {
-  challenge: Challenge!
-  choice: Choice!
-}
-
 type Mutation {
   uploadImage(image: File!): String!
 
@@ -30,15 +11,25 @@ type Mutation {
     address: String
   ): Boolean!
 
-  editToken(options: TokenOptions!): Boolean!
+  editToken(
+    symbol: String!
+    description: String!
+    image: File
+    decimals: Int
+    address: String
+  ): Boolean!
 
   removeToken(tokenId: ID!): Boolean!
 
   challengeToken(
-    challengingToken: String!
-    challengedToken: String!
+    challengingTokenAddress: String!
+    challengedTokenAddress: String!
     description: String
   ): Boolean!
 
-  voteChallenge(options: VoteOptions!): Boolean!
+  voteChallenge(
+    challengeId: String!
+    voteChoices: [String!]!, 
+    voters: [String!]!
+  ): Boolean!
 }

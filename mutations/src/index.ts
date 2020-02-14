@@ -8,6 +8,7 @@ import {
 import { ethers } from 'ethers'
 import { AsyncSendable, Web3Provider } from 'ethers/providers'
 import { applySignedWithAttribute, ipfsHexHash, setAttribute } from './utils'
+import { AddTokenArguments, EditTokenArguments, RemoveTokenArguments, ChallengeTokenArguments, VoteChallengeArguments } from './types'
 const ipfsHttpClient = require('ipfs-http-client')
 
 interface UploadImageEvent extends EventPayload {
@@ -169,7 +170,7 @@ async function uploadImage(_, { image }: any, context: Context) {
 
 async function addToken(
   _,
-  { symbol, description, image, decimals, address }: any,
+  { symbol, description, image, decimals, address }: AddTokenArguments,
   context: Context,
 ) {
   const { ipfs, ethereum } = context.graph.config
@@ -226,10 +227,12 @@ async function addToken(
   return true
 }
 
-async function editToken(_, { options }: any, context: Context) {
-  const { ipfs, ethereum } = context.graph.config
+async function editToken(_,
+  { symbol, description, image, decimals, address }: EditTokenArguments,
+  context: Context
+) {
 
-  const { symbol, description, image, decimals } = options
+  const { ipfs, ethereum } = context.graph.config
 
   const imageHash = await uploadToIpfs(ipfs, image)
 
@@ -238,6 +241,7 @@ async function editToken(_, { options }: any, context: Context) {
     description,
     image: imageHash,
     decimals,
+    address
   })
 
   const metadataHash = await uploadToIpfs(ipfs, metadata)
@@ -262,8 +266,8 @@ async function editToken(_, { options }: any, context: Context) {
   return true
 }
 
-async function removeToken(_, args: any, context: Context) {
-  const { tokenId } = args
+async function removeToken(_, { tokenId }: RemoveTokenArguments, context: Context) {
+
   const { ethereum } = context.graph.config
 
   const owner = ethereum.getSigner(0)
@@ -281,7 +285,7 @@ async function removeToken(_, args: any, context: Context) {
 
 async function challengeToken(
   _,
-  { challengingTokenAddress, challengedTokenAddress, description }: any,
+  { challengingTokenAddress, challengedTokenAddress, description }: ChallengeTokenArguments,
   context: Context,
 ) {
   const { ipfs, ethereum } = context.graph.config
@@ -316,7 +320,10 @@ async function challengeToken(
   return true
 }
 
-async function voteChallenge(_, args: any, context: Context) {
+async function voteChallenge(_,
+  { challengeId, voteChoices, voters }: VoteChallengeArguments,
+  context: Context
+) {
   const { ethereum } = context.graph.config
 
   const tokenRegistry = await getContract(
@@ -325,8 +332,17 @@ async function voteChallenge(_, args: any, context: Context) {
     ethereum.getSigner(),
   )
 
-  //tokenRegistry.submitVotes( ... )
-
+  try{
+    await tokenRegistry.submitVotes(
+      challengeId,
+      voteChoices,
+      voters
+    )
+  } catch(err) {
+    console.log(err)
+    throw err
+  }
+  
   return true
 }
 

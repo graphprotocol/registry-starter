@@ -113,6 +113,20 @@ export const REMOVE_TOKEN = gql`
   }
 `
 
+export const VOTE_CHALLENGE = gql`
+  mutation voteChallenge(
+    $challengeId: String!
+    $voteChoices: [String!]!, 
+    $voters: [String!]!
+  ) {
+    voteChallenge(
+      challengeId: $challengeId
+      voteChoices: $voteChoices
+      voters: $voters
+    ) @client
+  }
+`
+
 export const PROFILE_QUERY = gql`
   query profile($id: ID!) {
     user(id: $id) {
