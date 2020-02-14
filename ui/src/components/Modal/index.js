@@ -11,22 +11,21 @@ import { URI_AVAILABLE } from '@web3-react/walletconnect-connector'
 import { walletExists } from '../../services/ethers'
 import wallets from '../../connectors/wallets'
 import { walletconnect } from '../../connectors'
+import { useAccount } from '../../hooks'
 
 import QRCode from './QRCode'
 import Divider from '../Divider'
 import Close from '../../images/close.svg'
 
 const Modal = ({ showModal, closeModal }) => {
-  const { account, activate } = useWeb3React()
-
-  // TODO: Error state in the UI
-  const [walletError, setWalletError] = useState(false)
+  const { activate } = useWeb3React()
   const [selectedWallet, setSelectedWallet] = useState(null)
   const [showWalletsView, setShowWalletsView] = useState(true)
   const [showAccountView, setShowAccountView] = useState(false)
   const [showPendingView, setShowPendingView] = useState(false)
   const [uri, setUri] = useState('')
   const [isWalletEnabled, setIsWalletEnabled] = useState(false)
+  const { account, setAccount } = useAccount()
 
   // set up the uri listener for walletconnect
   useEffect(() => {
