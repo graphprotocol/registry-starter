@@ -17,7 +17,7 @@
     "build:contracts": "lerna exec --scope token-registry-contracts -- yarn build",
     "build:ci": "yarn build:contracts && yarn build:mutations && yarn build:subgraph && yarn build:ui:ci",
     "build:mutations": "lerna exec --scope token-registry-mutations -- yarn build",
-    "build:subgraph": "lerna exec --scope token-registry -- yarn build",
+    "build:subgraph": "lerna exec --scope token-registry -- 'yarn codegen && yarn build'",
     "build:ui": "lerna exec --scope registry-starter -- yarn build",
     "build:ui:ci": "lerna exec --scope registry-starter -- yarn build:ci",
     "start": "concurrently \"yarn:start:ui\" \"yarn:start:env\"",
