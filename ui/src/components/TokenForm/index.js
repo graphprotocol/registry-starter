@@ -32,7 +32,7 @@ const TokenForm = ({
     />
     <Field
       type="input"
-      title="Contract Address"
+      title="Contract Address (optional)"
       placeholder="Enter address"
       charsCount={42}
       value={token.address}

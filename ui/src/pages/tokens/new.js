@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
-import { cloneDeep } from 'lodash.clonedeep'
+import cloneDeep from 'lodash.clonedeep'
 import { useMutation } from '@graphprotocol/mutations-apollo-react'
 
 import { TOKENS_QUERY, ADD_TOKEN } from '../../apollo/queries'
@@ -27,32 +27,34 @@ const NewToken = ({ ...props }) => {
     optimisticResponse: {
       addToken: true,
     },
-    update: (proxy, result) => {
-      const data = cloneDeep(
-        proxy.readQuery(
-          {
-            query: TOKENS_QUERY,
-            variables: {},
-          },
-          true
-        )
-      )
+    // update: (proxy, result) => {
+    //   const data = cloneDeep(
+    //     proxy.readQuery(
+    //       {
+    //         query: TOKENS_QUERY,
+    //         variables: {},
+    //       },
+    //       true
+    //     )
+    //   )
 
-      if (result.data && result.data.addToken) {
-        console.log('RESULT.DATA ', result.data)
-        console.log('DATA: ', data)
-        // data.tokens.push(token)
-      }
-      proxy.writeQuery({
-        query: TOKENS_QUERY,
-        data,
-        variables: {},
-      })
-    },
+    // if (result.data && result.data.addToken) {
+    //   console.log('RESULT.DATA ', result.data)
+    //   console.log('DATA: ', data)
+    //   // data.tokens.push(token)
+    // }
+    // proxy.writeQuery({
+    //   query: TOKENS_QUERY,
+    //   data,
+    //   variables: {},
+    // })
+    // },
     onError: error => {
       console.error(error)
     },
   })
+
+  console.log('ERROR: ', error)
 
   const setValue = (field, value) => {
     setToken(state => ({

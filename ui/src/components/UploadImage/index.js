@@ -16,6 +16,7 @@ const UPLOAD_IMAGE = gql`
 
 const UploadImage = ({ setValue }) => {
   const [image, setImage] = useState('')
+  const isLoading = true
   const [uploadImage, { loading }] = useMutation(UPLOAD_IMAGE, {
     onError: error => {
       console.error('Error uploading image to IPFS: ', error)
@@ -72,8 +73,13 @@ const UploadImage = ({ setValue }) => {
       {image ? (
         <Grid sx={styles.grid} gap={0}>
           <img
-            src={`/${image}`}
-            sx={{ height: '60px', width: '60px', position: 'relative' }}
+            src={`${process.env.GATSBY_IPFS_HTTP_URI}/api/v0/cat?arg=${image}`}
+            sx={{
+              height: '64px',
+              width: '64px',
+              position: 'relative',
+              objectFit: 'contain',
+            }}
             alt="Token logo"
           />
           <Close
@@ -104,7 +110,13 @@ const UploadImage = ({ setValue }) => {
           gap={2}
         >
           <p sx={{ variant: 'large' }}>Upload image</p>
-          {loading && <div>loading..</div>}
+          {isLoading && (
+            <img
+              src="/loading-dots.gif"
+              alt="Uploading"
+              sx={{ height: '24px', width: 'auto' }}
+            />
+          )}
         </Grid>
       )}
     </label>
