@@ -116,7 +116,7 @@ export const REMOVE_TOKEN = gql`
 export const VOTE_CHALLENGE = gql`
   mutation voteChallenge(
     $challengeId: String!
-    $voteChoices: [String!]!, 
+    $voteChoices: [Int!]!, 
     $voters: [String!]!
   ) {
     voteChallenge(

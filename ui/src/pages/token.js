@@ -11,6 +11,7 @@ import {
   TOKEN_DETAILS_QUERY,
   CHALLENGE_TOKEN,
   REMOVE_TOKEN,
+  VOTE_CHALLENGE
 } from '../apollo/queries'
 
 import Divider from '../components/Divider'
@@ -36,6 +37,8 @@ const Token = ({ location }) => {
   const [tokensVoted, setTokensVoted] = useState([])
   const [choice, setChoice] = useState('')
   const tokenId = location ? location.pathname.split('/').slice(-1)[0] : ''
+
+  let activeChallengeId
 
   const setValue = (field, value) => {
     setChallenge(state => ({
@@ -81,6 +84,18 @@ const Token = ({ location }) => {
     },
   })
 
+  const [submitVotes, { loading: votesLoading }] = useMutation(VOTE_CHALLENGE, {
+    onCompleted: data => {
+      if (data) {
+        console.log('data: ', data)
+        // TODO: action after voting
+      }
+    },
+    onError: error => {
+      console.error(error)
+    },
+  })
+
   useEffect(() => {
     setIsChallengeDisabled(
       !(challenge.description.length > 0 && challenge.token !== null)
@@ -99,11 +114,25 @@ const Token = ({ location }) => {
 
   const handleVote = choice => {
     console.log('Handle choice clicked: ', choice)
+    
+    let vote
+
     if (choice === 'yes') {
+      vote = 1
       setShowKeepDialog(false)
     } else {
+      vote = 2
       setShowRemoveDialog(false)
     }
+
+    submitVotes({
+      variables: {
+        challengeId: activeChallengeId,
+        voteChoices: new Array(tokensVoted.length).fill(vote),
+        voters: tokensVoted.map( token => token.id )
+      }
+    })
+
     setChoice(choice)
   }
 
@@ -128,7 +157,14 @@ const Token = ({ location }) => {
     const activeChallenge = token.challenges.find(
       challenge => challenge.resolved === false
     )
-    description = activeChallenge ? activeChallenge.description : ''
+
+    if(activeChallenge) {
+      description = activeChallenge.description
+      activeChallengeId = activeChallenge.id
+    } else {
+      description = ''
+    }
+    
   }
 
   let items = [
