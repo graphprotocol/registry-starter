@@ -1,0 +1,6 @@
+.Toastify__toast--default {
+  background: none !important;
+  box-shadow: none !important;
+  padding: 35px !important;
+  width: 355px !important;
+}

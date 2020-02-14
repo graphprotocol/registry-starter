@@ -1,0 +1,35 @@
+scalar File
+
+type Mutation {
+  uploadImage(image: File!): String!
+
+  addToken(
+    symbol: String!
+    description: String!
+    image: File
+    decimals: Int
+    address: String
+  ): Boolean!
+
+  editToken(
+    symbol: String!
+    description: String!
+    image: File
+    decimals: Int
+    address: String
+  ): Boolean!
+
+  removeToken(tokenId: ID!): Boolean!
+
+  challengeToken(
+    challengingTokenAddress: String!
+    challengedTokenAddress: String!
+    description: String
+  ): Boolean!
+
+  voteChallenge(
+    challengeId: String!
+    voteChoices: [Int!]!, 
+    voters: [String!]!
+  ): Boolean!
+}

@@ -4,15 +4,7 @@ import PropTypes from 'prop-types'
 import { jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 
-const Menu = ({
-  children,
-  items,
-  top,
-  right,
-  setOpen,
-  menuStyles,
-  ...props
-}) => {
+const Menu = ({ children, items, setOpen, menuStyles, ...props }) => {
   const [isOpen, setIsOpen] = useState(false)
 
   useEffect(() => {
@@ -113,7 +105,6 @@ const iconStyles = {
 }
 
 Menu.propTypes = {
-  children: PropTypes.any,
   items: PropTypes.arrayOf(
     PropTypes.shape({
       text: PropTypes.any,
@@ -122,6 +113,8 @@ Menu.propTypes = {
       delay: PropTypes.number,
     })
   ),
+  setOpen: PropTypes.func,
+  menuStyles: PropTypes.any,
 }
 
 export default Menu

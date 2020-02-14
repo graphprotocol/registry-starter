@@ -3,65 +3,34 @@ import { useState, useEffect, Fragment } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
-import { useWeb3React } from '@web3-react/core'
-// import ThreeBox from '3box'
+import { useAccount } from '../hooks'
+import ThreeBox from '3box'
 
 import { metamaskAccountChange } from '../services/ethers'
+import { PROFILE_QUERY } from '../apollo/queries'
 
 import Divider from '../components/Divider'
 import Section from '../components/Section'
 import Button from '../components/Button'
 
-const PROFILE_QUERY = gql`
-  query profile($id: ID!) {
-    user(where: { id: $id }) {
-      id
-      name
-      bio
-      tokens {
-        id
-        symbol
-        image
-      }
-      challenges {
-        id
-        token {
-          symbol
-          image
-        }
-      }
-      votes {
-        id
-        challenge {
-          token {
-            symbol
-            image
-          }
-        }
-      }
-    }
-  }
-`
-
 const Profile = ({ location }) => {
   const [profile, setProfile] = useState(null)
-
-  const { account } = useWeb3React()
+  const { account, setAccount } = useAccount()
 
   useEffect(() => {
     async function getProfile() {
-      //   const threeBoxProfile = await ThreeBox.getProfile(account)
-      //   const threeBoxAccounts = await ThreeBox.getVerifiedAccounts(
-      //     threeBoxProfile
-      //   )
-      //   if (threeBoxProfile && Object.keys(threeBoxProfile).length > 0) {
-      //     setProfile(state => ({
-      //       ...state,
-      //       ...threeBoxProfile,
-      //       accounts: threeBoxAccounts,
-      //     }))
-      //   }
+      const threeBoxProfile = await ThreeBox.getProfile(account)
+      console.log('threeBoxProfile: ', threeBoxProfile)
+      const threeBoxAccounts = await ThreeBox.getVerifiedAccounts(
+        threeBoxProfile
+      )
+      if (threeBoxProfile && Object.keys(threeBoxProfile).length > 0) {
+        setProfile(state => ({
+          ...state,
+          ...threeBoxProfile,
+          accounts: threeBoxAccounts,
+        }))
+      }
     }
     metamaskAccountChange(() => {
       if (typeof window !== 'undefined') {
@@ -79,11 +48,15 @@ const Profile = ({ location }) => {
     },
   })
 
-  if (loading && !error) {
+  if (loading) {
     return <div />
   }
 
-  const user = data.user
+  if (error) {
+    console.error('Error with apollo query: ', error)
+  }
+
+  const user = data && data.user
 
   const displayProfileId = profileId.slice(0, 6) + '...' + profileId.slice(-6)
 
@@ -95,6 +68,7 @@ const Profile = ({ location }) => {
             gridTemplateColumns: '80px 1fr',
             alignItems: 'center',
           }}
+          gap={[1, 3]}
         >
           <Box>
             <img

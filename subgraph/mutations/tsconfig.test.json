@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "declaration": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "lib": ["es2015", "es6", "esnext.asynciterable", "dom"]
+  },
+  "include": ["src/**/__tests__/**/*.test.ts"]
+}

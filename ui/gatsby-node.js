@@ -1,3 +1,8 @@
+let env = process.env.CI ? 'development' : process.env.NODE_ENV
+require("dotenv").config({
+  path: `.env.${env}`,
+})
+
 exports.onCreatePage = async ({ page, actions }) => {
   const { createPage } = actions
   // set up client-side routes
@@ -15,4 +20,16 @@ exports.onCreatePage = async ({ page, actions }) => {
     page.matchPath = '/profile/*'
     createPage(page)
   }
+}
+
+exports.onCreateWebpackConfig = ({
+  stage,
+  rules,
+  loaders,
+  plugins,
+  actions,
+}) => {
+  actions.setWebpackConfig({
+    node: { fs: 'empty', net: 'empty', child_process: 'empty' },
+  })
 }

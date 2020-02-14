@@ -3,7 +3,7 @@ pragma solidity ^0.5.8;
 import "./ReserveBank.sol";
 import "./Registry.sol";
 import "./lib/EthereumDIDRegistry.sol";
-import "./lib/dai.sol";
+import "./lib/Dai.sol";
 import "./lib/Ownable.sol";
 
 contract TokenRegistry is Registry, Ownable {
@@ -69,13 +69,15 @@ contract TokenRegistry is Registry, Ownable {
         address indexed member,
         uint256 indexed challengeID,
         uint256 yesVotes,
-        uint256 noVotes
+        uint256 noVotes,
+        uint256 voteCount
     );
     event ChallengeSucceeded(
         address indexed member,
         uint256 indexed challengeID,
         uint256 yesVotes,
-        uint256 noVotes
+        uint256 noVotes,
+        uint256 voteCount
     );
 
     /****
@@ -91,7 +93,7 @@ contract TokenRegistry is Registry, Ownable {
     // Note that challenge deposit and token held constant in global variable
     struct Challenge {
         address challenger;         // The member who submitted the challenge
-        address member;             // The member
+        address challengee;             // The member being challenged
         uint256 yesVotes;           // The total number of YES votes for this challenge
         uint256 noVotes;            // The total number of NO votes for this challenge
         uint256 voterCount;         // Total count of voters participating in the challenge
@@ -202,8 +204,9 @@ contract TokenRegistry is Registry, Ownable {
         erc1056Registry.changeOwnerSigned(_newMember, _sigV[0], _sigR[0], _sigS[0], _owner);
 
         // Approve the TokenRegistry to transfer on the owners behalf
-        // Nonce starts at 0. Expiry = 0 is infinite. true is unlimited allowance
-        approvedToken.permit(_owner, address(this), 0, 0, true, _sigV[1], _sigR[1], _sigS[1]);
+        // Expiry = 0 is infinite. true is unlimited allowance
+        uint256 nonce = approvedToken.nonces(_owner); 
+        approvedToken.permit(_owner, address(this), nonce, 0, true, _sigV[1], _sigR[1], _sigS[1]);
 
         // Transfers tokens from owner to the reserve bank
         require(
@@ -307,14 +310,8 @@ contract TokenRegistry is Registry, Ownable {
     ) external onlyMemberOwner(_challengingMember) returns (uint256 challengeID) {
         uint256 challengeeMemberTime = getMembershipStartTime(_challengedMember);
         require (challengeeMemberTime > 0, "challenge - Challengee must exist");
-        uint256 challengerMemberTime = getMembershipStartTime(_challengingMember);
-
         uint256 currentChallengeID = getChallengeID(_challengedMember);
         if(currentChallengeID > 0){
-            require(
-                challengeCanBeResolved(currentChallengeID),
-                "challenge - Member can't be challenged multiple times at once"
-            );
             // Doing this allows us to never get stuck in a state with unresolved challenges
             // Also, the challenge rewards the deposit fee to winner or loser, so they are
             // financially motivated too
@@ -329,11 +326,11 @@ contract TokenRegistry is Registry, Ownable {
         uint256 newChallengeID = challengeCounter;
         Challenge memory newChallenge = Challenge({
             challenger: _challengingMember,
-            member: _challengedMember,
+            challengee: _challengedMember,
             /* solium-disable-next-line security/no-block-members*/
-            yesVotes: now - challengerMemberTime,
+            yesVotes: 0, // starts at 0 since the submitVote() will add this
             noVotes: 0,
-            voterCount: 1,
+            voterCount: 0, // starts at 0 since submitVote() will add this
             /* solium-disable-next-line security/no-block-members*/
             endTime: now + votingPeriodDuration,
             details: _details
@@ -396,7 +393,7 @@ contract TokenRegistry is Registry, Ownable {
         );
 
         require(
-            storedChallenge.member != _votingMember,
+            storedChallenge.challengee != _votingMember,
             "submitVote - Member can't vote on their own challenge"
         );
 
@@ -417,7 +414,6 @@ contract TokenRegistry is Registry, Ownable {
         emit SubmitVote(_challengeID, msg.sender, _votingMember, _voteChoice, voteWeight);
     }
 
-    // TODO - test gas limit for this, and maybe hard code in the array size
     /**
     @dev                    Submit many votes from owner with multiple members they own
     @param _challengeID     The challenge ID
@@ -431,7 +427,7 @@ contract TokenRegistry is Registry, Ownable {
     ) public {
         require(
             _voteChoices.length == _voters.length,
-            "SubmitVotes - Arrays must be equal"
+            "submitVotes - Arrays must be equal"
         );
         for (uint256 i; i < _voteChoices.length; i++){
             submitVote(_challengeID, _voteChoices[i], _voters[i]);
@@ -449,33 +445,38 @@ contract TokenRegistry is Registry, Ownable {
         bool didPass = storedChallenge.yesVotes > storedChallenge.noVotes;
         bool moreThanOneVote = storedChallenge.voterCount > 1;
         if (didPass && moreThanOneVote) {
+        address challengerOwner = erc1056Registry.identityOwner(storedChallenge.challenger);
 
-            // Transfer challenge deposit to challenger for winning challenge
+            // Transfer challenge deposit and losers application fee
+            // to challenger for winning challenge
             require(
-                withdraw(storedChallenge.challenger, challengeDeposit),
+                withdraw(challengerOwner, challengeDeposit + applicationFee),
                 "resolveChallenge - Rewarding challenger failed"
             );
-            deleteMember(storedChallenge.member);
+            deleteMember(storedChallenge.challengee);
             emit ChallengeSucceeded(
-                storedChallenge.member,
+                storedChallenge.challengee,
                 _challengeID,
                 storedChallenge.yesVotes,
-                storedChallenge.noVotes
+                storedChallenge.noVotes,
+                storedChallenge.voterCount 
             );
         } else {
-            // Transfer challenge deposit to challengee. This keeps the token balance the same
-            // whether or not the challenge fails.
+            address challengeeOwner = erc1056Registry.identityOwner(storedChallenge.challengee);
+            // Transfer challenge deposit to challengee
             require(
-                withdraw(storedChallenge.challenger, challengeDeposit),
+                withdraw(challengeeOwner, challengeDeposit),
                 "resolveChallenge - Rewarding challenger failed"
             );
             // Remove challenge ID from registry
-            editChallengeID(storedChallenge.member, 0);
+            editChallengeID(storedChallenge.challengee, 0);
             emit ChallengeFailed(
-                storedChallenge.member,
+                storedChallenge.challengee,
                 _challengeID,
                 storedChallenge.yesVotes,
-                storedChallenge.noVotes
+                storedChallenge.noVotes,
+                storedChallenge.voterCount 
+
             );
         }
 
@@ -556,7 +557,7 @@ contract TokenRegistry is Registry, Ownable {
         );
         require(
             hasVotingPeriodExpired(storedChallenge.endTime),
-            "challengeCanBeResolved - Challenge is not ready to be resolved"
+            "challengeCanBeResolved - Current challenge is not ready to be resolved"
         );
         return true;
     }

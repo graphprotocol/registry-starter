@@ -1,0 +1,60 @@
+{
+  "name": "token-registry-mutations",
+  "version": "1.0.0",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "yarn build:package",
+    "build:bundle": "rimraf ./bundle && webpack",
+    "build:package": "tsc --outDir ./dist && rimraf ./package && mkdir ./package && cp -r ./dist ./package/dist && cp package.json ./package",
+    "es5:check": "es-check es5 ./bundle/index.js",
+    "test": "jest --passWithNoTests --verbose",
+    "test:watch": "jest --watch --passWithNoTests"
+  },
+  "dependencies": {
+    "@graphprotocol/mutations": "0.0.0-alpha.0",
+    "apollo-cache-inmemory": "^1.6.5",
+    "apollo-client": "^2.6.8",
+    "token-registry-contracts": "^0.0.1",
+    "apollo-link": "^1.2.13",
+    "apollo-link-http": "^1.5.16",
+    "apollo-link-state": "^0.4.2",
+    "ethereumjs-util": "^6.2.0",
+    "ethers": "^4.0.40",
+    "graphql": "^14.6.0",
+    "graphql-tag": "^2.10.3",
+    "ipfs-http-client": "^42.0.0",
+    "js-sha3": "^0.8.0",
+    "rxjs": "^6.5.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.7.5",
+    "@babel/preset-env": "^7.7.6",
+    "@types/jest": "^25.1.2",
+    "@types/node": "^13.7.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-add-module-exports": "^1.0.2",
+    "cross-fetch": "^3.0.4",
+    "es-check": "^5.1.0",
+    "jest": "^25.1.0",
+    "rimraf": "3.0.0",
+    "ts-jest": "^25.2.0",
+    "ts-loader": "6.2.1",
+    "typescript": "^3.7.3",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "jest": {
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.test.json"
+      }
+    },
+    "transform": {
+      "^.+\\.ts?$": "ts-jest"
+    },
+    "testRegex": "(.*(.test\\.ts))$"
+  }
+}

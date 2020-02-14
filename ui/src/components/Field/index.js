@@ -16,12 +16,12 @@ const Field = ({
 }) => {
   const charRef = useRef()
 
-  if (value && value.length === charsCount) {
-    charRef.current.style = `opacity: 1; transition: all 0.3s ease;`
-    setTimeout(() => {
-      charRef.current.style = 'opacity: 0.4; transition: all 0.3s ease '
-    }, 500)
-  }
+  // if (value && value.length === charsCount) {
+  //   charRef.current.style = `opacity: 1; transition: all 0.3s ease;`
+  //   setTimeout(() => {
+  //     charRef.current.style = 'opacity: 0.4; transition: all 0.3s ease '
+  //   }, 500)
+  // }
 
   return (
     <Box

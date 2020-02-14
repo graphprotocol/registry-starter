@@ -1,12 +1,15 @@
 {
-  "name": "curation-starter",
+  "name": "registry-starter",
   "private": true,
   "description": "A template for developing web3 daps",
   "version": "0.1.0",
   "author": "Nena Djaja",
   "dependencies": {
+    "3box": "1.16.3",
     "@apollo/react-hooks": "^3.1.3",
     "@emotion/core": "^10.0.27",
+    "@graphprotocol/mutations": "0.0.0-alpha.0",
+    "@graphprotocol/mutations-apollo-react": "0.0.0-alpha.0",
     "@reach/dialog": "^0.8.0",
     "@reach/menu-button": "^0.8.0",
     "@web3-react/core": "^6.0.6",
@@ -41,6 +44,7 @@
     "theme-ui": "^0.3.1"
   },
   "devDependencies": {
+    "dotenv": "8.2.0",
     "prettier": "^1.19.1"
   },
   "keywords": [
@@ -49,6 +53,7 @@
   "license": "MIT",
   "scripts": {
     "build": "gatsby build",
+    "build:ci": "CI=true gatsby build",
     "develop": "gatsby develop -p 8080",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "start": "npm run develop",

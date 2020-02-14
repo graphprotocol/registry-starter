@@ -1,23 +1,11 @@
 /** @jsx jsx */
 import { useContext } from 'react'
 import { useQuery } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
 import { Grid } from '@theme-ui/components'
 import { jsx } from 'theme-ui'
 import { ReactContext } from '../components/Layout'
 import Card from '../components/Card'
-
-const TOKENS_QUERY = gql`
-  query tokens($isChallenged: Boolean, $orderBy: TokenOrderByInput) {
-    tokens(where: { isChallenged: $isChallenged }, orderBy: $orderBy) {
-      id
-      symbol
-      image
-      description
-      isChallenged
-    }
-  }
-`
+import { TOKENS_QUERY } from '../apollo/queries'
 
 const IndexPage = () => {
   const context = useContext(ReactContext)
@@ -28,11 +16,16 @@ const IndexPage = () => {
       ? { ...variables, orderBy: context.order }
       : { ...variables }
 
-  const { data, loading } = useQuery(TOKENS_QUERY, {
+  const { data, loading, error } = useQuery(TOKENS_QUERY, {
     variables: variables,
   })
 
-  if (loading) {
+  if (loading || !data) {
+    return <div />
+  }
+
+  if (error) {
+    console.error('Error with Apollo query: ', error)
     return <div />
   }
 

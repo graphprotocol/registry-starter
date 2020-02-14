@@ -3,39 +3,66 @@ import { useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
+import { useMutation } from '@apollo/react-hooks'
 
+import { TOKEN_QUERY, EDIT_TOKEN } from '../../apollo/queries'
 import TokenForm from '../../components/TokenForm'
-
-const TOKEN_QUERY = gql`
-  query token($id: ID!) {
-    token(where: { id: $id }) {
-      id
-      symbol
-      image
-      description
-      decimals
-      address
-    }
-  }
-`
 
 const EditToken = ({ location, ...props }) => {
   const tokenId = location ? location.pathname.split('/')[2] : ''
-  const { loading, error, data } = useQuery(TOKEN_QUERY, {
-    variables: {
-      id: tokenId,
-    },
-  })
-
   const [isDisabled, setIsDisabled] = useState(true)
   const [token, setToken] = useState({
     symbol: '',
     description: '',
     address: '',
     decimals: '',
-    imageName: '',
-    imageUrl: '',
+    image: '',
+  })
+
+  const { loading, error, data } = useQuery(TOKEN_QUERY, {
+    variables: {
+      id: tokenId,
+    },
+  })
+  const [
+    editToken,
+    { data: mutationData, loading: mutationLoading },
+  ] = useMutation(EDIT_TOKEN, {
+    refetchQueries: [
+      {
+        query: TOKEN_QUERY,
+        variables: {
+          id: tokenId,
+        },
+      },
+    ],
+    optimisticResponse: {
+      addToken: true,
+    },
+    update: (proxy, result) => {
+      const data = cloneDeep(
+        proxy.readQuery(
+          {
+            query: TOKEN_QUERY,
+            variables: {},
+          },
+          true
+        )
+      )
+
+      if (result.data && result.data.addToken) {
+        console.log('RESULT.DATA ', result.data)
+        // data.tokens.push(token)
+      }
+      proxy.writeQuery({
+        query: TOKEN_QUERY,
+        data,
+        variables: {},
+      })
+    },
+    onError: error => {
+      console.error(error)
+    },
   })
 
   useEffect(() => {
@@ -46,27 +73,12 @@ const EditToken = ({ location, ...props }) => {
         symbol: tokenObj ? tokenObj.symbol : '',
         description: tokenObj ? tokenObj.description : '',
         decimals: tokenObj ? tokenObj.decimals : '',
-        imageName:
-          tokenObj && tokenObj.image
-            ? tokenObj.image
-                .split('/')
-                .slice(-1)
-                .join('')
-            : '',
-        imageUrl: tokenObj ? tokenObj.image : '',
+        image: '',
       }))
     }
   }, [data])
 
   const setValue = (field, value) => {
-    if (field === 'image') {
-      return setToken(state => ({
-        ...state,
-        imageUrl: value.url,
-        imageName: value.name,
-      }))
-    }
-
     setToken(state => ({
       ...state,
       [field]: value,
@@ -85,13 +97,17 @@ const EditToken = ({ location, ...props }) => {
 
   const handleSubmit = () => {
     //TODO: handle submit logic here
-    console.log('Submitted')
+    editToken({ variables: { ...token } })
   }
 
   return (
     <Grid>
       <Styled.h1>Edit {token.symbol}</Styled.h1>
-      <Styled.p>TODO: Need Copy</Styled.p>
+      <Styled.p>
+        Edit data about a token on the Ethereum Tokens Registry. Make sure the
+        token exists and all information is accurate to mitigate the risk of the
+        token being challenged.
+      </Styled.p>
       <Box sx={{ maxWidth: '504px', width: '100%', my: 7 }}>
         <TokenForm
           token={token}

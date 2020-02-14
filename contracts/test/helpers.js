@@ -5,7 +5,7 @@ const ethutil = require('ethereumjs-util')
 // Local imports
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
 const EthereumDIDRegistry = artifacts.require('EthereumDIDRegistry.sol')
-const Token = artifacts.require('dai.sol')
+const Token = artifacts.require('Dai.sol')
 const utils = require('./utils.js')
 
 ////////////// CONSTANTS //////////////
@@ -32,6 +32,7 @@ const helpers = {
             utils.stringToBytes32(offChainDataName) +
             utils.stripHexPrefix(utils.mockIPFSData) +
             maxValidity
+        
         // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
         const setAttributeSignedSig = await module.exports.setAttributeSigned(
             newMemberWallet,
@@ -121,6 +122,7 @@ const helpers = {
         const sig = await module.exports.signDataDIDRegistry(
             memberAddress,
             memberPrivateKey,
+            memberAddress,
             Buffer.from('changeOwner').toString('hex') + utils.stripHexPrefix(ownerAddress),
             'changeOwner'
         )
@@ -149,22 +151,24 @@ const helpers = {
     // Note owner is signer, because ownership has already been changed over
     setAttributeSigned: async (newMemberWallet, ownerWallet, data) => {
         const memberAddress = newMemberWallet.signingKey.address
-        const ownerPrivateKey = Buffer.from(
+        const signerAddress = ownerWallet.signingKey.address
+        const signerPrivateKey = Buffer.from(
             utils.stripHexPrefix(ownerWallet.signingKey.privateKey),
             'hex'
         )
         const sig = await module.exports.signDataDIDRegistry(
             memberAddress,
-            ownerPrivateKey,
+            signerPrivateKey,
+            signerAddress,
             data,
             'setAttribute'
         )
         return sig
     },
 
-    signDataDIDRegistry: async (identity, signingKey, data, functionName) => {
+    signDataDIDRegistry: async (identity, signingKey, signingAddress, data, functionName) => {
         const didReg = await EthereumDIDRegistry.deployed()
-        const nonce = await didReg.nonce(identity)
+        const nonce = await didReg.nonce(signingAddress)
         const paddedNonce = utils.leftPad(Buffer.from([nonce], 64).toString('hex'))
         let dataToSign
 
@@ -291,6 +295,91 @@ const helpers = {
             nonce
         )
         return sig
+    },
+
+    challenge: async (challenger, challengee, details, challengerOwner) => {
+        const tokenRegistry = await TokenRegistry.deployed()
+        const token = await Token.deployed()
+        const reserveBankAddress = await tokenRegistry.reserveBank()
+        const reserveBankBalanceStart = await token.balanceOf(reserveBankAddress)
+        const challengerBalanceStart = await token.balanceOf(challengerOwner)
+
+        // Check member exists
+        assert(await tokenRegistry.isMember(challengee), 'Member was not added')
+
+        const tx = await tokenRegistry.challenge(challenger, challengee, details, {
+            from: challengerOwner
+        })
+
+        // Check balances
+        const reserveBankBalanceAfterChallenge = await token.balanceOf(reserveBankAddress)
+        const challengerBalanceAfterChallenge = await token.balanceOf(challengerOwner)
+        assert.equal(
+            reserveBankBalanceStart.add(utils.challengeDepositBN).toString(),
+            reserveBankBalanceAfterChallenge.toString(),
+            'Reserve bank did not receive challenge deposit'
+        )
+        assert.equal(
+            challengerBalanceStart.sub(utils.challengeDepositBN).toString(),
+            challengerBalanceAfterChallenge.toString(),
+            'Challenger did not send the deposit'
+        )
+
+        // Get challengeID
+        const challengeID = tx.logs[0].args.challengeID.toString()
+        assert(await tokenRegistry.memberChallengeExists(challengee), 'Challenge was not created')
+        return challengeID
+    },
+
+    resolveChallenge: async (challengeID, challengerOwner, challengeeOwner) => {
+        const tokenRegistry = await TokenRegistry.deployed()
+        const token = await Token.deployed()
+        const reserveBankAddress = await tokenRegistry.reserveBank()
+        const reserveBankBalanceAfterChallenge = await token.balanceOf(reserveBankAddress)
+        const challengerBalanceAfterChallenge = await token.balanceOf(challengerOwner)
+        const challengeeBalanceAfterChallenge = await token.balanceOf(challengeeOwner)
+
+        // Increase time so challenge can be resolved
+        await utils.increaseTime(utils.votePeriod + 1)
+        assert(
+            await tokenRegistry.challengeCanBeResolved(challengeID),
+            'Challenge could not be resolved'
+        )
+        const result = await tokenRegistry.resolveChallenge(challengeID, { from: challengerOwner })
+        const challengeResult = result.logs[1].event
+
+        // Check balances
+        const reserveBankBalanceAfterResolve = await token.balanceOf(reserveBankAddress)
+
+        if (challengeResult === 'ChallengeSucceeded') {
+            const challengerBalanceAfterResolve = await token.balanceOf(challengerOwner)
+            assert.equal(
+                reserveBankBalanceAfterChallenge
+                    .sub(utils.challengeDepositBN.add(utils.applyFeeBN))
+                    .toString(),
+                reserveBankBalanceAfterResolve.toString(),
+                'Reserve bank did not send out challenge deposit and application fee'
+            )
+            assert.equal(
+                challengerBalanceAfterChallenge
+                    .add(utils.challengeDepositBN.add(utils.applyFeeBN))
+                    .toString(),
+                challengerBalanceAfterResolve.toString(),
+                'Challenger did not get their deposit and challengees application fee'
+            )
+        } else if (challengeResult === 'ChallengeFailed') {
+            const challengeeBalanceAfterResolve = await token.balanceOf(challengeeOwner)
+            assert.equal(
+                reserveBankBalanceAfterChallenge.sub(utils.challengeDepositBN).toString(),
+                reserveBankBalanceAfterResolve.toString(),
+                'Reserve bank did not send out challenge deposit and application fee'
+            )
+            assert.equal(
+                challengeeBalanceAfterChallenge.add(utils.challengeDepositBN).toString(),
+                challengeeBalanceAfterResolve.toString(),
+                'Challenger did not get their deposit and challengees application fee'
+            )
+        }
     }
 }
 

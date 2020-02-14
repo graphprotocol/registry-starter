@@ -28,7 +28,13 @@ const Section = ({ title, subtitle, items }) => {
 Section.propTypes = {
   title: PropTypes.string,
   subtitle: PropTypes.string,
-  items: PropTypes.any,
+  items: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string,
+      symbol: PropTypes.string,
+      image: PropTypes.string,
+    })
+  ),
 }
 
 export default Section

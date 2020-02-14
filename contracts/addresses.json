@@ -1,17 +1,16 @@
 {
-    "updated-on": "February 10th 2020",
-    "ropsten": {
-      "tokenRegistry": "0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3",
-      "ethereumDIDRegistry": "0xdca7ef03e98e0dc2b855be647c39abe984fcf21b",
-      "mockDAI": "0x54Fe55d5d255b8460fB3Bc52D5D676F9AE5697CD",
-      "reserveBank": "0x05fbf3f158Ae7c56c87dB57ebEde4374deA6fBD8"
-    },
-    "ganache": {
-        "tokenRegistry": "0x0290FB167208Af455bB137780163b7B7a9a10C16",
-        "ethereumDIDRegistry": "0x59d3631c86BbE35EF041872d502F218A39FBa150",
-        "mockDAI": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
-        "reserveBank": ""
-    },
-    "mainnet": {}
-  }
-  
+  "updated-on": "February 10th 2020",
+  "ropsten": {
+    "tokenRegistry": "0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3",
+    "ethereumDIDRegistry": "0xdca7ef03e98e0dc2b855be647c39abe984fcf21b",
+    "mockDAI": "0x54Fe55d5d255b8460fB3Bc52D5D676F9AE5697CD",
+    "reserveBank": "0x05fbf3f158Ae7c56c87dB57ebEde4374deA6fBD8"
+  },
+  "ganache": {
+      "tokenRegistry": "0x9b1f7F645351AF3631a656421eD2e40f2802E6c0",
+      "ethereumDIDRegistry": "0x0290FB167208Af455bB137780163b7B7a9a10C16",
+      "mockDAI": "0xCfEB869F69431e42cdB54A4F4f105C19C080A601",
+      "reserveBank": "0x4C65804f4b00a50e0750293973D7EAf32602587E"
+  },
+  "mainnet": {}
+}

@@ -5,12 +5,13 @@ const BN = require('bn.js')
 const config = require('../conf/config.js')
 const paramConfig = config.tokenRegistryParams
 // The deterministic flag mneumonic from ganache
-const ganacheMneumonic =
-    'myth like bonus scare over problem client lizard pioneer submit female collect'
+
 
 const utils = {
     /****** Constants ******/
     applyFeeBN: new BN(paramConfig.applicationFee),
+    challengeDepositBN: new BN(paramConfig.challengeDeposit),
+
     ZERO_ADDRESS: constants.ZERO_ADDRESS,
 
     mockIPFSData: '0xbabbabb9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
@@ -29,18 +30,7 @@ const utils = {
     /****** Ethers ******/
     ethersWallet: path => ethers.Wallet.fromMnemonic(ganacheMneumonic, path),
 
-    walletPaths: {
-        zero: "m/44'/60'/0'/0/0",
-        one: "m/44'/60'/0'/0/1",
-        two: "m/44'/60'/0'/0/2",
-        three: "m/44'/60'/0'/0/3",
-        four: "m/44'/60'/0'/0/4",
-        five: "m/44'/60'/0'/0/5",
-        six: "m/44'/60'/0'/0/6",
-        seven: "m/44'/60'/0'/0/7",
-        eight: "m/44'/60'/0'/0/8",
-        nine: "m/44'/60'/0'/0/9"
-    },
+    wallets: config.wallets,
 
     getStringHash: domain =>
         `${ethers.utils.solidityKeccak256(['string'], [domain]).toString('hex')}`,

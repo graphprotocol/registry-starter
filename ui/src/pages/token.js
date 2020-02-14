@@ -3,7 +3,16 @@ import { Fragment, useState, useEffect } from 'react'
 import { Styled, jsx, Box } from 'theme-ui'
 import { Grid } from '@theme-ui/components'
 import { useQuery } from '@apollo/react-hooks'
-import { gql } from 'apollo-boost'
+import { navigate } from 'gatsby'
+import { useMutation } from '@graphprotocol/mutations-apollo-react'
+
+import {
+  TOKEN_DETAILS_QUERY,
+  CHALLENGE_TOKEN,
+  REMOVE_TOKEN,
+  VOTE_CHALLENGE
+} from '../apollo/queries'
+import { useAccount } from '../hooks'
 
 import Divider from '../components/Divider'
 import Link from '../components/Link'
@@ -13,37 +22,9 @@ import Select from '../components/Select'
 import Field from '../components/Field'
 import Menu from '../components/Select/Menu'
 import TokenList from '../components/Select/TokenList'
-import { navigate } from 'gatsby'
-
-const TOKEN_QUERY = gql`
-  query token($id: ID!) {
-    token(where: { id: $id }) {
-      id
-      symbol
-      image
-      description
-      isChallenged
-      decimals
-      address
-      totalVotes
-      owner {
-        id
-        tokens {
-          id
-          symbol
-          image
-        }
-      }
-      challenges {
-        id
-        resolved
-        description
-      }
-    }
-  }
-`
 
 const Token = ({ location }) => {
+  const { account, setAccount } = useAccount()
   const [isChallengeOpen, setIsChallengeOpen] = useState(false)
   const [showChallengeDialog, setShowChallengeDialog] = useState(false)
   const [showKeepDialog, setShowKeepDialog] = useState(false)
@@ -55,6 +36,9 @@ const Token = ({ location }) => {
   })
   const [tokensVoted, setTokensVoted] = useState([])
   const [choice, setChoice] = useState('')
+  const tokenId = location ? location.pathname.split('/').slice(-1)[0] : ''
+
+  let activeChallengeId
 
   const setValue = (field, value) => {
     setChallenge(state => ({
@@ -63,6 +47,55 @@ const Token = ({ location }) => {
     }))
   }
 
+  const [challengeToken, { loading: challengeLoading, state }] = useMutation(
+    CHALLENGE_TOKEN,
+    {
+      refetchQueries: [
+        {
+          query: TOKEN_DETAILS_QUERY,
+          variables: {
+            id: tokenId,
+          },
+        },
+      ],
+      onCompleted: data => {
+        if (data) {
+          console.log('data: ', data)
+          // update state
+          setShowChallengeDialog(false)
+        }
+      },
+      onError: error => {
+        console.error(error)
+      },
+    }
+  )
+
+  const [removeToken, { loading: removeLoading }] = useMutation(REMOVE_TOKEN, {
+    onCompleted: data => {
+      if (data) {
+        console.log('data: ', data)
+        // update state and navigate to profile page
+        navigate(`/profile/${token.owner.id}`)
+      }
+    },
+    onError: error => {
+      console.error(error)
+    },
+  })
+
+  const [submitVotes, { loading: votesLoading }] = useMutation(VOTE_CHALLENGE, {
+    onCompleted: data => {
+      if (data) {
+        console.log('data: ', data)
+        // TODO: action after voting
+      }
+    },
+    onError: error => {
+      console.error(error)
+    },
+  })
+
   useEffect(() => {
     setIsChallengeDisabled(
       !(challenge.description.length > 0 && challenge.token !== null)
@@ -70,23 +103,40 @@ const Token = ({ location }) => {
   }, [challenge])
 
   const handleChallenge = () => {
-    // TODO: call challenge function
-    console.log('Handle challenge clicked')
-    setShowChallengeDialog(false)
+    challengeToken({
+      variables: {
+        challengingTokenAddress: challenge.token.id,
+        challengedTokenAddress: tokenId,
+        description: challenge.description,
+      },
+    })
   }
 
   const handleVote = choice => {
     console.log('Handle choice clicked: ', choice)
+    
+    let vote
+
     if (choice === 'yes') {
+      vote = 1
       setShowKeepDialog(false)
     } else {
+      vote = 2
       setShowRemoveDialog(false)
     }
+
+    submitVotes({
+      variables: {
+        challengeId: activeChallengeId,
+        voteChoices: new Array(tokensVoted.length).fill(vote),
+        voters: tokensVoted.map( token => token.id )
+      }
+    })
+
     setChoice(choice)
   }
 
-  const tokenId = location ? location.pathname.split('/').slice(-1)[0] : ''
-  const { loading, error, data } = useQuery(TOKEN_QUERY, {
+  const { loading, error, data } = useQuery(TOKEN_DETAILS_QUERY, {
     variables: {
       id: tokenId,
     },
@@ -107,7 +157,48 @@ const Token = ({ location }) => {
     const activeChallenge = token.challenges.find(
       challenge => challenge.resolved === false
     )
-    description = activeChallenge ? activeChallenge.description : ''
+
+    if(activeChallenge) {
+      description = activeChallenge.description
+      activeChallengeId = activeChallenge.id
+    } else {
+      description = ''
+    }
+    
+  }
+
+  let items = [
+    {
+      text: 'Challenge',
+      handleSelect: value => {
+        setShowChallengeDialog(true)
+      },
+      icon: '/challenge.png',
+    },
+  ]
+
+  if (token && account) {
+    if (token.owner.id === account) {
+      items = items.concat([
+        {
+          text: 'Edit',
+          handleSelect: value => {
+            navigate(`/edit/${token.id}`)
+          },
+          icon: '/edit.png',
+        },
+        {
+          text: 'Remove',
+          handleSelect: value => {
+            removeToken({
+              variables: {
+                tokenId: tokenId,
+              },
+            })
+          },
+        },
+      ])
+    }
   }
 
   return (
@@ -119,25 +210,7 @@ const Token = ({ location }) => {
           sx={{ height: '80px', width: '80px', objectFit: 'contain' }}
         />
         <Styled.h1 sx={{ my: 2 }}>{token.symbol}</Styled.h1>
-        <Menu
-          menuStyles={{ top: '60px', right: '0' }}
-          items={[
-            {
-              text: 'Challenge',
-              handleSelect: value => {
-                setShowChallengeDialog(true)
-              },
-              icon: '/challenge.png',
-            },
-            {
-              text: 'Edit',
-              handleSelect: value => {
-                navigate(`/edit/${token.id}`)
-              },
-              icon: '/edit.png',
-            },
-          ]}
-        >
+        <Menu menuStyles={{ top: '60px', right: '0' }} items={items}>
           <Box
             sx={{
               backgroundColor: 'white',
@@ -306,7 +379,7 @@ const Token = ({ location }) => {
                     <Styled.p>3d 6h</Styled.p>
                   </Box>
                   <Box>
-                    <p sx={{ variant: 'text.smaller' }}>Voters</p>
+                    <p sx={{ variant: 'text.smaller' }}>Votes</p>
                     <Styled.p>{token.totalVotes}</Styled.p>
                   </Box>
                   <Box>
