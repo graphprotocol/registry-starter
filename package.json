@@ -34,5 +34,8 @@
     "concurrently": "5.1.0",
     "lerna": "3.20.2",
     "wait-on": "4.0.0"
+  },
+  "dependencies": {
+    "react-toastify": "^5.5.0"
   }
 }
