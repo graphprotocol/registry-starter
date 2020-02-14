@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Registry of crypto projects",
   "main": "index.js",
-  "repository": "https://github.com/graphprotocol/curation-starter",
+  "repository": "https://github.com/graphprotocol/registry-starter",
   "author": "The Graph",
   "license": "MIT",
   "devDependencies": {

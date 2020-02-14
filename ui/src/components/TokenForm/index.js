@@ -42,7 +42,7 @@ const TokenForm = ({
       <p sx={{ variant: 'text.small', color: 'secondary', mb: 2 }}>
         Token Logo (optional)
       </p>
-      <UploadImage setValue={setValue} />
+      <UploadImage isLoading={isLoading} setValue={setValue} />
     </Box>
     <Field
       type="input"

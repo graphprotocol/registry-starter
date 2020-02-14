@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 description: Universally shared projects registry
-repository: https://github.com/graphprotocol/curation-starter
+repository: https://github.com/graphprotocol/registry-starter
 schema:
   file: ./schema.graphql
 dataSources:

@@ -35,7 +35,7 @@ const Navigation = ({
 
   useEffect(() => {
     // Listen for changing MM accounts
-    metamaskAccountChange(accounts => setUserAccount(accounts[0]))
+    metamaskAccountChange(accounts => setAccount(accounts[0]))
   }, [account])
 
   const filterItems = Object.keys(FILTERS).map(filter => {

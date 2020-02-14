@@ -14,9 +14,8 @@ const UPLOAD_IMAGE = gql`
   }
 `
 
-const UploadImage = ({ setValue }) => {
+const UploadImage = ({ isLoading, setValue }) => {
   const [image, setImage] = useState('')
-  const isLoading = true
   const [uploadImage, { loading }] = useMutation(UPLOAD_IMAGE, {
     onError: error => {
       console.error('Error uploading image to IPFS: ', error)
@@ -109,7 +108,9 @@ const UploadImage = ({ setValue }) => {
           }}
           gap={2}
         >
-          <p sx={{ variant: 'large' }}>Upload image</p>
+          <p sx={{ variant: 'large' }}>
+            {isLoading ? 'Uploading' : 'Upload image'}
+          </p>
           {isLoading && (
             <img
               src="/loading-dots.gif"

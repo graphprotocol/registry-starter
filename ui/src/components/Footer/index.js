@@ -7,7 +7,7 @@ const Footer = ({ ...props }) => {
     <Grid sx={rootStyles} {...props}>
       <Box sx={{ textAlign: ['center', 'left', 'left'] }}>
         <a
-          href="https://github.com/graphprotocol/curation-starter"
+          href="https://github.com/graphprotocol/registry-starter"
           target="_blank"
           rel="noopener noreferrer"
           sx={{ display: 'inline-block', textDecoration: 'none' }}
