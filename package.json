@@ -4,8 +4,8 @@
   "workspaces": {
     "packages": [
       "./contracts",
-      "./mutations",
       "./subgraph",
+      "./subgraph/mutations",
       "./ui"
     ],
     "nohoist": [

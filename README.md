@@ -5,7 +5,7 @@ TokenRegistry is an on-chain registry of tokens. It will be indexed as a subgrap
 This monorepo contains:
 * [`./contracts`](./contracts) - TokenRegistry Contracts  
 * [`./subgraph`](./subgraph) - TokenRegistry Subgraph  
-* [`./mutations`](./mutations) - TokenRegistry Mutations  
+* [`./subgraph/mutations`](./subgraph/mutations) - TokenRegistry Mutations  
 * [`./ui`](./ui) - Sample dApp
 
 # Setup

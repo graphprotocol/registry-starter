@@ -30,6 +30,6 @@ export interface ChallengeTokenArguments {
 
 export interface VoteChallengeArguments {
   challengeId: string
-  voteChoices: number[],
+  voteChoices: number[]
   voters: string[]
 }

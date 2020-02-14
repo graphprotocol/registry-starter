@@ -2,7 +2,8 @@ import { keccak256 } from 'js-sha3'
 import { ethers, Contract, Signer } from 'ethers'
 import base from 'base-x'
 
-const DAI_PERMIT_TYPEHASH = 'ea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb'
+const DAI_PERMIT_TYPEHASH =
+  'ea2aa0a1be11a07ed86d755c93467f4f82362b452371d1ba94d1715123511acb'
 const offChainDataName = 'TokenData'
 const maxValidity = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 
@@ -10,7 +11,7 @@ export const setAttributeSigned = async (
   newMember: Signer,
   owner: Signer,
   data: string,
-  ethDIDContract: Contract
+  ethDIDContract: Contract,
 ) => {
   const memberAddress = await newMember.getAddress()
   const sig = await signDataDIDRegistry(
@@ -18,7 +19,7 @@ export const setAttributeSigned = async (
     owner,
     data,
     'setAttribute',
-    ethDIDContract
+    ethDIDContract,
   )
   return sig
 }
@@ -26,24 +27,18 @@ export const setAttributeSigned = async (
 export const daiPermit = async (
   holder: Signer,
   spenderAddress: string,
-  daiContract: Contract
+  daiContract: Contract,
 ) => {
   const holderAddress = await holder.getAddress()
   const nonce = (await daiContract.nonces(holderAddress)).toString()
-  const sig = await signPermit(
-    holderAddress,
-    spenderAddress,
-    holder,
-    nonce,
-    daiContract
-  )
+  const sig = await signPermit(holderAddress, spenderAddress, holder, nonce, daiContract)
   return sig
 }
 
 export const applySigned = async (
   newMember: Signer,
   owner: Signer,
-  ethDIDContract: Contract
+  ethDIDContract: Contract,
 ) => {
   const newMemberAddress = await newMember.getAddress()
   const ownerAddress = await owner.getAddress()
@@ -53,7 +48,7 @@ export const applySigned = async (
     newMember,
     Buffer.from('changeOwner').toString('hex') + stripHexPrefix(ownerAddress),
     'changeOwner',
-    ethDIDContract
+    ethDIDContract,
   )
   return sig
 }
@@ -63,7 +58,7 @@ export const signDataDIDRegistry = async (
   signer: Signer,
   data: string,
   functionName: string,
-  ethDIDContract: Contract
+  ethDIDContract: Contract,
 ) => {
   const nonce = await ethDIDContract.nonce(identity)
   const paddedNonce = leftPad(Buffer.from([nonce], 64).toString('hex'))
@@ -92,7 +87,7 @@ export const signDataDIDRegistry = async (
   return {
     r: splitSig.r,
     s: splitSig.s,
-    v: splitSig.v
+    v: splitSig.v,
   }
 }
 
@@ -101,7 +96,7 @@ export const signPermit = async (
   spenderAddress: string,
   holder: Signer,
   nonce: string,
-  daiContract: Contract
+  daiContract: Contract,
 ) => {
   const paddedNonce = leftPad(Buffer.from([nonce]).toString('hex'))
   // We set expiry to 0 always, as that will be default for the TokenRegistry calling
@@ -139,7 +134,9 @@ export const signPermit = async (
   /*  Expected hashedStruct value:
       01b930e8948f5be49f019425c83bcf1657b07efb06fb959192051e9c412abace
   */
-  const hashedStruct = Buffer.from(keccak256.arrayBuffer(Buffer.from(structEncoded, 'hex')))
+  const hashedStruct = Buffer.from(
+    keccak256.arrayBuffer(Buffer.from(structEncoded, 'hex')),
+  )
   const stringHashedStruct = hashedStruct.toString('hex')
   const stringDomainSeparator = DAI_DOMAIN_SEPARATOR.toString('hex')
 
@@ -168,7 +165,7 @@ export const signPermit = async (
   return {
     r: splitSig.r,
     s: splitSig.s,
-    v: splitSig.v
+    v: splitSig.v,
   }
 }
 
@@ -183,9 +180,8 @@ export const applySignedWithAttribute = async (
   metadataIpfsHash: string,
   tokenRegistryContract: Contract,
   ethDIDContract: Contract,
-  daiContract: Contract
+  daiContract: Contract,
 ) => {
-
   const ownerAddress = await owner.getAddress()
   const memberAddress = await newMember.getAddress()
 
@@ -208,7 +204,7 @@ export const applySignedWithAttribute = async (
     newMember,
     owner,
     setAttributeData,
-    ethDIDContract
+    ethDIDContract,
   )
 
   // Send all three meta transactions to TokenRegistry to be executed in one tx
@@ -226,8 +222,8 @@ export const applySignedWithAttribute = async (
     '0x' + maxValidity,
     {
       gasLimit: 1000000,
-      gasPrice: ethers.utils.parseUnits('1.0', 'gwei')
-    }
+      gasPrice: ethers.utils.parseUnits('1.0', 'gwei'),
+    },
   )
 
   return tx
@@ -237,25 +233,25 @@ export const setAttribute = async (
   memberAddress: string,
   owner: Signer,
   metadataIpfsHash: string,
-  ethDIDContract: Contract
+  ethDIDContract: Contract,
 ) => {
   const fromOwner = new ethers.Contract(
     ethDIDContract.address,
     ethDIDContract.interface,
-    owner
+    owner,
   )
   const tx = await fromOwner.setAttribute(
     memberAddress,
     '0x' + stringToBytes32(offChainDataName),
     Buffer.from(metadataIpfsHash, 'hex'),
-    '0x' + maxValidity
+    '0x' + maxValidity,
   )
   return tx
 }
 
 const createDaiDomainSeparator = async (daiContract: Contract) => {
   const domain = keccak256(
-    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)',
   )
   const daiName = 'Dai Stablecoin'
   const daiVersion = '1'
