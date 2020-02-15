@@ -1,6 +1,7 @@
 // Node modules
 const keccak256 = require('js-sha3').keccak_256
-const ethutil = require('ethereumjs-util')
+const BN = require('bn.js')
+const ethers = require('ethers')
 
 // Local imports
 const TokenRegistry = artifacts.require('TokenRegistry.sol')
@@ -32,11 +33,11 @@ const helpers = {
             utils.stringToBytes32(offChainDataName) +
             utils.stripHexPrefix(utils.mockIPFSData) +
             maxValidity
-        
+
         // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
         const setAttributeSignedSig = await module.exports.setAttributeSigned(
             newMemberWallet,
-            ownerWallet,
+            newMemberWallet, //ownerWallet
             setAttributeData
         )
 
@@ -45,15 +46,12 @@ const helpers = {
         const ownerBalanceStart = await token.balanceOf(ownerAddress)
 
         // Send all three meta transactions to TokenRegistry to be executed in one tx
-        tx = await tokenRegistry.applySignedWithAttribute(
+        tx = await tokenRegistry.applySignedWithAttributeAndPermit(
             newMemberAddress,
-            [applySignedSig.v, permitSig.v],
-            [applySignedSig.r, permitSig.r],
-            [applySignedSig.s, permitSig.s],
+            [setAttributeSignedSig.v, applySignedSig.v, permitSig.v],
+            [setAttributeSignedSig.r, applySignedSig.r, permitSig.r],
+            [setAttributeSignedSig.s, applySignedSig.s, permitSig.s],
             ownerAddress,
-            setAttributeSignedSig.v,
-            setAttributeSignedSig.r,
-            setAttributeSignedSig.s,
             '0x' + utils.stringToBytes32(offChainDataName),
             utils.mockIPFSData,
             '0x' + maxValidity,
@@ -95,7 +93,7 @@ const helpers = {
         assert.equal(ownerAddress, identityOwner, 'Ownership was not transferred')
 
         // Check set attribute worked
-        const setAttributeLogData = tx.receipt.rawLogs[4].data
+        const setAttributeLogData = tx.receipt.rawLogs[1].data
         const mockDataFromLogs = setAttributeLogData.slice(
             setAttributeLogData.length - 64,
             setAttributeLogData.length
@@ -148,12 +146,12 @@ const helpers = {
     },
 
     // Must be used in applySignedWithAttribute() to make a single transaction
-    // Note owner is signer, because ownership has already been changed over
+    // Note owner is signer, because ownership has already been changed over // TODO this is cchanged
     setAttributeSigned: async (newMemberWallet, ownerWallet, data) => {
         const memberAddress = newMemberWallet.signingKey.address
-        const signerAddress = ownerWallet.signingKey.address
+        const signerAddress = memberAddress //ownerWallet.signingKey.address
         const signerPrivateKey = Buffer.from(
-            utils.stripHexPrefix(ownerWallet.signingKey.privateKey),
+            utils.stripHexPrefix(newMemberWallet.signingKey.privateKey), // CHANGED TOO
             'hex'
         )
         const sig = await module.exports.signDataDIDRegistry(
@@ -168,7 +166,10 @@ const helpers = {
 
     signDataDIDRegistry: async (identity, signingKey, signingAddress, data, functionName) => {
         const didReg = await EthereumDIDRegistry.deployed()
-        const nonce = await didReg.nonce(signingAddress)
+        let nonce = await didReg.nonce(signingAddress)
+        if (functionName == 'changeOwner') {
+            nonce = 1 // TODO - maybe cchange this to now be hard coded
+        }
         const paddedNonce = utils.leftPad(Buffer.from([nonce], 64).toString('hex'))
         let dataToSign
 
@@ -188,12 +189,15 @@ const helpers = {
                 data
         }
         const hash = Buffer.from(keccak256.buffer(Buffer.from(dataToSign, 'hex')))
-        const signature = ethutil.ecsign(hash, signingKey)
+
+        // This is how to use ethers without prepending "x19Ethereum Signed ..."
+        const rawSigner = new ethers.utils.SigningKey(signingKey)
+        let splitSig = rawSigner.signDigest(hash)
 
         return {
-            r: '0x' + signature.r.toString('hex'),
-            s: '0x' + signature.s.toString('hex'),
-            v: signature.v
+            r: splitSig.r,
+            s: splitSig.s,
+            v: splitSig.v
         }
     },
 
@@ -271,11 +275,14 @@ const helpers = {
             fc60391b0087e420dc8e15ae01ef93d0814572bbd80b3111248897d3a0d9f941
         */
         const digest = Buffer.from(keccak256.buffer(Buffer.from(digestData, 'hex')))
-        const signature = ethutil.ecsign(digest, holderPrivateKey)
+
+        const rawSigner = new ethers.utils.SigningKey(holderPrivateKey)
+        let splitSig = rawSigner.signDigest(digest)
+
         return {
-            r: '0x' + signature.r.toString('hex'),
-            s: '0x' + signature.s.toString('hex'),
-            v: signature.v
+            r: splitSig.r,
+            s: splitSig.s,
+            v: splitSig.v
         }
     },
 

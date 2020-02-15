@@ -86,9 +86,13 @@ contract('tokenRegistry', () => {
             )
 
             // Then we look at the logs to confirm success
-            for (let i = 0; i < result.logs.length; i ++){
-                assert.equal(result.logs[i].event, 'SubmitVote', "SubmitVote not emitted 3 times")
-                assert.equal(result.logs[i].args.voteChoice.toString(), voteChoice.Yes, 'Vote choice not recorded correctly')
+            for (let i = 0; i < result.logs.length; i++) {
+                assert.equal(result.logs[i].event, 'SubmitVote', 'SubmitVote not emitted 3 times')
+                assert.equal(
+                    result.logs[i].args.voteChoice.toString(),
+                    voteChoice.Yes,
+                    'Vote choice not recorded correctly'
+                )
             }
         })
     })

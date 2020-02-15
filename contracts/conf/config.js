@@ -15,7 +15,6 @@ const walletPaths = {
     eight: "m/44'/60'/0'/0/8",
     nine: "m/44'/60'/0'/0/9",
     ten: "m/44'/60'/0'/0/10"
-
 }
 
 const wallets = {
@@ -29,7 +28,7 @@ const wallets = {
     seven: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.seven),
     eight: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.eight),
     nine: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.nine),
-    ten: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.ten),
+    ten: () => ethers.Wallet.fromMnemonic(ganacheMneumonic, walletPaths.ten)
 }
 const config = {
     tokenRegistryParams: {
@@ -55,7 +54,6 @@ const config = {
     mainnetParams: {
         daiAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
         ethereumDIDRegistryAddress: '0xdca7ef03e98e0dc2b855be647c39abe984fcf21b'
- 
     },
     // Used for deployng and interacting on testnets
     // These should be 5 metamask accounts in your own browser

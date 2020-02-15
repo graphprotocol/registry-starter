@@ -6,7 +6,6 @@ const config = require('../conf/config.js')
 const paramConfig = config.tokenRegistryParams
 // The deterministic flag mneumonic from ganache
 
-
 const utils = {
     /****** Constants ******/
     applyFeeBN: new BN(paramConfig.applicationFee),

@@ -119,7 +119,6 @@ contract('tokenRegistry', () => {
                 }),
                 `submitVote - Challenge voting period has expired`
             )
-
         })
     })
 })

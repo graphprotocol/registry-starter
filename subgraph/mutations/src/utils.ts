@@ -1,5 +1,5 @@
 import { keccak256 } from 'js-sha3'
-import { ethers, Contract, Signer } from 'ethers'
+import { ethers, Contract, Signer, utils } from 'ethers'
 import base from 'base-x'
 
 const DAI_PERMIT_TYPEHASH =
@@ -12,6 +12,7 @@ export const setAttributeSigned = async (
   owner: Signer,
   data: string,
   ethDIDContract: Contract,
+  rawSigner: utils.SigningKey
 ) => {
   const memberAddress = await newMember.getAddress()
   const sig = await signDataDIDRegistry(
@@ -20,6 +21,7 @@ export const setAttributeSigned = async (
     data,
     'setAttribute',
     ethDIDContract,
+    rawSigner
   )
   return sig
 }
@@ -39,6 +41,7 @@ export const applySigned = async (
   newMember: Signer,
   owner: Signer,
   ethDIDContract: Contract,
+  rawSigner: utils.SigningKey
 ) => {
   const newMemberAddress = await newMember.getAddress()
   const ownerAddress = await owner.getAddress()
@@ -49,6 +52,7 @@ export const applySigned = async (
     Buffer.from('changeOwner').toString('hex') + stripHexPrefix(ownerAddress),
     'changeOwner',
     ethDIDContract,
+    rawSigner
   )
   return sig
 }
@@ -59,8 +63,12 @@ export const signDataDIDRegistry = async (
   data: string,
   functionName: string,
   ethDIDContract: Contract,
+  rawSigner: utils.SigningKey
 ) => {
-  const nonce = await ethDIDContract.nonce(identity)
+  let nonce = await ethDIDContract.nonce(identity) // ** need to add 1 TODO*
+  if (functionName == 'changeOwner'){
+    nonce = 1 // TODO - maybe cchange this to now be hard coded
+}
   const paddedNonce = leftPad(Buffer.from([nonce], 64).toString('hex'))
   let dataToSign
 
@@ -81,8 +89,12 @@ export const signDataDIDRegistry = async (
   }
 
   const hash = Buffer.from(keccak256(Buffer.from(dataToSign, 'hex')), 'hex')
-  const signature = await signer.signMessage(hash)
-  const splitSig = ethers.utils.splitSignature(signature)
+  // const signature = await signer.signMessage(hash)
+  // const nonRawSig = ethers.utils.splitSignature(signature)
+
+  let splitSig = rawSigner.signDigest(hash)
+  // console.log("nonRAW: ", nonRawSig)
+  console.log("RAW: ", splitSig)
 
   return {
     r: splitSig.r,
@@ -176,6 +188,7 @@ export const stringToBytes32 = str => {
 
 export const applySignedWithAttribute = async (
   newMember: Signer,
+  newMemberSigningKey: utils.SigningKey,
   owner: Signer,
   metadataIpfsHash: string,
   tokenRegistryContract: Contract,
@@ -186,10 +199,10 @@ export const applySignedWithAttribute = async (
   const memberAddress = await newMember.getAddress()
 
   // Get the signature for changing ownership on ERC-1056 Registry
-  const applySignedSig = await applySigned(newMember, owner, ethDIDContract)
+  const applySignedSig = await applySigned(newMember, owner, ethDIDContract, newMemberSigningKey)
 
   // Get the signature for permitting TokenRegistry to transfer DAI on users behalf
-  const permitSig = await daiPermit(owner, tokenRegistryContract.address, daiContract)
+  // const permitSig = await daiPermit(owner, tokenRegistryContract.address, daiContract)
 
   const metadataIpfsBytes = Buffer.from(metadataIpfsHash, 'hex')
 
@@ -205,18 +218,34 @@ export const applySignedWithAttribute = async (
     owner,
     setAttributeData,
     ethDIDContract,
+    newMemberSigningKey
   )
 
   // Send all three meta transactions to TokenRegistry to be executed in one tx
+  // const tx = await tokenRegistryContract.applySignedWithAttribute(
+  //   memberAddress,
+  //   [applySignedSig.v, permitSig.v],
+  //   [applySignedSig.r, permitSig.r],
+  //   [applySignedSig.s, permitSig.s],
+  //   ownerAddress,
+  //   setAttributeSignedSig.v,
+  //   setAttributeSignedSig.r,
+  //   setAttributeSignedSig.s,
+  //   '0x' + stringToBytes32(offChainDataName),
+  //   metadataIpfsBytes,
+  //   '0x' + maxValidity,
+  //   {
+  //     gasLimit: 1000000,
+  //     gasPrice: ethers.utils.parseUnits('1.0', 'gwei'),
+  //   },
+  // )
+
   const tx = await tokenRegistryContract.applySignedWithAttribute(
     memberAddress,
-    [applySignedSig.v, permitSig.v],
-    [applySignedSig.r, permitSig.r],
-    [applySignedSig.s, permitSig.s],
+    [setAttributeSignedSig.v, applySignedSig.v],
+    [setAttributeSignedSig.r, applySignedSig.r],
+    [setAttributeSignedSig.s, applySignedSig.s],
     ownerAddress,
-    setAttributeSignedSig.v,
-    setAttributeSignedSig.r,
-    setAttributeSignedSig.s,
     '0x' + stringToBytes32(offChainDataName),
     metadataIpfsBytes,
     '0x' + maxValidity,

@@ -54,7 +54,12 @@ contract('tokenRegistry', () => {
             it('should allow a member to be challenged, lose, and be removed, and then reapply successfully. Also tests chalengee cannot vote on their own challenge', async () => {
                 const tokenRegistry = await TokenRegistry.deployed()
 
-                const challengeID = await helpers.challenge(member1Address, member5Address, fakeDetails, owner1Address)
+                const challengeID = await helpers.challenge(
+                    member1Address,
+                    member5Address,
+                    fakeDetails,
+                    owner1Address
+                )
 
                 await tokenRegistry.submitVote(challengeID, voteChoice.Yes, member2Address, {
                     from: owner2Address
@@ -88,7 +93,12 @@ contract('tokenRegistry', () => {
                 // Check member exists
                 assert(await tokenRegistry.isMember(member4Address), 'Member was not added')
 
-                const challengeID = await helpers.challenge(member1Address, member4Address, fakeDetails, owner1Address)
+                const challengeID = await helpers.challenge(
+                    member1Address,
+                    member4Address,
+                    fakeDetails,
+                    owner1Address
+                )
 
                 await tokenRegistry.submitVote(challengeID, voteChoice.No, member2Address, {
                     from: owner2Address
@@ -117,7 +127,12 @@ contract('tokenRegistry', () => {
                 // Check member exists
                 assert(await tokenRegistry.isMember(member4Address), 'Member was not added')
 
-                const challengeID = await helpers.challenge(member1Address, member4Address, fakeDetails, owner1Address)
+                const challengeID = await helpers.challenge(
+                    member1Address,
+                    member4Address,
+                    fakeDetails,
+                    owner1Address
+                )
 
                 await helpers.resolveChallenge(challengeID, owner1Address, owner4Address)
 
@@ -151,7 +166,7 @@ contract('tokenRegistry', () => {
                     tokenRegistry.challenge(nonMemberAddress, member3Address, fakeDetails, {
                         from: nonMemberAddress
                     }),
-                    "onlyMemberOwner - Address is not a member"
+                    'onlyMemberOwner - Address is not a member'
                 )
 
                 // Expect fail for trying to challenge self
@@ -159,10 +174,8 @@ contract('tokenRegistry', () => {
                     tokenRegistry.challenge(member3Address, nonMemberAddress, fakeDetails, {
                         from: owner3Address
                     }),
-                    "challenge - Challengee must exist"
+                    'challenge - Challengee must exist'
                 )
-
-                
             })
             it('challengee cannot have two challenges against them. and challengee cannot exit during ongoing challenge', async () => {
                 const tokenRegistry = await TokenRegistry.deployed()
@@ -181,11 +194,9 @@ contract('tokenRegistry', () => {
 
                 // Expect member can't exit when challenged
                 await utils.expectRevert(
-                    tokenRegistry.memberExit(member4Address, {from: owner4Address}),
+                    tokenRegistry.memberExit(member4Address, { from: owner4Address }),
                     "memberExit - Can't exit during ongoing challenge"
                 )
-
-                
             })
         }
     )

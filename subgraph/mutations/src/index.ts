@@ -194,6 +194,10 @@ async function addToken(
   const owner = ethereum.getSigner(0)
   const member = await ethers.Wallet.createRandom().connect(ethereum)
 
+  // Used for raw signing of data, without x19Ethereum...
+  const memberSigningKey = new ethers.utils.SigningKey(member.privateKey)
+
+  // Dave - below makes a contract instance where a signer is already attacched
   const tokenRegistryContract = await getContract(context, 'TokenRegistry', owner)
   const ethereumDIDContract = await getContract(context, 'EthereumDIDRegistry', owner)
   const daiContract = await getContract(context, 'Dai', owner)
@@ -201,6 +205,7 @@ async function addToken(
   try {
     await applySignedWithAttribute(
       member,
+      memberSigningKey,
       owner,
       metadataHash,
       tokenRegistryContract,

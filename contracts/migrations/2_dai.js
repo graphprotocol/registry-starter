@@ -39,7 +39,10 @@ module.exports = async (deployer, network) => {
         const token = await Token.deployed()
         const tokenHolder = tokenHolders[0]
 
-        const displayAmt = config.testnetParams.amountToEachAccount.slice(0, config.testnetParams.amountToEachAccount.length - parseInt(18, 10))
+        const displayAmt = config.testnetParams.amountToEachAccount.slice(
+            0,
+            config.testnetParams.amountToEachAccount.length - parseInt(18, 10)
+        )
         // eslint-disable-next-line no-console
         console.log(`Allocating ${displayAmt} DAI tokens to ` + `${tokenHolder}.`)
         await token.transfer(tokenHolder, config.testnetParams.amountToEachAccount)
