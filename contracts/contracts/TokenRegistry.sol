@@ -169,9 +169,7 @@ contract TokenRegistry is Registry, Ownable {
     ADD MEMBER FUNCTIONS
     *******************/
 
-    function applySignedOnly(
-        address _newMember
-    ) external {
+    function applySignedOnly(address _newMember) external {
         require(
             getMembershipStartTime(_newMember) == 0,
             "applySignedInternal - This member already exists"
@@ -181,7 +179,7 @@ contract TokenRegistry is Registry, Ownable {
         setMember(_newMember, membershipTime);
         emit NewMember(
             _newMember,
-            membershipTime,
+            now,
             applicationFee
         );
     }

@@ -113,6 +113,8 @@ const abis = {
     .abi,
 }
 
+console.log('FIND ME: ', abis.TokenRegistry)
+
 const addresses = require('token-registry-contracts/addresses.json')
 
 const addressMap = {
@@ -213,7 +215,7 @@ async function addToken(
       daiContract,
     )
   } catch (err) {
-    console.log(err)
+    console.log('TX err: ', err)
     throw err
   }
 

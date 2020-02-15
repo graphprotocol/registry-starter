@@ -12,7 +12,7 @@ export const setAttributeSigned = async (
   owner: Signer,
   data: string,
   ethDIDContract: Contract,
-  rawSigner: utils.SigningKey
+  rawSigner: utils.SigningKey,
 ) => {
   const memberAddress = await newMember.getAddress()
   const sig = await signDataDIDRegistry(
@@ -21,7 +21,7 @@ export const setAttributeSigned = async (
     data,
     'setAttribute',
     ethDIDContract,
-    rawSigner
+    rawSigner,
   )
   return sig
 }
@@ -41,7 +41,7 @@ export const applySigned = async (
   newMember: Signer,
   owner: Signer,
   ethDIDContract: Contract,
-  rawSigner: utils.SigningKey
+  rawSigner: utils.SigningKey,
 ) => {
   const newMemberAddress = await newMember.getAddress()
   const ownerAddress = await owner.getAddress()
@@ -52,7 +52,7 @@ export const applySigned = async (
     Buffer.from('changeOwner').toString('hex') + stripHexPrefix(ownerAddress),
     'changeOwner',
     ethDIDContract,
-    rawSigner
+    rawSigner,
   )
   return sig
 }
@@ -63,12 +63,12 @@ export const signDataDIDRegistry = async (
   data: string,
   functionName: string,
   ethDIDContract: Contract,
-  rawSigner: utils.SigningKey
+  rawSigner: utils.SigningKey,
 ) => {
   let nonce = await ethDIDContract.nonce(identity) // ** need to add 1 TODO*
-  if (functionName == 'changeOwner'){
+  if (functionName == 'changeOwner') {
     // nonce = 1 // TODO - maybe cchange this to now be hard coded
-}
+  }
   const paddedNonce = leftPad(Buffer.from([nonce], 64).toString('hex'))
   let dataToSign
 
@@ -88,7 +88,7 @@ export const signDataDIDRegistry = async (
       data
   }
 
-  console.log("DATAT TO SIGN: ", dataToSign)
+  console.log('DATAT TO SIGN: ', dataToSign)
 
   const hash = Buffer.from(keccak256(Buffer.from(dataToSign, 'hex')), 'hex')
   // const signature = await signer.signMessage(hash)
@@ -96,7 +96,7 @@ export const signDataDIDRegistry = async (
 
   let splitSig = rawSigner.signDigest(hash)
   // console.log("nonRAW: ", nonRawSig)
-  console.log("RAW: ", splitSig)
+  console.log('RAW: ', splitSig)
 
   return {
     r: splitSig.r,
@@ -200,15 +200,22 @@ export const applySignedWithAttribute = async (
   const ownerAddress = await owner.getAddress()
   const memberAddress = await newMember.getAddress()
 
-  await tokenRegistryContract.applySignedOnly(ownerAddress)
+  // const tx = await tokenRegistryContract.challenge(ownerAddress, memberAddress, '0x' + maxValidity)
+
+  // const tx = await tokenRegistryContract.withdraw(ownerAddress, 0)
+  console.log('FUN: ', tokenRegistryContract.applySignedOnly)
+  console.log('OWNER ADD: ', ownerAddress)
+  const tx = await tokenRegistryContract.applySignedOnly(ownerAddress)
+  // const tx = await tokenRegistryContract.updateCharter('0x' + maxValidity)
+
+  console.log('GGGG: ', tx)
 
   // const metadataIPFSBytesString = ipfsHexHash(metadataIpfsHash)
   // const name = stringToBytes32(offChainDataName)
 
   // await ethDIDContract.setAttribute(owner, name, metadataIPFSBytesString, maxValidity )
-  
 
-  return true
+  return tx
 }
 
 export const setAttribute = async (
