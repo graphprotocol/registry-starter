@@ -44,7 +44,7 @@ const helpers = {
         const reserveBankAddress = await tokenRegistry.reserveBank()
         const reserveBankBalanceStart = await token.balanceOf(reserveBankAddress)
         const ownerBalanceStart = await token.balanceOf(ownerAddress)
-
+        console.log(utils.mockIPFSData)
         // Send all three meta transactions to TokenRegistry to be executed in one tx
         tx = await tokenRegistry.applySignedWithAttributeAndPermit(
             newMemberAddress,
@@ -188,6 +188,8 @@ const helpers = {
                 utils.stripHexPrefix(identity) +
                 data
         }
+        console.log("DATAT TO SIGN: ", dataToSign)
+
         const hash = Buffer.from(keccak256.buffer(Buffer.from(dataToSign, 'hex')))
 
         // This is how to use ethers without prepending "x19Ethereum Signed ..."
@@ -210,8 +212,8 @@ const helpers = {
         const hashedName = keccak256(daiName)
         const hashedVersion = keccak256(daiVersion)
 
-        // ChainID of uint256 9854 used for development, in bytes32
-        const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
+        // ChainID of uint256 9545 used for development, in bytes32
+        const paddedChainID = '0000000000000000000000000000000000000000000000000000000000002549'
         const daiAddress = (await Token.deployed()).address
         const paddedDaiAddress = utils.leftPad(utils.stripHexPrefix(daiAddress))
         const data = domain + hashedName + hashedVersion + paddedChainID + paddedDaiAddress

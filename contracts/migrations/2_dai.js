@@ -16,7 +16,7 @@ module.exports = async (deployer, network) => {
             config.ganacheParams.wallets.four().signingKey.address
         ]
         tokenMinter = config.ganacheParams.wallets.zero().signingKey.address
-        chainID = 9854
+        chainID = 9545
     } else {
         tokenHolders = [
             config.metamaskAddresses.one,

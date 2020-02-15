@@ -67,7 +67,7 @@ export const signDataDIDRegistry = async (
 ) => {
   let nonce = await ethDIDContract.nonce(identity) // ** need to add 1 TODO*
   if (functionName == 'changeOwner'){
-    nonce = 1 // TODO - maybe cchange this to now be hard coded
+    // nonce = 1 // TODO - maybe cchange this to now be hard coded
 }
   const paddedNonce = leftPad(Buffer.from([nonce], 64).toString('hex'))
   let dataToSign
@@ -77,16 +77,18 @@ export const signDataDIDRegistry = async (
       '1900' +
       stripHexPrefix(ethDIDContract.address) +
       paddedNonce +
-      stripHexPrefix(identity) +
+      stripHexPrefix(identity.toLowerCase()) +
       data
   } else if (functionName == 'setAttribute') {
     dataToSign =
       '1900' +
       stripHexPrefix(ethDIDContract.address) +
       paddedNonce +
-      stripHexPrefix(identity) +
+      stripHexPrefix(identity.toLowerCase()) +
       data
   }
+
+  console.log("DATAT TO SIGN: ", dataToSign)
 
   const hash = Buffer.from(keccak256(Buffer.from(dataToSign, 'hex')), 'hex')
   // const signature = await signer.signMessage(hash)
@@ -198,64 +200,15 @@ export const applySignedWithAttribute = async (
   const ownerAddress = await owner.getAddress()
   const memberAddress = await newMember.getAddress()
 
-  // Get the signature for changing ownership on ERC-1056 Registry
-  const applySignedSig = await applySigned(newMember, owner, ethDIDContract, newMemberSigningKey)
+  await tokenRegistryContract.applySignedOnly(ownerAddress)
 
-  // Get the signature for permitting TokenRegistry to transfer DAI on users behalf
-  // const permitSig = await daiPermit(owner, tokenRegistryContract.address, daiContract)
+  // const metadataIPFSBytesString = ipfsHexHash(metadataIpfsHash)
+  // const name = stringToBytes32(offChainDataName)
 
-  const metadataIpfsBytes = Buffer.from(metadataIpfsHash, 'hex')
+  // await ethDIDContract.setAttribute(owner, name, metadataIPFSBytesString, maxValidity )
+  
 
-  const setAttributeData =
-    Buffer.from('setAttribute').toString('hex') +
-    stringToBytes32(offChainDataName) +
-    stripHexPrefix(metadataIpfsBytes.toString()) +
-    maxValidity
-
-  // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
-  const setAttributeSignedSig = await setAttributeSigned(
-    newMember,
-    owner,
-    setAttributeData,
-    ethDIDContract,
-    newMemberSigningKey
-  )
-
-  // Send all three meta transactions to TokenRegistry to be executed in one tx
-  // const tx = await tokenRegistryContract.applySignedWithAttribute(
-  //   memberAddress,
-  //   [applySignedSig.v, permitSig.v],
-  //   [applySignedSig.r, permitSig.r],
-  //   [applySignedSig.s, permitSig.s],
-  //   ownerAddress,
-  //   setAttributeSignedSig.v,
-  //   setAttributeSignedSig.r,
-  //   setAttributeSignedSig.s,
-  //   '0x' + stringToBytes32(offChainDataName),
-  //   metadataIpfsBytes,
-  //   '0x' + maxValidity,
-  //   {
-  //     gasLimit: 1000000,
-  //     gasPrice: ethers.utils.parseUnits('1.0', 'gwei'),
-  //   },
-  // )
-
-  const tx = await tokenRegistryContract.applySignedWithAttribute(
-    memberAddress,
-    [setAttributeSignedSig.v, applySignedSig.v],
-    [setAttributeSignedSig.r, applySignedSig.r],
-    [setAttributeSignedSig.s, applySignedSig.s],
-    ownerAddress,
-    '0x' + stringToBytes32(offChainDataName),
-    metadataIpfsBytes,
-    '0x' + maxValidity,
-    {
-      gasLimit: 1000000,
-      gasPrice: ethers.utils.parseUnits('1.0', 'gwei'),
-    },
-  )
-
-  return tx
+  return true
 }
 
 export const setAttribute = async (
@@ -288,7 +241,7 @@ const createDaiDomainSeparator = async (daiContract: Contract) => {
   const hashedVersion = keccak256(daiVersion)
 
   // ChainID of uint256 9545 used for development, in bytes32
-  const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
+  const paddedChainID = '0000000000000000000000000000000000000000000000000000000000002549'
   const daiAddress = daiContract.address
   const paddedDaiAddress = leftPad(stripHexPrefix(daiAddress))
   const data = domain + hashedName + hashedVersion + paddedChainID + paddedDaiAddress

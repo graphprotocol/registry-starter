@@ -169,131 +169,8 @@ contract TokenRegistry is Registry, Ownable {
     ADD MEMBER FUNCTIONS
     *******************/
 
-    /**
-    @dev                            Allows a user to apply to add a member to the Registry and
-                                    add off chain data to the DID registry. Important note - the
-                                    signature for changeOwner() and permit() are from newMember.
-                                    The signature of changeAttribute is the member.
-    @param _newMember               The address of the new member
-    @param _sigV                    V of the apply and permit() signature : [0] = apply, [1] = permit.
-    @param _sigR                    R of the apply and permit() signature : [0] = apply, [1] = permit
-    @param _sigS                    S of the apply and permit() signature : [0] = apply, [1] = permit
-    @param _owner                   Owner of the member application
-    @param _offChainDataName        Attribute name. Should be a string less than 32 bytes, converted
-                                    to bytes32. example: 'TokenData' = 0x546f6b656e44617461,
-                                    with zeros appended to make it 32 bytes. (add 42 zeros)
-    @param _offChainDataValue       Attribute data stored offchain (such as IPFS)
-    @param _offChainDataValidity    Length of time attribute data is valid
-    */
-    function applySignedWithAttributeAndPermitInternal(
-        address _newMember,
-        uint8[3] memory _sigV,
-        bytes32[3] memory _sigR,
-        bytes32[3] memory _sigS,
-        address _owner,
-        bytes32 _offChainDataName,
-        bytes memory _offChainDataValue,
-        uint256 _offChainDataValidity
-    ) public {
-        require(
-            getMembershipStartTime(_newMember) == 0,
-            "applySignedInternal - This member already exists"
-        );
-        /* solium-disable-next-line security/no-block-members*/
-        uint256 membershipTime = now;
-        setMember(_newMember, membershipTime);
-
-        // This event must be emitted before changeOwnerSigned() is called. This creates an identity
-        // in TokenRegistry, and from that point on, ethereumDIDRegistry events are relevant to this
-        // identity
-        emit NewMember(
-            _newMember,
-            membershipTime,
-            applicationFee
-        );
-
-        erc1056Registry.setAttributeSigned(
-            _newMember,
-            _sigV[0],
-            _sigR[0],
-            _sigS[0],
-            _offChainDataName,
-            _offChainDataValue,
-            _offChainDataValidity
-        );
-
-        erc1056Registry.changeOwnerSigned(_newMember, _sigV[1], _sigR[1], _sigS[1], _owner);
-
-        // Approve the TokenRegistry to transfer on the owners behalf
-        // Expiry = 0 is infinite. true is unlimited allowance
-        uint256 nonce = approvedToken.nonces(_owner); 
-        approvedToken.permit(_owner, address(this), nonce, 0, true, _sigV[2], _sigR[2], _sigS[2]);
-
-        // Transfers tokens from owner to the reserve bank
-        require(
-            approvedToken.transferFrom(_owner, address(reserveBank), applicationFee),
-            "applySignedInternal - Token transfer failed"
-        );
-    }
-
-    /**
-    @dev                            Allows a user to apply to add a member to the Registry and
-                                    add off chain data to the DID registry. Important note - the
-                                    signature for changeOwner() and permit() are from newMember.
-                                    The signature of changeAttribute is the member.
-    @param _newMember               The address of the new member
-    @param _sigV                    V of the apply and permit() signature : [0] = apply, [1] = permit.
-    @param _sigR                    R of the apply and permit() signature : [0] = apply, [1] = permit
-    @param _sigS                    S of the apply and permit() signature : [0] = apply, [1] = permit
-    @param _owner                   Owner of the member application
-    @param _offChainDataName        Attribute name. Should be a string less than 32 bytes, converted
-                                    to bytes32. example: 'TokenData' = 0x546f6b656e44617461,
-                                    with zeros appended to make it 32 bytes. (add 42 zeros)
-    @param _offChainDataValue       Attribute data stored offchain (such as IPFS)
-    @param _offChainDataValidity    Length of time attribute data is valid
-    */
-    function applySignedWithAttributeAndPermit(
-        address _newMember,
-        uint8[3] calldata _sigV,
-        bytes32[3] calldata _sigR,
-        bytes32[3] calldata _sigS,
-        address _owner,
-        bytes32 _offChainDataName,
-        bytes calldata _offChainDataValue,
-        uint256 _offChainDataValidity
-    ) external {
-        applySignedWithAttributeAndPermitInternal(_newMember, _sigV, _sigR, _sigS, _owner,
-            _offChainDataName,
-            _offChainDataValue,
-            _offChainDataValidity
-        );
-    }
-
-        /**
-    @dev                            Allows a user to apply to add a member to the Registry and
-                                    add off chain data to the DID registry. Important note - the
-                                    signature for changeOwner() and permit() are from newMember.
-                                    The signature of changeAttribute is the member.
-    @param _newMember               The address of the new member
-    @param _sigV                    V of the apply and permit() signature : [0] = apply, [1] = permit.
-    @param _sigR                    R of the apply and permit() signature : [0] = apply, [1] = permit
-    @param _sigS                    S of the apply and permit() signature : [0] = apply, [1] = permit
-    @param _owner                   Owner of the member application
-    @param _offChainDataName        Attribute name. Should be a string less than 32 bytes, converted
-                                    to bytes32. example: 'TokenData' = 0x546f6b656e44617461,
-                                    with zeros appended to make it 32 bytes. (add 42 zeros)
-    @param _offChainDataValue       Attribute data stored offchain (such as IPFS)
-    @param _offChainDataValidity    Length of time attribute data is valid
-    */
-    function applySignedWithAttribute(
-        address _newMember,
-        uint8[2] calldata _sigV,
-        bytes32[2] calldata _sigR,
-        bytes32[2] calldata _sigS,
-        address _owner,
-        bytes32 _offChainDataName,
-        bytes calldata _offChainDataValue,
-        uint256 _offChainDataValidity
+    function applySignedOnly(
+        address _newMember
     ) external {
         require(
             getMembershipStartTime(_newMember) == 0,
@@ -302,41 +179,12 @@ contract TokenRegistry is Registry, Ownable {
         /* solium-disable-next-line security/no-block-members*/
         uint256 membershipTime = now;
         setMember(_newMember, membershipTime);
-
-        // This event must be emitted before changeOwnerSigned() is called. This creates an identity
-        // in TokenRegistry, and from that point on, ethereumDIDRegistry events are relevant to this
-        // identity
         emit NewMember(
             _newMember,
             membershipTime,
             applicationFee
         );
-
-        erc1056Registry.setAttributeSigned(
-            _newMember,
-            _sigV[0],
-            _sigR[0],
-            _sigS[0],
-            _offChainDataName,
-            _offChainDataValue,
-            _offChainDataValidity
-        );
-
-        erc1056Registry.changeOwnerSigned(_newMember, _sigV[1], _sigR[1], _sigS[1], _owner);
     }
-
-    // function daiPermit (address _owner, uint8  _sigV, bytes32 _sigR, bytes32 _sigS,){
-    //     // Approve the TokenRegistry to transfer on the owners behalf
-    //     // Expiry = 0 is infinite. true is unlimited allowance
-    //     uint256 nonce = approvedToken.nonces(_owner); 
-    //     approvedToken.permit(_owner, address(this), nonce, 0, true, _sigV[1], _sigR[1], _sigS[1]);
-
-    //     // Transfers tokens from owner to the reserve bank
-    //     // require(
-    //     //     approvedToken.transferFrom(_owner, address(reserveBank), applicationFee),
-    //     //     "applySignedInternal - Token transfer failed"
-    //     // );
-    // }
 
     /**
     @dev                Allow a member to voluntarily leave
