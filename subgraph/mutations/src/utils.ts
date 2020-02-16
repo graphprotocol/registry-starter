@@ -200,22 +200,40 @@ export const applySignedWithAttribute = async (
   const ownerAddress = await owner.getAddress()
   const memberAddress = await newMember.getAddress()
 
+  // const contract = getContract(
+  //   '0xB92bc5A048d6BAdc5856dDeF3109345DdfA13641',
+  //   CONTRACT_ABI.abi,
+  //   undefined
+  // )
+  console.log('CONTRACT: ', tokenRegistryContract)
+  const transaction = await tokenRegistryContract.applySignedOnly(ownerAddress, {
+    gasLimit: 300000,
+    gasPrice: utils.parseUnits('1.0', 'gwei'),
+  })
+  console.log('TRANSACTION: ', transaction)
+  transaction
+    .wait()
+    .then(res => {
+      console.log('SUCCESS: ', res)
+    })
+    .catch(e => console.error('TRANSACTION: ', e))
+
   // const tx = await tokenRegistryContract.challenge(ownerAddress, memberAddress, '0x' + maxValidity)
 
   // const tx = await tokenRegistryContract.withdraw(ownerAddress, 0)
-  console.log('FUN: ', tokenRegistryContract.applySignedOnly)
-  console.log('OWNER ADD: ', ownerAddress)
-  const tx = await tokenRegistryContract.applySignedOnly(ownerAddress)
-  // const tx = await tokenRegistryContract.updateCharter('0x' + maxValidity)
+  // console.log('FUN: ', tokenRegistryContract.applySignedOnly)
+  // console.log('OWNER ADD: ', ownerAddress)
+  // const tx = await tokenRegistryContract.applySignedOnly(ownerAddress, {from: ownerAddress, gas: 1000000})
+  // // const tx = await tokenRegistryContract.updateCharter('0x' + maxValidity)
 
-  console.log('GGGG: ', tx)
+  // console.log('GGGG: ', tx)
 
-  // const metadataIPFSBytesString = ipfsHexHash(metadataIpfsHash)
-  // const name = stringToBytes32(offChainDataName)
+  // // const metadataIPFSBytesString = ipfsHexHash(metadataIpfsHash)
+  // // const name = stringToBytes32(offChainDataName)
 
-  // await ethDIDContract.setAttribute(owner, name, metadataIPFSBytesString, maxValidity )
+  // // await ethDIDContract.setAttribute(owner, name, metadataIPFSBytesString, maxValidity )
 
-  return tx
+  // return tx
 }
 
 export const setAttribute = async (

@@ -6,9 +6,9 @@ schema:
 dataSources:
   - kind: ethereum/contract
     name: TokenRegistry
-    network: ganache
+    network: ropsten
     source:
-      address: '0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3' # Ropsten: 0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3 Ganache: 0x0290FB167208Af455bB137780163b7B7a9a10C16
+      address: '0xB92bc5A048d6BAdc5856dDeF3109345DdfA13641' # Ropsten: 0xB92bc5A048d6BAdc5856dDeF3109345DdfA13641 Ganache: 0x0290FB167208Af455bB137780163b7B7a9a10C16
       abi: TokenRegistry
     mapping:
       kind: ethereum/events
@@ -39,13 +39,13 @@ dataSources:
           handler: handleMemberChallenged
         - event: SubmitVote(indexed uint256,indexed address,indexed address,uint8,uint256)
           handler: handleSubmitVote
-        - event: ChallengeFailed(indexed address,indexed uint256,uint256,uint256)
+        - event: ChallengeFailed(indexed address,indexed uint256,uint256,uint256,uint256)
           handler: handleChallengeFailed
-        - event: ChallengeSucceeded(indexed address,indexed uint256,uint256,uint256)
+        - event: ChallengeSucceeded(indexed address,indexed uint256,uint256,uint256,uint256)
           handler: handleChallengeSucceeded
   - kind: ethereum/contract
     name: EthereumDIDRegistry
-    network: ganache
+    network: ropsten
     source:
       address: '0xdca7ef03e98e0dc2b855be647c39abe984fcf21b' # Ropsten: 0xdca7ef03e98e0dc2b855be647c39abe984fcf21b # Ganache: 0x59d3631c86BbE35EF041872d502F218A39FBa150
       abi: EthereumDIDRegistry

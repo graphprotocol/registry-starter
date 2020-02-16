@@ -33,7 +33,6 @@ const wallets = {
 const config = {
     tokenRegistryParams: {
         owner: wallets.zero().signingKey.address, // Ganache deterministic account 0
-        ropstenOwner: '0x93606b27cB5e4c780883eC4F6b7Bed5f6572d1dd', // Daves metamask account 0
         votingPeriodDuration: 432000, // 5 days, in seconds
         challengeDeposit: '10000000000000000000', // $1 DAI challenge fee
         applicationFee: '10000000000000000000', // $1 DAI application fee
@@ -49,7 +48,9 @@ const config = {
         amountToEachAccount: '20000000000000000000000000', // $20M DAI to 5 accounts
         name: 'MockDAI',
         // Note the DID address is the same for mainnet, ropsten, rinkeby, kovan and goerli
-        ethereumDIDRegistryAddress: '0xdca7ef03e98e0dc2b855be647c39abe984fcf21b'
+        ethereumDIDRegistryAddress: '0xdca7ef03e98e0dc2b855be647c39abe984fcf21b',
+        ropstenOwner: '0x93606b27cB5e4c780883eC4F6b7Bed5f6572d1dd', // Daves metamask account 0
+
     },
     mainnetParams: {
         daiAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',

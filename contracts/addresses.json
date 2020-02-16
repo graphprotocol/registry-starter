@@ -1,10 +1,10 @@
 {
   "updated-on": "February 10th 2020",
   "ropsten": {
-    "tokenRegistry": "0xD6164dA25B95669d1a8c81C4b9b46E91D882c1c3",
+    "tokenRegistry": "0xB92bc5A048d6BAdc5856dDeF3109345DdfA13641",
     "ethereumDIDRegistry": "0xdca7ef03e98e0dc2b855be647c39abe984fcf21b",
-    "mockDAI": "0x54Fe55d5d255b8460fB3Bc52D5D676F9AE5697CD",
-    "reserveBank": "0x05fbf3f158Ae7c56c87dB57ebEde4374deA6fBD8"
+    "mockDAI": "0x6755ACCB4f609A46108028cc288ca4E678b5F1C1",
+    "reserveBank": "0x910e7ee2D003D689F6c290D1829C871236266CC4"
   },
   "ganache": {
       "tokenRegistry": "0x9b1f7F645351AF3631a656421eD2e40f2802E6c0",

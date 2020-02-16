@@ -170,10 +170,10 @@ contract TokenRegistry is Registry, Ownable {
     *******************/
 
     function applySignedOnly(address _newMember) external {
-        require(
-            getMembershipStartTime(_newMember) == 0,
-            "applySignedInternal - This member already exists"
-        );
+        // require(
+        //     getMembershipStartTime(_newMember) == 0,
+        //     "applySignedInternal - This member already exists"
+        // );
         /* solium-disable-next-line security/no-block-members*/
         uint256 membershipTime = now;
         setMember(_newMember, membershipTime);

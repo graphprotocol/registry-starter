@@ -134,11 +134,13 @@ async function getContract(context: Context, contract: string, signer: ethers.Si
   }
 
   const network = await ethereum.getNetwork()
-  let networkName = network.name
+  // let networkName = network.name
 
-  if (networkName === 'dev' || networkName === 'unknown') {
-    networkName = 'ganache'
-  }
+  // if (networkName === 'dev' || networkName === 'unknown') {
+  //   networkName = 'ganache'
+  // }
+
+  let networkName = 'ropsten'
 
   const networkAddresses = addresses[networkName]
 
