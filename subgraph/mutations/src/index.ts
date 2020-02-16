@@ -86,6 +86,7 @@ const config = {
   },
   ipfs: (endpoint: string) => {
     const url = new URL(endpoint)
+
     return ipfsHttpClient({
       protocol: url.protocol.replace(/[:]+$/, ''),
       host: url.hostname,
@@ -171,6 +172,8 @@ async function addToken(
 ) {
   const { ipfs, ethereum } = context.graph.config
 
+  const network = await ethereum.getNetwork()
+
   const { state } = context.graph
 
   const imageHash = await uploadToIpfs(ipfs, image)
@@ -211,6 +214,7 @@ async function addToken(
       tokenRegistryContract,
       ethereumDIDContract,
       daiContract,
+      ethereum,
     )
   } catch (err) {
     console.log(err)

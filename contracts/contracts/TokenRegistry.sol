@@ -325,19 +325,6 @@ contract TokenRegistry is Registry, Ownable {
         erc1056Registry.changeOwnerSigned(_newMember, _sigV[1], _sigR[1], _sigS[1], _owner);
     }
 
-    // function daiPermit (address _owner, uint8  _sigV, bytes32 _sigR, bytes32 _sigS,){
-    //     // Approve the TokenRegistry to transfer on the owners behalf
-    //     // Expiry = 0 is infinite. true is unlimited allowance
-    //     uint256 nonce = approvedToken.nonces(_owner); 
-    //     approvedToken.permit(_owner, address(this), nonce, 0, true, _sigV[1], _sigR[1], _sigS[1]);
-
-    //     // Transfers tokens from owner to the reserve bank
-    //     // require(
-    //     //     approvedToken.transferFrom(_owner, address(reserveBank), applicationFee),
-    //     //     "applySignedInternal - Token transfer failed"
-    //     // );
-    // }
-
     /**
     @dev                Allow a member to voluntarily leave
     @param _member      Member exiting the list

@@ -16,7 +16,7 @@ module.exports = async (deployer, network) => {
             config.ganacheParams.wallets.four().signingKey.address
         ]
         tokenMinter = config.ganacheParams.wallets.zero().signingKey.address
-        chainID = 9854
+        chainID = 9545
     } else {
         tokenHolders = [
             config.metamaskAddresses.one,
@@ -39,13 +39,13 @@ module.exports = async (deployer, network) => {
         const token = await Token.deployed()
         const tokenHolder = tokenHolders[0]
 
-        const displayAmt = config.testnetParams.amountToEachAccount.slice(
+        const displayAmt = config.ropstenParams.amountToEachAccount.slice(
             0,
-            config.testnetParams.amountToEachAccount.length - parseInt(18, 10)
+            config.ropstenParams.amountToEachAccount.length - parseInt(18, 10)
         )
         // eslint-disable-next-line no-console
         console.log(`Allocating ${displayAmt} DAI tokens to ` + `${tokenHolder}.`)
-        await token.transfer(tokenHolder, config.testnetParams.amountToEachAccount)
+        await token.transfer(tokenHolder, config.ropstenParams.amountToEachAccount)
         giveTokensTo(tokenHolders.slice(1))
     }
 
@@ -58,7 +58,7 @@ module.exports = async (deployer, network) => {
         const token = await Token.deployed()
 
         // eslint-disable-next-line no-console
-        await token.mint(tokenMinter, config.testnetParams.supply)
+        await token.mint(tokenMinter, config.ropstenParams.supply)
         await giveTokensTo(tokenHolders)
     } else {
         // eslint-disable-next-line no-console

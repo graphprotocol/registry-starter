@@ -210,8 +210,8 @@ const helpers = {
         const hashedName = keccak256(daiName)
         const hashedVersion = keccak256(daiVersion)
 
-        // ChainID of uint256 9854 used for development, in bytes32
-        const paddedChainID = '000000000000000000000000000000000000000000000000000000000000267e'
+        // ChainID of uint256 9545 used for development, in bytes32
+        const paddedChainID = '0000000000000000000000000000000000000000000000000000000000002549'
         const daiAddress = (await Token.deployed()).address
         const paddedDaiAddress = utils.leftPad(utils.stripHexPrefix(daiAddress))
         const data = domain + hashedName + hashedVersion + paddedChainID + paddedDaiAddress
