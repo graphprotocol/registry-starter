@@ -7,7 +7,9 @@ import {
 } from '@graphprotocol/mutations'
 import { ethers } from 'ethers'
 import { AsyncSendable, Web3Provider } from 'ethers/providers'
-import { applySignedWithAttribute, ipfsHexHash, setAttribute } from './utils/erc1056'
+import { applySignedWithAttribute, setAttribute } from './utils/erc1056'
+import { ipfsHexHash } from './utils/helpers'
+
 import {
   AddTokenArguments,
   EditTokenArguments,
@@ -197,10 +199,9 @@ async function addToken(
   const owner = ethereum.getSigner(0)
   const member = await ethers.Wallet.createRandom().connect(ethereum)
 
-  // Used for raw signing of data, without x19Ethereum...
+  // Used for raw signing of data (in browser random key)
   const memberSigningKey = new ethers.utils.SigningKey(member.privateKey)
 
-  // Dave - below makes a contract instance where a signer is already attacched
   const tokenRegistryContract = await getContract(context, 'TokenRegistry', owner)
   const ethereumDIDContract = await getContract(context, 'EthereumDIDRegistry', owner)
   const daiContract = await getContract(context, 'Dai', owner)

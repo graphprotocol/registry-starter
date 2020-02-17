@@ -78,7 +78,7 @@ export const signDataDIDRegistry = async (
 ) => {
   let nonce = await ethDIDContract.nonce(identity) // ** need to add 1 TODO*
   if (functionName == 'changeOwner') {
-    nonce = 1 // TODO - maybe cchange this to now be hard coded
+    nonce = 1
   }
   const paddedNonce = leftPad(Buffer.from([nonce], 64).toString('hex'))
   let dataToSign
@@ -167,7 +167,7 @@ export const applySignedWithAttribute = async (
     '0x' + config.maxValidity,
     {
       gasLimit: 1000000,
-      gasPrice: ethers.utils.parseUnits('1.0', 'gwei'),
+      gasPrice: ethers.utils.parseUnits('25.0', 'gwei'),
     },
   )
   console.log('TRANSACTION: ', tx)

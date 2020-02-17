@@ -22,9 +22,9 @@ const permitSchema = [
 
 async function signPermit(provider, domain, message) {
   let signer = provider.getSigner()
-  let myAddr = await signer.getAddress()
+  let signerAddr = await signer.getAddress()
 
-  if (myAddr.toLowerCase() !== message.holder.toLowerCase()) {
+  if (signerAddr.toLowerCase() !== message.holder.toLowerCase()) {
     throw `signPermit: address of signer does not match holder address in message`
   }
 
@@ -33,7 +33,7 @@ async function signPermit(provider, domain, message) {
 
     let tokenContract = new ethers.Contract(domain.verifyingContract, tokenAbi, provider)
 
-    let nonce = await tokenContract.nonces(myAddr)
+    let nonce = await tokenContract.nonces(signerAddr)
 
     message = { ...message, nonce: nonce.toString() }
   }
@@ -49,7 +49,7 @@ async function signPermit(provider, domain, message) {
   }
 
   let sig = await provider.send('eth_signTypedData_v3', [
-    myAddr,
+    signerAddr,
     JSON.stringify(typedData),
   ])
 
@@ -68,13 +68,13 @@ export const daiPermit = async (
     name: 'Dai Stablecoin',
     version: '1',
     chainId: config.chainID,
-    verifyingContract: '0x4dcC2886A94566B2688931Ad939fBA6c20B47e87',
+    verifyingContract: config.verifyingDAIContract,
   }
 
   const message = {
     holder: holderAddress,
     spender: spenderAddress,
-    nonce,
+    nonce: nonce,
     expiry: 0,
     allowed: true,
   }

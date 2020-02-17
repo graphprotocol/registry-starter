@@ -146,12 +146,12 @@ const helpers = {
     },
 
     // Must be used in applySignedWithAttribute() to make a single transaction
-    // Note owner is signer, because ownership has already been changed over // TODO this is cchanged
-    setAttributeSigned: async (newMemberWallet, ownerWallet, data) => {
+    // At the time, owner is  random key generated in browser
+    setAttributeSigned: async (newMemberWallet, data) => {
         const memberAddress = newMemberWallet.signingKey.address
-        const signerAddress = memberAddress //ownerWallet.signingKey.address
+        const signerAddress = memberAddress
         const signerPrivateKey = Buffer.from(
-            utils.stripHexPrefix(newMemberWallet.signingKey.privateKey), // CHANGED TOO
+            utils.stripHexPrefix(newMemberWallet.signingKey.privateKey),
             'hex'
         )
         const sig = await module.exports.signDataDIDRegistry(
@@ -168,7 +168,7 @@ const helpers = {
         const didReg = await EthereumDIDRegistry.deployed()
         let nonce = await didReg.nonce(signingAddress)
         if (functionName == 'changeOwner') {
-            nonce = 1 // TODO - maybe cchange this to now be hard coded
+            nonce = 1 // TODO - Change this so it isn't just 1, should be nonce + 1
         }
         const paddedNonce = utils.leftPad(Buffer.from([nonce], 64).toString('hex'))
         let dataToSign
@@ -200,6 +200,8 @@ const helpers = {
             v: splitSig.v
         }
     },
+
+    // TODO - refactor all of the DAI helpers to be like the ones in mutations
 
     createDaiDomainSeparator: async () => {
         const domain = keccak256(
