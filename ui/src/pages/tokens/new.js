@@ -5,7 +5,7 @@ import { Grid } from '@theme-ui/components'
 import cloneDeep from 'lodash.clonedeep'
 import { useMutation } from '@graphprotocol/mutations-apollo-react'
 
-import { TOKENS_QUERY, ADD_TOKEN } from '../../apollo/queries'
+import client from '../../apollo/client'
 import TokenForm from '../../components/TokenForm'
 
 const NewToken = ({ ...props }) => {
@@ -18,6 +18,7 @@ const NewToken = ({ ...props }) => {
     image: '',
   })
   const [addToken, { data, loading, error, state }] = useMutation(ADD_TOKEN, {
+    client,
     refetchQueries: [
       {
         query: TOKENS_QUERY,

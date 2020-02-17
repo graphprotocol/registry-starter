@@ -6,8 +6,15 @@ import {
   StateBuilder,
 } from '@graphprotocol/mutations'
 import { ethers } from 'ethers'
+import gql from "graphql-tag"
 import { AsyncSendable, Web3Provider } from 'ethers/providers'
-import { applySignedWithAttribute, ipfsHexHash, setAttribute } from './utils'
+import {
+  applySignedWithAttribute,
+  ipfsHexHash,
+  setAttribute,
+  sleep,
+  uploadToIpfs
+} from './utils'
 import {
   AddTokenArguments,
   EditTokenArguments,
@@ -122,6 +129,44 @@ const addressMap = {
   TokenRegistry: 'tokenRegistry',
 }
 
+const queryUserToken = async (context: Context) => {
+  const { client } = context
+  const { ethereum } = context.graph.config
+
+  const owner = await ethereum.getSigner().getAddress()
+
+  if (client) {
+    for (let i = 0; i < 20; ++i) {
+      const { data } = await client.query({
+        query: gql`
+          query tokens(
+            $where: Token_filter
+          ) {
+            tokens(where: $where) {
+              id
+              symbol
+              image
+              description
+              isChallenged
+            }
+          }`,
+          variables: {
+            where: { owner }
+          }
+        }
+      )
+
+      if (data === null) {
+        await sleep(500)
+      } else {
+        return data.tokens[0]
+      }
+    }
+  }
+
+  return null
+}
+
 async function getContract(context: Context, contract: string, signer: ethers.Signer) {
   const { ethereum } = context.graph.config
 
@@ -212,7 +257,7 @@ async function addToken(
     throw err
   }
 
-  return true
+  return await queryUserToken(context)
 }
 
 async function editToken(
@@ -320,16 +365,6 @@ async function voteChallenge(
   }
 
   return true
-}
-
-const uploadToIpfs = async (ipfs: any, data: any): Promise<string> => {
-  let result
-
-  for await (const returnedValue of ipfs.add(data)) {
-    result = returnedValue
-  }
-
-  return result.path
 }
 
 const resolvers: MutationResolvers<Config, State, EventMap> = {
