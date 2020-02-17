@@ -292,7 +292,7 @@ async function editToken(
     throw err
   }
 
-  return true
+  return await queryUserToken(context)
 }
 
 async function removeToken(_, { tokenId }: RemoveTokenArguments, context: Context) {

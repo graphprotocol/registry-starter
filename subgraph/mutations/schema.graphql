@@ -9,7 +9,7 @@ type Mutation {
     image: File
     decimals: Int
     address: String
-  ): Boolean!
+  ): Token!
 
   editToken(
     symbol: String!
@@ -17,7 +17,7 @@ type Mutation {
     image: File
     decimals: Int
     address: String
-  ): Boolean!
+  ): Token!
 
   removeToken(tokenId: ID!): Boolean!
 
