@@ -290,3 +290,17 @@ export const ipfsHexHash = (ipfsHash: string) => {
       .toString('hex')
   )
 }
+
+export const uploadToIpfs = async (ipfs: any, data: any): Promise<string> => {
+  let result
+
+  for await (const returnedValue of ipfs.add(data)) {
+    result = returnedValue
+  }
+
+  return result.path
+}
+
+export const sleep = (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
