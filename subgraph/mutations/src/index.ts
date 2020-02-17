@@ -7,7 +7,7 @@ import {
 } from '@graphprotocol/mutations'
 import { ethers } from 'ethers'
 import { AsyncSendable, Web3Provider } from 'ethers/providers'
-import { applySignedWithAttribute, ipfsHexHash, setAttribute } from './utils'
+import { applySignedWithAttribute, ipfsHexHash, setAttribute } from './utils/erc1056'
 import {
   AddTokenArguments,
   EditTokenArguments,
