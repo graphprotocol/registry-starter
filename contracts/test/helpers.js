@@ -37,7 +37,6 @@ const helpers = {
         // Get the signature for setting the attribute (i.e. Token data) on ERC-1056
         const setAttributeSignedSig = await module.exports.setAttributeSigned(
             newMemberWallet,
-            newMemberWallet, //ownerWallet
             setAttributeData
         )
 

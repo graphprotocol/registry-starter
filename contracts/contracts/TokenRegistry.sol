@@ -413,13 +413,13 @@ contract TokenRegistry is Registry, Ownable {
     @dev                    Allow an owner to submit a vote
     @param _challengeID     The challenge ID
     @param _voteChoice      The vote choice (yes or no)
-    @param _votingMember    The member who is voting (note owner is msg.sender)
+    @param _voter    The member who is voting (note owner is msg.sender)
     */
     function submitVote(
         uint256 _challengeID,
         VoteChoice _voteChoice,
-        address _votingMember
-    ) public onlyMemberOwner(_votingMember) {
+        address _voter
+    ) public onlyMemberOwner(_voter) {
         require(
             _voteChoice == VoteChoice.Yes || _voteChoice == VoteChoice.No,
             "submitVote - Vote must be either Yes or No"
@@ -435,20 +435,20 @@ contract TokenRegistry is Registry, Ownable {
             "submitVote - Challenge voting period has expired"
         );
         require(
-            storedChallenge.voteChoiceByMember[_votingMember] == VoteChoice.Null,
+            storedChallenge.voteChoiceByMember[_voter] == VoteChoice.Null,
             "submitVote - Member has already voted on this challenge"
         );
 
         require(
-            storedChallenge.challengee != _votingMember,
+            storedChallenge.challengee != _voter,
             "submitVote - Member can't vote on their own challenge"
         );
 
-        uint256 memberStartTime = getMembershipStartTime(_votingMember);
+        uint256 memberStartTime = getMembershipStartTime(_voter);
         // The lower the member start time (i.e. the older the member) the more vote weight
         uint256 voteWeight = storedChallenge.endTime.sub(memberStartTime);
-        storedChallenge.voteChoiceByMember[_votingMember] = _voteChoice;
-        storedChallenge.voteWeightByMember[_votingMember] = voteWeight;
+        storedChallenge.voteChoiceByMember[_voter] = _voteChoice;
+        storedChallenge.voteWeightByMember[_voter] = voteWeight;
         storedChallenge.voterCount += 1;
 
         // Count vote
@@ -458,7 +458,7 @@ contract TokenRegistry is Registry, Ownable {
             storedChallenge.noVotes = storedChallenge.noVotes.add(voteWeight);
         }
 
-        emit SubmitVote(_challengeID, msg.sender, _votingMember, _voteChoice, voteWeight);
+        emit SubmitVote(_challengeID, msg.sender, _voter, _voteChoice, voteWeight);
     }
 
     /**
